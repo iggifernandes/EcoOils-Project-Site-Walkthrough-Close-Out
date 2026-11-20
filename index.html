@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Site Walkthrough Close-Out</title>
+<link rel="icon" href="wordmark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#231f20;--mut:#6e6b6c;--line:#dcdcdc;--bg:#f6f6f5;--card:#fff;--green:#44a276;--gdark:#025b40;--yellow:#fbce07;--red:#dd1d21;--navy:#002060;--warn:#8a5a00;--warnbg:#fff4d6;--errbg:#fde8e8;--ok:#1d6b2a;--okbg:#e6f4dc}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{margin:0}
+body{font:400 15px/1.45 Jost,system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+button,input,select,textarea{font:inherit;color:inherit}
+header.eh{background:#fff;padding:10px 16px 6px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:1px solid var(--line)}
+.brand{width:150px;max-width:50%;display:block}
+.brand img{width:100%;height:auto;display:block}
+.brand .proj{display:flex;justify-content:space-between;color:var(--yellow);font:600 17px/1 Jost,sans-serif;margin-top:3px;padding:0 1px}
+.eh-r{display:flex;flex-direction:column;align-items:flex-end;margin-left:auto}
+.eh-v{font-size:12px;letter-spacing:.08em;color:var(--mut);line-height:1.2;padding-top:2px;font-variant-numeric:tabular-nums}
+.lang{display:flex}.lang button{background:none;border:0;border-bottom:3px solid transparent;min-width:44px;min-height:40px;padding:0 8px;letter-spacing:.06em;color:var(--mut);cursor:pointer}
+.lang button.on{color:var(--ink);font-weight:600;border-bottom-color:var(--green)}
+.titlebar{padding:18px 16px 4px;max-width:1180px;margin:0 auto}
+h1.pt{margin:0;font:300 24px/1.2 Jost,sans-serif;text-transform:uppercase;letter-spacing:.22em;color:#6e6b6c}
+.sub{color:var(--mut);font-size:13px;letter-spacing:.06em;margin-top:2px}
+nav.tabs{display:flex;gap:2px;max-width:1180px;margin:8px auto 0;padding:0 10px;border-bottom:1px solid var(--line);overflow:auto}
+nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;min-height:44px;color:var(--mut);letter-spacing:.06em;cursor:pointer;white-space:nowrap}
+nav.tabs button.on{color:var(--ink);font-weight:600;border-bottom-color:var(--green)}
+nav.tabs .sp{flex:1}
+main{max-width:1180px;margin:0 auto;padding:16px 12px 80px}
+.tab{display:none}.tab.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px}
+.card h2{margin:0 0 10px;font:600 13px/1.2 Jost,sans-serif;text-transform:uppercase;letter-spacing:.14em;color:var(--gdark)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}.grid>*{min-width:0}.grid .w{grid-column:1/-1}
+@media(max-width:620px){.grid{grid-template-columns:1fr}}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--mut)}
+label.f b{color:var(--red);font-weight:600}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid #c9c9c9;border-radius:8px;background:#fff;font-size:15px}
+textarea{resize:vertical;min-height:84px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--green);border-color:var(--green)}
+button.btn{background:#fff;border:1px solid #bdbdbd;border-radius:8px;padding:9px 14px;cursor:pointer;min-height:40px}
+button.btn:hover{border-color:var(--gdark)}
+button.btn.pri{background:var(--gdark);border-color:var(--gdark);color:#fff}
+button.btn.yel{background:var(--yellow);border-color:var(--yellow);font-weight:600}
+button.btn.ghost{background:transparent}button.btn.danger{color:var(--red)}
+button.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row.end{justify-content:flex-end}
+.hint{font-size:12.5px;color:var(--mut)}
+.box{border-radius:8px;padding:10px 12px;font-size:14px;margin:8px 0}
+.box.info{background:#eef6f1;border:1px solid #cfe5d8}.box.warn{background:var(--warnbg);color:var(--warn)}.box.err{background:var(--errbg);color:#8d1c1c}.box.ok{background:var(--okbg);color:var(--ok)}
+.dz{border:2px dashed #b9c9c0;border-radius:10px;min-height:110px;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--mut);cursor:pointer;padding:10px;background:#fafcfb}
+.dz.over{border-color:var(--green);background:#eef6f1}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.th{position:relative;width:104px;height:104px;border-radius:8px;overflow:hidden;border:1px solid var(--line);cursor:zoom-in;background:#eee}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+.th button{position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;cursor:pointer;line-height:1}
+.th.add{display:flex;align-items:center;justify-content:center;border:2px dashed #b9c9c0;font-size:34px;color:var(--mut);cursor:pointer;background:#fafcfb}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
+.kpi b{display:block;font:300 28px/1.1 Jost,sans-serif;letter-spacing:.04em}.kpi span{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+.kpi.red b{color:var(--red)}.kpi.grn b{color:var(--gdark)}
+.fl{display:grid;grid-template-columns:1fr 1fr 2fr;gap:8px;margin-bottom:12px}@media(max-width:620px){.fl{grid-template-columns:1fr}}
+.item{background:#fff;border:1px solid var(--line);border-left:5px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:4px 12px;align-items:center}
+.item:hover{border-color:var(--gdark)}
+.item.High{border-left-color:var(--red)}.item.Medium{border-left-color:var(--yellow)}.item.Low{border-left-color:var(--green)}
+.item .id{font-weight:600;letter-spacing:.06em}.item .mid{min-width:0}.item .mid div{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .d{font-size:13px;color:var(--mut)}
+.chip{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;letter-spacing:.04em;white-space:nowrap;border:1px solid transparent}
+.chip.Open{background:#eee;color:#444}.chip.Overdue{background:var(--errbg);color:#8d1c1c;border-color:#f3b9b9}.chip.ClosedbyIC{background:#e4ebf8;color:var(--navy)}
+.chip.Verified{background:var(--okbg);color:var(--ok)}.chip.Reopened{background:var(--warnbg);color:var(--warn)}
+.risk{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}.risk.High{background:var(--red)}.risk.Medium{background:var(--yellow)}.risk.Low{background:var(--green)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:620px){.pair{grid-template-columns:1fr}}
+.pair h3{margin:0 0 6px;font:600 12px/1 Jost,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--gdark)}
+.pair .ph{display:flex;gap:6px;flex-wrap:wrap}.pair .ph img{max-width:100%;border-radius:8px;border:1px solid var(--line);cursor:zoom-in;display:block}
+.pair .ph img.big{width:100%;max-height:420px;object-fit:contain;background:#f2f2f2}.pair .ph img.sm{width:calc(50% - 3px)}
+.pair .none{border:1px dashed #bbb;border-radius:8px;padding:30px 10px;text-align:center;color:var(--mut);font-size:13px}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:3px 12px;font-size:14px;margin:8px 0}.kv dt{color:var(--mut)}.kv dd{margin:0;word-break:break-word}
+@media(max-width:520px){.kv{grid-template-columns:1fr}.kv dt{margin-top:6px}}
+#dlg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:60;overflow:auto;padding:14px}
+#dlg .in{background:#fff;border-radius:12px;max-width:860px;margin:0 auto;padding:16px}
+#peek{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:90;display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:10px}
+#peek img{max-width:100%;max-height:100%;border-radius:6px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;background:#231f20;color:#fff;padding:10px 16px;border-radius:9px;z-index:99;max-width:92vw}
+.toast.err{background:var(--red)}
+.ct{display:flex;gap:8px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px;background:#fff}
+.ct small{color:var(--mut)}
+/* report */
+.rep{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;margin-top:12px}
+.rep .rh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:2px solid var(--gdark);padding-bottom:10px;margin-bottom:10px}
+.rep .rh h2{margin:0;font:300 20px/1.2 Jost,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#6e6b6c}
+.rep .sum{display:flex;gap:18px;flex-wrap:wrap;margin:8px 0 14px;font-size:13px;color:var(--mut)}.rep .sum b{display:block;font:300 22px/1.1 Jost,sans-serif;color:var(--ink)}
+.rep .fnd{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:12px;break-inside:avoid;page-break-inside:avoid}
+.rep .fh{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+@media print{
+  @page{size:A4;margin:12mm}
+  body{background:#fff}
+  header.eh,.titlebar,nav.tabs,.noprint,#toast,#dlg,.tab:not(#tab-report){display:none!important}
+  main{padding:0;max-width:none}#tab-report{display:block}
+  .rep{border:0;padding:0;margin:0}.rep .pair .ph img.big{max-height:68mm;width:auto;max-width:100%}
+  .rep .fnd{border-color:#999}
+}
+</style>
+</head>
+<body>
+<header class="eh">
+  <div class="brand"><img src="wordmark.png" alt="EcoOils"><div class="proj" aria-label="Project"><span>P</span><span>R</span><span>O</span><span>J</span><span>E</span><span>C</span><span>T</span></div></div>
+  <div class="eh-r"><div class="eh-v" id="ver">v1.0.0</div>
+    <div class="lang" id="lang"><button data-l="en" class="on">EN</button><button data-l="id">ID</button><button data-l="ms">MS</button></div></div>
+</header>
+<div class="titlebar"><h1 class="pt" data-i="app.title"></h1><div class="sub">Sei Mangkei</div></div>
+
+<main>
+<div id="noapi" class="box warn" hidden>
+  <b data-i="api.missing"></b>
+  <div class="row" style="margin-top:6px"><input id="apiUrl" placeholder="https://script.google.com/macros/s/…/exec" style="flex:1;min-width:220px"><button class="btn" id="apiSave" data-i="btn.save"></button></div>
+</div>
+
+<!-- ============ IC CLOSE-OUT (opened from the emailed link) ============ -->
+<section id="vIC" hidden>
+  <div id="icLoading" class="box info" data-i="ic.loading"></div>
+  <div id="icErr" class="box err" hidden></div>
+  <div id="icBody" hidden>
+    <div class="card">
+      <h2 data-i="ic.finding"></h2>
+      <div class="row" style="justify-content:space-between"><b id="icId" style="letter-spacing:.08em"></b><span id="icChip"></span></div>
+      <dl class="kv" id="icKv"></dl>
+      <div class="box warn" id="icHse" hidden></div>
+    </div>
+    <div class="card"><h2 data-i="ic.photos"></h2><div class="pair" id="icPair"></div></div>
+    <div class="card" id="icForm">
+      <h2 data-i="ic.closeTitle"></h2>
+      <p class="hint" data-i="ic.closeHelp"></p>
+      <div class="grid">
+        <label class="f w"><span><span data-i="ic.name"></span> <b>*</b></span><input id="ic_name" maxlength="120" autocomplete="name"></label>
+        <label class="f w"><span data-i="ic.note"></span><textarea id="ic_note" maxlength="1000"></textarea></label>
+        <div class="w"><div class="hint"><span data-i="ic.after"></span> <b style="color:var(--red)">*</b></div><div id="pb_ic"></div></div>
+      </div>
+      <div class="row end" style="margin-top:12px"><button class="btn pri" id="icSend" data-i="ic.send"></button></div>
+    </div>
+    <div class="box ok" id="icDone" hidden></div>
+  </div>
+</section>
+
+<!-- ============ HSSE LOGIN ============ -->
+<section id="vLogin" hidden>
+ <div class="card" style="max-width:460px">
+  <h2 data-i="a.login"></h2>
+  <div id="loginBox">
+   <label class="f"><span data-i="a.email"></span><input id="l_email" type="email" autocomplete="username"></label>
+   <label class="f" style="margin-top:8px"><span data-i="a.pin"></span><input id="l_pin" type="password" inputmode="numeric" maxlength="6" autocomplete="current-password"></label>
+   <div class="row" style="margin-top:10px"><button class="btn pri" id="btnLogin" data-i="a.loginBtn"></button><button class="btn ghost" id="btnForgot" data-i="a.forgot"></button></div>
+  </div>
+  <div id="resetBox" hidden>
+   <p class="hint" data-i="a.resetInfo"></p>
+   <div class="row"><button class="btn" id="btnSendCode" data-i="a.sendCode"></button></div>
+   <label class="f" style="margin-top:8px"><span data-i="a.code"></span><input id="r_code" inputmode="numeric" maxlength="6" autocomplete="one-time-code"></label>
+   <label class="f" style="margin-top:8px"><span data-i="a.newPin"></span><input id="r_pin" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></label>
+   <label class="f" style="margin-top:8px"><span data-i="a.newPin2"></span><input id="r_pin2" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></label>
+   <div class="row" style="margin-top:10px"><button class="btn pri" id="btnSetPin" data-i="a.setPin"></button><button class="btn ghost" id="btnBack" data-i="a.back"></button></div>
+  </div>
+ </div>
+</section>
+
+<!-- ============ HSSE APP ============ -->
+<section id="vAdm" hidden>
+ <nav class="tabs" id="tabs" style="margin-top:0">
+  <button data-t="list" class="on" data-i="tab.list"></button><button data-t="log" data-i="tab.log"></button><button data-t="report" data-i="tab.report"></button><button data-t="contacts" data-i="tab.contacts"></button>
+  <span class="sp"></span><button id="btnLogout" data-i="a.logout"></button>
+ </nav>
+
+ <div style="height:14px"></div>
+ <section id="tab-list" class="tab on">
+  <div class="kpis" id="kpis"></div>
+  <div class="fl">
+    <select id="fl_ic"></select><select id="fl_st"></select><input id="fl_q" data-ph="l.search">
+  </div>
+  <div id="items"></div>
+ </section>
+
+ <section id="tab-log" class="tab">
+  <div class="card"><h2 data-i="log.title"></h2>
+   <div class="grid">
+    <label class="f"><span><span data-i="f.ic"></span> <b>*</b></span><select id="f_ic"></select><input id="f_ic2" maxlength="60" style="margin-top:6px;text-transform:uppercase" data-ph="ph.otherCo" hidden></label>
+    <label class="f"><span><span data-i="f.loc"></span> <b>*</b></span><select id="f_loc"></select><input id="f_loc2" maxlength="120" style="margin-top:6px" data-ph="ph.otherLoc" hidden></label>
+    <label class="f"><span><span data-i="f.cat"></span> <b>*</b></span><select id="f_cat"></select></label>
+    <label class="f"><span><span data-i="f.risk"></span> <b>*</b></span><select id="f_risk"></select></label>
+    <label class="f"><span><span data-i="f.due"></span> <b>*</b></span><input id="f_due" type="date"><span class="hint" data-i="f.dueHint"></span></label>
+    <label class="f w"><span><span data-i="f.desc"></span> <b>*</b></span><textarea id="f_desc" maxlength="1500"></textarea></label>
+    <div class="w"><div class="hint"><span data-i="f.before"></span> <b style="color:var(--red)">*</b></div><div id="pb_log"></div></div>
+   </div>
+   <div class="row end" style="margin-top:12px"><button class="btn pri" id="btnLog" data-i="log.send"></button></div>
+  </div>
+  <div id="logDone" class="card" hidden></div>
+ </section>
+
+ <section id="tab-report" class="tab">
+  <div class="card noprint"><h2 data-i="rp.title"></h2>
+   <div class="grid">
+    <label class="f"><span data-i="f.ic"></span><select id="rp_ic"></select></label>
+    <label class="f"><span data-i="rp.which"></span><select id="rp_st"></select></label>
+    <label class="f"><span data-i="rp.from"></span><input id="rp_from" type="date"></label>
+    <label class="f"><span data-i="rp.to"></span><input id="rp_to" type="date"></label>
+   </div>
+   <div class="row" style="margin-top:12px"><button class="btn pri" id="rpBuild" data-i="rp.build"></button><button class="btn yel" id="rpPrint" data-i="rp.print" disabled></button><button class="btn" id="rpCsv" data-i="rp.csv"></button><span class="hint" id="rpProg"></span></div>
+  </div>
+  <div id="reportOut"></div>
+ </section>
+
+ <section id="tab-contacts" class="tab">
+  <div class="card"><h2 data-i="ct.title"></h2>
+   <p class="hint" data-i="ct.help"></p>
+   <div class="grid">
+    <label class="f"><span><span data-i="f.ic"></span> <b>*</b></span><select id="c_ic"></select><input id="c_ic2" maxlength="60" style="margin-top:6px;text-transform:uppercase" data-ph="ph.otherCo" hidden></label>
+    <label class="f"><span><span data-i="ct.role"></span> <b>*</b></span><select id="c_role"></select></label>
+    <label class="f"><span><span data-i="ct.name"></span> <b>*</b></span><input id="c_name" maxlength="120"></label>
+    <label class="f"><span><span data-i="a.email"></span> <b>*</b></span><input id="c_email" type="email" maxlength="120"></label>
+   </div>
+   <div class="row end" style="margin-top:10px"><button class="btn" id="ctCancel" data-i="btn.cancel" hidden></button><button class="btn pri" id="ctSave" data-i="btn.save"></button></div>
+  </div>
+  <div id="ctList"></div>
+  <div class="card"><h2 data-i="dg.title"></h2>
+   <p class="hint" data-i="dg.help"></p>
+   <div id="dgInfo" class="hint"></div>
+   <div class="row" style="margin-top:8px"><button class="btn" id="dgNow" data-i="dg.now"></button></div>
+  </div>
+ </section>
+</section>
+</main>
+
+<div id="dlg" hidden><div class="in" id="dlgIn"></div></div>
+<div id="peek" hidden><img alt=""></div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+const LOCS = ["ADMINISTRATION BUILDING", "BLOCK 6 B SOUTH EAST CORNER", "BLOCK 6B", "BLOCK 6B EAST GATE", "BOILER / CHIMNEY AREA", "CONTROL ROOM, MCC ROOM", "COOLING TOWER", "DDE TREATMENT PLANT (DTP)", "DIESEL TANK", "DIRTY COOLING TOWER", "DRY AND LIQUID CHEMICAL STORAGE", "ECOOILS WARE HOUSE", "EFFLUENT TREATMENT PLANT (ETP)", "ELECTRICAL SUBSTATION (PLN)", "EXTRACTION PLANT", "FA PLANT", "FIRE WATER PUMP HOUSE", "FIRE WATER TANK", "GSB OFFICE", "HEXANE AND DIESEL RECEIVING BAY", "HEXANE TANK", "KKS OFFICE", "LOADING/UNLOADING AREA (PUMP HOUSE)", "MCC BUILDING", "NORTH-WEST CORNER BLOCK 6A", "OFFICE VEHICLE PARKING AREA", "OIL POLISHING PLANT", "PBS OFFICE", "PIPE RACK", "PRE TREATMENT UNIT (PTU)", "RAW WATER PIT", "SCHEDULED & DOMESTIC WASTE SHED", "SECURITY BUILDING", "SECURITY POST", "SILO", "TANK FARM", "TRUCK PARKING AREA", "VAPOR ABSORPTION MACHINE (VAM) SHED", "WAREHOUSE", "WAREHOUSE BLOCK B", "WASTE WATER TREATMENT PLANT (WWTP)", "WATER TANK", "WATER TREATMENT PLANT (WTP) AND WATER TANKS", "WEIGHT BRIDGE", "WEN OFFICE", "WORKSHOP AREA"];
+const APP_VERSION = '1.0.0';
+const API_URL = '';
+const COMPANIES = ['PT. ECOOILS', 'PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS', 'PT. SOS'];
+const OTHER_CO = 'OTHER (TYPE YOUR COMPANY NAME)';
+const DUE_DAYS = {High: 0, Medium: 3, Low: 7};
+const CATS = [
+ ['Housekeeping','Kerapian dan kebersihan','Kekemasan dan kebersihan'],['Working at height','Bekerja di ketinggian','Kerja di tempat tinggi'],
+ ['Scaffolding','Perancah (scaffolding)','Perancah (scaffolding)'],['Electrical','Kelistrikan','Elektrik'],['Lifting and rigging','Pengangkatan dan rigging','Pengangkatan dan rigging'],
+ ['Excavation','Penggalian','Penggalian'],['Hot work and fire','Pekerjaan panas dan api','Kerja panas dan api'],['Confined space','Ruang terbatas','Ruang terkurung'],
+ ['PPE','APD','PPE'],['Vehicles and traffic','Kendaraan dan lalu lintas','Kenderaan dan lalu lintas'],['Tools and equipment','Alat dan peralatan','Alat dan peralatan'],
+ ['Chemicals and hazardous materials','Bahan kimia dan B3','Bahan kimia dan bahan berbahaya'],['Waste and environment','Limbah dan lingkungan','Sisa dan alam sekitar'],
+ ['Access and egress','Akses dan jalur keluar','Akses dan laluan keluar'],['Signage and barricades','Rambu dan barikade','Papan tanda dan penghadang'],['Permit to work','Izin kerja (PTW)','Permit kerja (PTW)'],
+ ['Welfare and facilities','Kesejahteraan dan fasilitas','Kebajikan dan kemudahan'],['Other','Lainnya','Lain-lain']
+];
+const RISKS = ['High', 'Medium', 'Low'];
+const STATUSES = ['Open', 'Overdue', 'Closed by IC', 'Verified', 'Reopened'];
+
+/* ---------- language ---------- */
+const D = {
+'app.title':['Site walkthrough close-out','Penutupan temuan walkthrough lokasi','Penutupan dapatan walkthrough tapak'],
+'api.missing':['The app is not connected to its backend yet. Paste the Apps Script web app address:','Aplikasi belum terhubung ke backend. Tempel alamat web app Apps Script:','Aplikasi belum disambung ke backend. Tampal alamat web app Apps Script:'],
+'btn.save':['Save','Simpan','Simpan'],'btn.cancel':['Cancel','Batal','Batal'],'btn.close':['Close','Tutup','Tutup'],'btn.edit':['Edit','Ubah','Ubah'],'btn.delete':['Delete','Hapus','Padam'],
+'tab.list':['Findings','Temuan','Dapatan'],'tab.log':['Log a finding','Catat temuan','Catat dapatan'],'tab.report':['Report','Laporan','Laporan'],'tab.contacts':['Contacts','Kontak','Kenalan'],
+'a.login':['HSSE sign-in','Masuk HSSE','Log masuk HSSE'],'a.email':['Email','Email','Emel'],'a.pin':['PIN (6 digits)','PIN (6 digit)','PIN (6 digit)'],'a.loginBtn':['Sign in','Masuk','Log masuk'],
+'a.forgot':['Forgot PIN / set PIN','Lupa PIN / atur PIN','Lupa PIN / tetapkan PIN'],'a.resetInfo':['We email a 6-digit code to your HSSE address. Enter it with a new 6-digit PIN.','Kami mengirim kode 6 digit ke email HSSE Anda. Masukkan kode itu dengan PIN baru 6 digit.','Kami menghantar kod 6 digit ke emel HSSE anda. Masukkan kod itu bersama PIN baharu 6 digit.'],
+'a.sendCode':['Email me a code','Kirim kode ke email saya','Hantar kod ke emel saya'],'a.code':['6-digit code from the email','Kode 6 digit dari email','Kod 6 digit daripada emel'],'a.newPin':['New PIN (6 digits)','PIN baru (6 digit)','PIN baharu (6 digit)'],
+'a.newPin2':['Repeat the new PIN','Ulangi PIN baru','Ulang PIN baharu'],'a.setPin':['Set PIN','Atur PIN','Tetapkan PIN'],'a.back':['Back to sign-in','Kembali ke masuk','Kembali ke log masuk'],'a.logout':['Sign out','Keluar','Log keluar'],
+'l.search':['Search ref, location, text','Cari no. ref, lokasi, teks','Cari no. rujukan, lokasi, teks'],'l.allIc':['All companies','Semua perusahaan','Semua syarikat'],'l.allSt':['All statuses','Semua status','Semua status'],
+'l.none':['No findings match.','Tidak ada temuan yang cocok.','Tiada dapatan yang sepadan.'],
+'k.open':['Open','Terbuka','Terbuka'],'k.overdue':['Overdue','Lewat tenggat','Lewat tempoh'],'k.wait':['Awaiting verification','Menunggu verifikasi','Menunggu pengesahan'],'k.ver':['Verified','Terverifikasi','Disahkan'],'k.avg':['Avg days to close','Rata-rata hari tutup','Purata hari tutup'],
+'s.Open':['Open','Terbuka','Terbuka'],'s.Overdue':['Overdue','Lewat tenggat','Lewat tempoh'],'s.Closed by IC':['Closed by IC, to verify','Ditutup IC, perlu verifikasi','Ditutup IC, perlu pengesahan'],'s.Verified':['Verified','Terverifikasi','Disahkan'],'s.Reopened':['Sent back','Dikembalikan','Dikembalikan'],
+'r.High':['High','Tinggi','Tinggi'],'r.Medium':['Medium','Sedang','Sederhana'],'r.Low':['Low','Rendah','Rendah'],
+'f.ic':['Company','Perusahaan','Syarikat'],'f.loc':['Location','Lokasi','Lokasi'],'f.cat':['Category','Kategori','Kategori'],'f.risk':['Risk','Risiko','Risiko'],'f.due':['Close by','Tutup sebelum','Tutup sebelum'],
+'f.dueHint':['High: same day. Medium: 3 days. Low: 7 days. You can change the date.','Tinggi: hari yang sama. Sedang: 3 hari. Rendah: 7 hari. Tanggal dapat diubah.','Tinggi: hari yang sama. Sederhana: 3 hari. Rendah: 7 hari. Tarikh boleh diubah.'],
+'f.desc':['What did you see? (what and where)','Apa yang Anda lihat? (apa dan di mana)','Apa yang anda lihat? (apa dan di mana)'],'f.before':['BEFORE photo (1 to 3)','Foto SEBELUM (1 sampai 3)','Foto SEBELUM (1 hingga 3)'],
+'ph.otherCo':['Type company name','Ketik nama perusahaan','Taip nama syarikat'],'ph.otherLoc':['Type the location','Ketik lokasi','Taip lokasi'],'p.drop':['Drop photos here or tap to choose','Letakkan foto di sini atau ketuk untuk memilih','Letakkan foto di sini atau ketik untuk memilih'],
+'log.title':['Log a walkthrough finding','Catat temuan walkthrough','Catat dapatan walkthrough'],'log.send':['Log finding and email the company','Catat temuan dan kirim email ke perusahaan','Catat dapatan dan hantar emel ke syarikat'],
+'log.done':['Finding logged','Temuan dicatat','Dapatan dicatat'],'log.mailSent':['Email sent to {n} contact(s) with the BEFORE photo and the close-out link.','Email dikirim ke {n} kontak beserta foto SEBELUM dan tautan penutupan.','Emel dihantar kepada {n} kenalan bersama foto SEBELUM dan pautan penutupan.'],
+'log.noMail':['No email contact for this company yet, so nothing was sent. Add one under Contacts, or send the link below by WhatsApp.','Belum ada kontak email untuk perusahaan ini, jadi belum ada yang terkirim. Tambahkan di Kontak, atau kirim tautan di bawah lewat WhatsApp.','Belum ada kenalan emel untuk syarikat ini, jadi tiada yang dihantar. Tambah di Kenalan, atau hantar pautan di bawah melalui WhatsApp.'],
+'log.quota':['The daily email limit was reached. Send the link below by WhatsApp.','Batas email harian tercapai. Kirim tautan di bawah lewat WhatsApp.','Had emel harian dicapai. Hantar pautan di bawah melalui WhatsApp.'],
+'log.another':['Log another','Catat lagi','Catat lagi'],'log.link':['Close-out link','Tautan penutupan','Pautan penutupan'],
+'v.fields':['Fill in company, location, category, risk, date and a description of at least 10 characters.','Isi perusahaan, lokasi, kategori, risiko, tanggal dan deskripsi minimal 10 karakter.','Isi syarikat, lokasi, kategori, risiko, tarikh dan penerangan sekurang-kurangnya 10 aksara.'],
+'v.photo':['Add at least one photo.','Tambahkan minimal satu foto.','Tambah sekurang-kurangnya satu foto.'],
+'d.finding':['Finding','Temuan','Dapatan'],'d.ref':['Ref','No. ref','No. rujukan'],'d.logged':['Logged','Dicatat','Dicatat'],'d.due':['Close by','Tutup sebelum','Tutup sebelum'],'d.closed':['Closed','Ditutup','Ditutup'],'d.closedBy':['Closed by','Ditutup oleh','Ditutup oleh'],
+'d.note':['Close-out note','Catatan penutupan','Nota penutupan'],'d.verified':['Verified','Diverifikasi','Disahkan'],'d.hse':['HSSE note','Catatan HSSE','Nota HSSE'],'d.sentBack':['Times sent back','Kali dikembalikan','Kali dikembalikan'],
+'ph.before':['Before','Sebelum','Sebelum'],'ph.after':['After','Sesudah','Selepas'],'ph.none':['No photo yet','Belum ada foto','Belum ada foto'],
+'x.verify':['Verify close-out','Verifikasi penutupan','Sahkan penutupan'],'x.sendBack':['Send back','Kembalikan','Kembalikan'],'x.backNote':['What is still missing? (required)','Apa yang masih kurang? (wajib)','Apa yang masih kurang? (wajib)'],
+'x.newDue':['New close-by date','Tanggal tutup baru','Tarikh tutup baharu'],'x.resend':['Email again','Kirim email lagi','Hantar emel lagi'],'x.copy':['Copy close-out link','Salin tautan penutupan','Salin pautan penutupan'],
+'x.wa':['Share on WhatsApp','Bagikan lewat WhatsApp','Kongsi melalui WhatsApp'],'x.onBehalf':['Close on behalf of the company','Tutup atas nama perusahaan','Tutup bagi pihak syarikat'],
+'x.byWho':['Closed by (name)','Ditutup oleh (nama)','Ditutup oleh (nama)'],'x.afterPh':['AFTER photo (1 to 3)','Foto SESUDAH (1 sampai 3)','Foto SELEPAS (1 hingga 3)'],
+'x.onBehalfHelp':['Use this when the company sent the after photo by WhatsApp. It is marked verified straight away.','Gunakan ini jika perusahaan mengirim foto sesudah lewat WhatsApp. Langsung ditandai terverifikasi.','Gunakan ini jika syarikat menghantar foto selepas melalui WhatsApp. Terus ditanda disahkan.'],
+'x.saveClose':['Save as closed and verified','Simpan sebagai ditutup dan terverifikasi','Simpan sebagai ditutup dan disahkan'],'x.update':['Update risk / date','Ubah risiko / tanggal','Ubah risiko / tarikh'],
+'x.confirmDel':['Delete this finding and its photos? This cannot be undone.','Hapus temuan ini beserta fotonya? Tidak dapat dibatalkan.','Padam dapatan ini beserta fotonya? Tidak boleh dibatalkan.'],
+'x.copied':['Link copied','Tautan disalin','Pautan disalin'],'x.saved':['Saved','Tersimpan','Disimpan'],'x.deleted':['Deleted','Terhapus','Dipadam'],'x.verifiedOk':['Verified','Terverifikasi','Disahkan'],'x.sentBackOk':['Sent back to the company by email','Dikembalikan ke perusahaan lewat email','Dikembalikan kepada syarikat melalui emel'],
+'rp.title':['Pictorial close-out report','Laporan bergambar penutupan','Laporan bergambar penutupan'],'rp.which':['Include','Sertakan','Sertakan'],'rp.from':['Logged from','Dicatat dari','Dicatat dari'],'rp.to':['Logged to','Dicatat sampai','Dicatat hingga'],
+'rp.build':['Build report','Buat laporan','Bina laporan'],'rp.print':['Print / save as PDF','Cetak / simpan PDF','Cetak / simpan PDF'],'rp.csv':['Download CSV','Unduh CSV','Muat turun CSV'],
+'rp.all':['All findings','Semua temuan','Semua dapatan'],'rp.closed':['Closed and verified only','Hanya yang ditutup dan terverifikasi','Hanya yang ditutup dan disahkan'],'rp.closedAny':['Closed (verified or to verify)','Ditutup (terverifikasi atau perlu verifikasi)','Ditutup (disahkan atau perlu pengesahan)'],
+'rp.head':['Site walkthrough close-out report','Laporan penutupan walkthrough lokasi','Laporan penutupan walkthrough tapak'],'rp.company':['Company','Perusahaan','Syarikat'],'rp.period':['Period','Periode','Tempoh'],'rp.generated':['Generated','Dibuat','Dijana'],
+'rp.logged':['Logged','Dicatat','Dicatat'],'rp.closedN':['Closed','Ditutup','Ditutup'],'rp.verN':['Verified','Terverifikasi','Disahkan'],'rp.openN':['Still open','Masih terbuka','Masih terbuka'],'rp.overN':['Overdue','Lewat tenggat','Lewat tempoh'],'rp.avg':['Avg days to close','Rata-rata hari tutup','Purata hari tutup'],
+'rp.empty':['No findings in this selection.','Tidak ada temuan pada pilihan ini.','Tiada dapatan pada pilihan ini.'],'rp.loading':['Loading photos {a} of {b}…','Memuat foto {a} dari {b}…','Memuat foto {a} daripada {b}…'],'rp.ready':['Report ready','Laporan siap','Laporan sedia'],
+'ct.title':['Who receives the findings','Siapa yang menerima temuan','Siapa yang menerima dapatan'],'ct.help':['Add the HSSE officer who fixes findings for each company, and the project manager who is copied on high-risk and overdue items.','Tambahkan petugas HSSE yang menindaklanjuti temuan tiap perusahaan, dan manajer proyek yang di-CC untuk temuan risiko tinggi dan lewat tenggat.','Tambah pegawai HSSE yang membetulkan dapatan bagi setiap syarikat, dan pengurus projek yang di-CC untuk perkara berisiko tinggi dan lewat tempoh.'],
+'ct.role':['Role','Peran','Peranan'],'ct.name':['Name','Nama','Nama'],'ct.hsse':['HSSE officer (receives findings)','Petugas HSSE (menerima temuan)','Pegawai HSSE (menerima dapatan)'],'ct.pm':['Project manager (copied)','Manajer proyek (CC)','Pengurus projek (CC)'],
+'ct.none':['No contacts yet.','Belum ada kontak.','Belum ada kenalan.'],'ct.bad':['Company, name and a valid email are required.','Perusahaan, nama dan email yang valid wajib diisi.','Syarikat, nama dan emel yang sah wajib diisi.'],
+'dg.title':['Daily digest','Ringkasan harian','Ringkasan harian'],'dg.help':['Every morning each company gets one email listing its open and overdue findings, each with its close-out link. Overdue items also copy the project manager.','Setiap pagi tiap perusahaan menerima satu email berisi temuan terbuka dan lewat tenggat, masing-masing dengan tautan penutupan. Temuan lewat tenggat juga di-CC ke manajer proyek.','Setiap pagi setiap syarikat menerima satu emel yang menyenaraikan dapatan terbuka dan lewat tempoh, setiap satu dengan pautan penutupan. Perkara lewat tempoh turut di-CC kepada pengurus projek.'],
+'dg.now':['Send the digest now','Kirim ringkasan sekarang','Hantar ringkasan sekarang'],'dg.on':['Automatic digest: ON','Ringkasan otomatis: AKTIF','Ringkasan automatik: AKTIF'],'dg.off':['Automatic digest: OFF. Run installDigestTrigger once in Apps Script.','Ringkasan otomatis: MATI. Jalankan installDigestTrigger sekali di Apps Script.','Ringkasan automatik: MATI. Jalankan installDigestTrigger sekali di Apps Script.'],
+'dg.sent':['Digest sent: {n} company email(s)','Ringkasan terkirim: {n} email perusahaan','Ringkasan dihantar: {n} emel syarikat'],'dg.nothing':['Nothing to send: no open findings with an email contact.','Tidak ada yang dikirim: tidak ada temuan terbuka dengan kontak email.','Tiada yang dihantar: tiada dapatan terbuka dengan kenalan emel.'],
+'ic.loading':['Loading the finding…','Memuat temuan…','Memuat dapatan…'],'ic.finding':['Walkthrough finding','Temuan walkthrough','Dapatan walkthrough'],'ic.photos':['Before and after','Sebelum dan sesudah','Sebelum dan selepas'],
+'ic.closeTitle':['Close this finding','Tutup temuan ini','Tutup dapatan ini'],'ic.closeHelp':['Fix the issue first. Then add a photo of the same spot AFTER the fix, your name, and submit. HSSE will check it.','Perbaiki dulu. Lalu tambahkan foto lokasi yang sama SESUDAH perbaikan, nama Anda, dan kirim. HSSE akan memeriksanya.','Betulkan dahulu. Kemudian tambah foto lokasi yang sama SELEPAS pembetulan, nama anda, dan hantar. HSSE akan menyemaknya.'],
+'ic.name':['Your name','Nama Anda','Nama anda'],'ic.note':['What was done (optional)','Apa yang dilakukan (opsional)','Apa yang dilakukan (pilihan)'],'ic.after':['AFTER photo (1 to 3)','Foto SESUDAH (1 sampai 3)','Foto SELEPAS (1 hingga 3)'],'ic.send':['Submit close-out','Kirim penutupan','Hantar penutupan'],
+'ic.done':['Thank you. Your close-out was sent to HSSE for checking.','Terima kasih. Penutupan Anda sudah dikirim ke HSSE untuk diperiksa.','Terima kasih. Penutupan anda telah dihantar kepada HSSE untuk disemak.'],
+'ic.waiting':['This finding was closed and is waiting for HSSE to verify it.','Temuan ini sudah ditutup dan menunggu verifikasi HSSE.','Dapatan ini telah ditutup dan menunggu pengesahan HSSE.'],'ic.verified':['This finding is closed and verified. Thank you.','Temuan ini sudah ditutup dan terverifikasi. Terima kasih.','Dapatan ini telah ditutup dan disahkan. Terima kasih.'],
+'ic.sentBack':['HSSE sent this back. Please fix what is missing and submit a new AFTER photo.','HSSE mengembalikan temuan ini. Mohon perbaiki yang kurang dan kirim foto SESUDAH yang baru.','HSSE mengembalikan dapatan ini. Sila betulkan yang kurang dan hantar foto SELEPAS yang baharu.'],
+'ic.needName':['Write your name.','Tulis nama Anda.','Tulis nama anda.'],'ic.needPhoto':['Add at least one AFTER photo.','Tambahkan minimal satu foto SESUDAH.','Tambah sekurang-kurangnya satu foto SELEPAS.'],
+'e.noapi':['The app is not connected to its backend.','Aplikasi belum terhubung ke backend.','Aplikasi belum disambung ke backend.'],'e.session':['Your session ended. Sign in again.','Sesi berakhir. Masuk lagi.','Sesi tamat. Log masuk semula.'],
+'m.codeSent':['If that address is allowed, a code was emailed.','Jika alamat itu diizinkan, kode sudah dikirim.','Jika alamat itu dibenarkan, kod telah dihantar.'],'m.pinSet':['PIN set. You can sign in now.','PIN diatur. Silakan masuk.','PIN ditetapkan. Sila log masuk.'],
+'m.pin6':['The PIN must be exactly 6 digits.','PIN harus tepat 6 digit.','PIN mesti tepat 6 digit.'],'m.pinMismatch':['The two PINs do not match.','Kedua PIN tidak sama.','Kedua-dua PIN tidak sama.'],'m.sending':['Sending…','Mengirim…','Menghantar…']
+};
+const LI = () => ({en:0, id:1, ms:2}[LANG] || 0);
+let LANG = 'en';
+try { LANG = localStorage.getItem('wt_lang') || 'en'; } catch (e) {}
+const t = (k, rep) => { const a = D[k]; let s = a ? (a[LI()] || a[0]) : k; if (rep) for (const x in rep) s = s.replace('{' + x + '}', rep[x]); return s; };
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const catLabel = v => { const c = CATS.find(x => x[0] === v); return c ? c[LI()] : v; };
+const todayISO = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const addDays = (iso, n) => { const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const fmtDate = iso => { if (!iso) return ''; const d = new Date(String(iso).slice(0, 10) + 'T12:00:00'); return isNaN(d) ? iso : d.toLocaleDateString({id:'id-ID', en:'en-GB', ms:'ms-MY'}[LANG], {day:'numeric', month:'short', year:'numeric'}); };
+const daysBetween = (a, b) => Math.round((new Date(b + 'T12:00:00Z') - new Date(a + 'T12:00:00Z')) / 86400000);
+let toastT;
+function toast(msg, err) { const e = $('#toast'); e.textContent = msg; e.className = 'toast' + (err ? ' err' : ''); e.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => e.hidden = true, 4500); }
+
+function applyLang() {
+  document.documentElement.lang = LANG;
+  $$('[data-i]').forEach(e => e.textContent = t(e.dataset.i));
+  $$('[data-ph]').forEach(e => e.placeholder = t(e.dataset.ph));
+  $$('#lang button').forEach(b => b.classList.toggle('on', b.dataset.l === LANG));
+  fillSelects(); if (!$('#vAdm').hidden) { renderList(); renderContacts(); }
+  if (IC) renderIC(); if (!$('#dlg').hidden && CUR) openDetail(CUR);
+}
+
+/* ---------- api ---------- */
+function apiUrl() { let l = ''; try { l = localStorage.getItem('wt_api') || ''; } catch (e) {} return API_URL || new URLSearchParams(location.search).get('api') || l; }
+async function api(body, ms) {
+  const u = apiUrl(); if (!u) throw new Error('NOAPI');
+  const ac = new AbortController(), tm = ms ? setTimeout(() => ac.abort(), ms) : 0;
+  try {
+    const r = await fetch(u, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(body), signal:ac.signal});
+    const j = await r.json(); if (!j.ok) throw new Error(j.error || 'Error'); return j;
+  } catch (e) {
+    if (e.message === 'SESSION') { logoutUI(); throw new Error(t('e.session')); }
+    if (e.message === 'NOAPI') { $('#noapi').hidden = false; throw new Error(t('e.noapi')); }
+    throw e;
+  } finally { clearTimeout(tm); }
+}
+const withToken = o => Object.assign({token: TOKEN}, o);
+
+/* ---------- photos: peek overlay, drag and drop, + button ---------- */
+function peek(src) { $('#peek img').src = src; $('#peek').hidden = false; }
+$('#peek').addEventListener('click', () => $('#peek').hidden = true);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') $('#peek').hidden = true; });
+function readImg(file, max, q) {
+  return new Promise((res, rej) => { const fr = new FileReader();
+    fr.onload = () => { const im = new Image(); im.onload = () => { const s = Math.min(1, max / Math.max(im.width, im.height)), w = Math.round(im.width * s), h = Math.round(im.height * s);
+      const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(im, 0, 0, w, h); res(c.toDataURL('image/jpeg', q)); }; im.onerror = rej; im.src = fr.result; };
+    fr.onerror = rej; fr.readAsDataURL(file); });
+}
+const PB = {log: [], ic: [], onb: []};
+function renderPB(kind) {
+  const root = $('#pb_' + kind), items = PB[kind]; if (!root) return;
+  root.innerHTML = '';
+  if (!items.length) { const dz = document.createElement('div'); dz.className = 'dz'; dz.textContent = t('p.drop'); root.appendChild(dz); wireDrop(dz, kind); return; }
+  const th = document.createElement('div'); th.className = 'thumbs';
+  items.forEach((src, i) => { const d = document.createElement('div'); d.className = 'th'; d.innerHTML = '<img alt=""><button type="button" aria-label="remove">×</button>';
+    d.querySelector('img').src = src; d.querySelector('img').onclick = () => peek(src);
+    d.querySelector('button').onclick = e => { e.stopPropagation(); items.splice(i, 1); renderPB(kind); }; th.appendChild(d); });
+  if (items.length < 3) { const a = document.createElement('div'); a.className = 'th add'; a.textContent = '+'; th.appendChild(a); wireDrop(a, kind); }
+  root.appendChild(th);
+}
+function wireDrop(el, kind) {
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.multiple = true; inp.hidden = true; el.appendChild(inp);
+  el.addEventListener('click', e => { if (e.target !== inp) inp.click(); });
+  inp.addEventListener('change', () => addFiles(kind, inp.files));
+  el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('over'); });
+  el.addEventListener('dragleave', () => el.classList.remove('over'));
+  el.addEventListener('drop', e => { e.preventDefault(); el.classList.remove('over'); addFiles(kind, e.dataTransfer.files); });
+}
+async function addFiles(kind, files) {
+  for (const f of [...files]) { if (PB[kind].length >= 3) break; if (!/^image\//.test(f.type)) continue;
+    try { PB[kind].push(await readImg(f, 1280, .78)); } catch (e) { toast('Photo error', true); } }
+  renderPB(kind);
+}
+
+/* ---------- selects ---------- */
+function setSel(sel, opts, keep) { const e = $(sel), cur = keep === undefined ? e.value : keep; e.innerHTML = opts.map(o => '<option value="' + esc(o[0]) + '">' + esc(o[1]) + '</option>').join(''); if ([...e.options].some(o => o.value === cur)) e.value = cur; }
+function fillSelects() {
+  const coOpts = [['', '—'], ...COMPANIES.map(c => [c, c]), [OTHER_CO, OTHER_CO]];
+  setSel('#f_ic', coOpts); setSel('#c_ic', coOpts);
+  setSel('#f_loc', [['', '—'], ...LOCS.map(x => [x, x]), ['__other', '…']]);
+  setSel('#f_cat', [['', '—'], ...CATS.map(c => [c[0], c[LI()]])]);
+  setSel('#f_risk', RISKS.map(r => [r, t('r.' + r)]), $('#f_risk').value || 'Medium');
+  setSel('#c_role', [['HSSE', t('ct.hsse')], ['PM', t('ct.pm')]]);
+  setSel('#fl_st', [['', t('l.allSt')], ...STATUSES.map(s => [s, t('s.' + s)])]);
+  setSel('#rp_st', [['all', t('rp.all')], ['closed', t('rp.closedAny')], ['verified', t('rp.closed')]]);
+  const ics = [...new Set(ROWS.map(r => r.ic))].sort();
+  setSel('#fl_ic', [['', t('l.allIc')], ...ics.map(c => [c, c])]);
+  setSel('#rp_ic', [['', t('l.allIc')], ...ics.map(c => [c, c])]);
+  $('#f_ic2').hidden = $('#f_ic').value !== OTHER_CO; $('#f_loc2').hidden = $('#f_loc').value !== '__other'; $('#c_ic2').hidden = $('#c_ic').value !== OTHER_CO;
+}
+
+/* ---------- state ---------- */
+let TOKEN = ''; try { TOKEN = sessionStorage.getItem('wt_tok') || ''; } catch (e) {}
+let ROWS = [], TODAY = todayISO(), CUR = null, IC = null, CONTACTS = [], PHC = {}, EDITING = '';
+const isOpen = r => r.status === 'Open' || r.status === 'Reopened';
+const isLate = r => isOpen(r) && String(r.dueDate).slice(0, 10) < TODAY;
+const chip = r => { const s = isLate(r) ? 'Overdue' : r.status; return '<span class="chip ' + s.replace(/ /g, '') + '">' + esc(t('s.' + s)) + '</span>'; };
+const idsOf = s => String(s || '').split(',').map(x => x.trim()).filter(Boolean);
+
+/* ---------- login ---------- */
+function logoutUI() { TOKEN = ''; try { sessionStorage.removeItem('wt_tok'); } catch (e) {} if (!IC) show('login'); }
+function show(v) { $('#vIC').hidden = v !== 'ic'; $('#vLogin').hidden = v !== 'login'; $('#vAdm').hidden = v !== 'adm'; }
+async function doLogin() {
+  const pin = $('#l_pin').value;
+  if (!/^\d{6}$/.test(pin)) return toast(t('m.pin6'), true);
+  try { const j = await api({action: 'login', email: $('#l_email').value, pin}); TOKEN = j.token; try { sessionStorage.setItem('wt_tok', TOKEN); localStorage.setItem('wt_email', j.email); } catch (e) {} $('#l_pin').value = ''; await enterAdmin(); }
+  catch (e) { toast(e.message, true); }
+}
+async function enterAdmin() { show('adm'); await Promise.all([loadList(), loadContacts()]); }
+
+/* ---------- findings list ---------- */
+async function loadList() { const j = await api(withToken({action: 'list'})); ROWS = j.rows; TODAY = j.today || TODAY; fillSelects(); renderList(); }
+function renderList() {
+  const rows = ROWS, open = rows.filter(isOpen), late = rows.filter(isLate), wait = rows.filter(r => r.status === 'Closed by IC'), ver = rows.filter(r => r.status === 'Verified');
+  const closed = rows.filter(r => r.closedAt), avg = closed.length ? (closed.reduce((a, r) => a + Math.max(0, daysBetween(String(r.createdAt).slice(0, 10), String(r.closedAt).slice(0, 10))), 0) / closed.length) : null;
+  $('#kpis').innerHTML = [['open', open.length, '', ''], ['overdue', late.length, 'red', 'Overdue'], ['wait', wait.length, '', 'Closed by IC'], ['ver', ver.length, 'grn', 'Verified'], ['avg', avg === null ? '–' : avg.toFixed(1), '', null]]
+    .map(k => '<div class="kpi ' + k[2] + '" data-f="' + (k[3] === null ? '' : (k[0] === 'open' ? 'Open' : k[3])) + '"><b>' + k[1] + '</b><span>' + esc(t('k.' + k[0])) + '</span></div>').join('');
+  $$('#kpis .kpi').forEach(k => k.onclick = () => { if (k.dataset.f !== '') { $('#fl_st').value = k.dataset.f; renderList(); } });
+  const ic = $('#fl_ic').value, st = $('#fl_st').value, q = $('#fl_q').value.trim().toLowerCase();
+  let f = rows.filter(r => (!ic || r.ic === ic) && (!st || (st === 'Overdue' ? isLate(r) : st === 'Open' ? isOpen(r) : r.status === st)) && (!q || [r.id, r.location, r.description, r.ic, r.category].join(' ').toLowerCase().includes(q)));
+  f.sort((a, b) => (isLate(b) - isLate(a)) || String(b.createdAt).localeCompare(String(a.createdAt)));
+  $('#items').innerHTML = f.length ? f.map(r => '<div class="item ' + esc(r.risk) + '" data-id="' + esc(r.id) + '"><span class="id">' + esc(r.id) + '</span><div class="mid"><div><b>' + esc(r.ic) + '</b> · ' + esc(r.location) + '</div><div class="d">' + esc(catLabel(r.category)) + ' · ' + esc(r.description) + '</div></div><div style="text-align:right">' + chip(r) + '<div class="d">' + esc(t('d.due')) + ' ' + esc(fmtDate(r.dueDate)) + '</div></div></div>').join('') : '<div class="hint">' + esc(t('l.none')) + '</div>';
+  $$('#items .item').forEach(e => e.onclick = () => openDetail(e.dataset.id));
+}
+
+/* ---------- finding detail ---------- */
+async function loadPhotos(ids) {
+  const need = ids.filter(i => !(i in PHC));
+  for (let i = 0; i < need.length; i += 3) { const part = need.slice(i, i + 3); try { const j = await api(withToken({action: 'photos', ids: part})); Object.assign(PHC, j.photos); } catch (e) { part.forEach(p => PHC[p] = ''); } }
+}
+function pairHTML(before, after) {
+  const col = (label, arr) => '<div><h3>' + esc(label) + '</h3>' + (arr.length ? '<div class="ph">' + arr.map((s, i) => '<img class="' + (i === 0 ? 'big' : 'sm') + '" data-src="1" alt="" src="' + s + '">').join('') + '</div>' : '<div class="none">' + esc(t('ph.none')) + '</div>') + '</div>';
+  return col(t('ph.before'), before) + col(t('ph.after'), after);
+}
+function wirePeek(root) { $$(root + ' img[data-src]').forEach(i => i.onclick = () => peek(i.src)); }
+async function openDetail(id) {
+  const r = ROWS.find(x => x.id === id); if (!r) return; CUR = id;
+  const bids = idsOf(r.beforePhotos).slice(0, 3), aids = idsOf(r.afterPhotos).slice(-3);
+  const dlg = $('#dlg'), inn = $('#dlgIn'); dlg.hidden = false;
+  const head = '<div class="row" style="justify-content:space-between"><b style="letter-spacing:.08em">' + esc(r.id) + '</b><span>' + chip(r) + '</span></div>';
+  const kv = [[t('f.ic'), r.ic], [t('f.loc'), r.location], [t('f.cat'), catLabel(r.category)], [t('f.risk'), '<span class="risk ' + esc(r.risk) + '"></span>' + esc(t('r.' + r.risk))], [t('d.logged'), fmtDate(String(r.createdAt).slice(0, 10))], [t('d.due'), fmtDate(r.dueDate)], [t('d.finding'), r.description]];
+  if (r.closedAt) kv.push([t('d.closed'), fmtDate(String(r.closedAt).slice(0, 10))], [t('d.closedBy'), r.closedBy], [t('d.note'), r.closeNote || '–']);
+  if (r.verifiedAt) kv.push([t('d.verified'), fmtDate(String(r.verifiedAt).slice(0, 10))]);
+  if (r.hseNote) kv.push([t('d.hse'), r.hseNote]);
+  if (Number(r.reopenCount)) kv.push([t('d.sentBack'), r.reopenCount]);
+  const own = r.ic === OTHER_CO ? '' : '';
+  let acts = '';
+  if (r.status === 'Closed by IC') acts += '<div class="card"><div class="row"><button class="btn pri" id="xVerify">' + esc(t('x.verify')) + '</button></div><label class="f" style="margin-top:10px"><span>' + esc(t('x.backNote')) + '</span><textarea id="xNote" maxlength="1000"></textarea></label><div class="row" style="margin-top:6px"><label class="f"><span>' + esc(t('x.newDue')) + '</span><input type="date" id="xDue" value="' + esc(addDays(TODAY, DUE_DAYS[r.risk] || 3)) + '"></label><button class="btn danger" id="xBack" style="align-self:flex-end">' + esc(t('x.sendBack')) + '</button></div></div>';
+  if (isOpen(r)) acts += '<div class="card"><div class="row"><button class="btn" id="xResend">' + esc(t('x.resend')) + '</button><button class="btn" id="xCopy">' + esc(t('x.copy')) + '</button><a class="btn" id="xWa" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">' + esc(t('x.wa')) + '</a></div></div>' +
+    '<div class="card"><h2>' + esc(t('x.update')) + '</h2><div class="row"><select id="xRisk" style="width:auto">' + RISKS.map(k => '<option value="' + k + '"' + (k === r.risk ? ' selected' : '') + '>' + esc(t('r.' + k)) + '</option>').join('') + '</select><input type="date" id="xDue2" style="width:auto" value="' + esc(String(r.dueDate).slice(0, 10)) + '"><button class="btn" id="xUpd">' + esc(t('btn.save')) + '</button></div></div>' +
+    '<div class="card"><h2>' + esc(t('x.onBehalf')) + '</h2><p class="hint">' + esc(t('x.onBehalfHelp')) + '</p><label class="f"><span>' + esc(t('x.byWho')) + '</span><input id="xBy" maxlength="120"></label><label class="f" style="margin-top:8px"><span>' + esc(t('ic.note')) + '</span><textarea id="xCn" maxlength="1000"></textarea></label><div class="hint" style="margin-top:8px">' + esc(t('x.afterPh')) + '</div><div id="pb_onb"></div><div class="row end" style="margin-top:10px"><button class="btn pri" id="xOnb">' + esc(t('x.saveClose')) + '</button></div></div>';
+  inn.innerHTML = '<div class="row" style="justify-content:flex-end"><button class="btn" id="xClose">' + esc(t('btn.close')) + '</button></div>' + head + '<dl class="kv">' + kv.map(p => '<dt>' + esc(p[0]) + '</dt><dd>' + (String(p[1]).startsWith('<span class="risk') ? p[1] : esc(p[1])) + '</dd>').join('') + '</dl><div class="pair" id="dPair"><div class="hint">…</div></div><div style="height:12px"></div>' + acts + '<div class="row end"><button class="btn danger" id="xDel">' + esc(t('btn.delete')) + '</button></div>';
+  $('#xClose').onclick = closeDetail;
+  PB.onb = []; renderPB('onb');
+  const wire = (sel, fn) => { const e = $(sel); if (e) e.onclick = fn; };
+  wire('#xVerify', async () => { try { await api(withToken({action: 'verify', id: id, status: 'Verified'})); toast(t('x.verifiedOk')); await refreshAfter(); } catch (e) { toast(e.message, true); } });
+  wire('#xBack', async () => { try { await api(withToken({action: 'update', id: id, fields: {dueDate: $('#xDue').value}})); await api(withToken({action: 'verify', id: id, status: 'Reopened', note: $('#xNote').value})); toast(t('x.sentBackOk')); await refreshAfter(); } catch (e) { toast(e.message, true); } });
+  wire('#xResend', async () => { try { const j = await api(withToken({action: 'resend', id: id})); toast(j.mail.sent ? t('log.mailSent', {n: j.mail.sent}) : t('log.noMail'), !j.mail.sent); } catch (e) { toast(e.message, true); } });
+  wire('#xCopy', async () => { try { await navigator.clipboard.writeText(r.link); toast(t('x.copied')); } catch (e) { toast(r.link); } });
+  const wa = $('#xWa'); if (wa) wa.href = 'https://wa.me/?text=' + encodeURIComponent('[' + r.id + '] ' + r.risk + ' - ' + r.location + ' - ' + t('d.due') + ' ' + fmtDate(r.dueDate) + '\n' + r.description + '\n' + r.link);
+  wire('#xUpd', async () => { try { await api(withToken({action: 'update', id: id, fields: {risk: $('#xRisk').value, dueDate: $('#xDue2').value}})); toast(t('x.saved')); await refreshAfter(true); } catch (e) { toast(e.message, true); } });
+  wire('#xOnb', async () => { if (!PB.onb.length) return toast(t('ic.needPhoto'), true); try { await api(withToken({action: 'adminClose', id: id, closedBy: $('#xBy').value, note: $('#xCn').value, after: PB.onb}), 60000); toast(t('x.saved')); delete PHC['']; await refreshAfter(); } catch (e) { toast(e.message, true); } });
+  wire('#xDel', async () => { if (!confirm(t('x.confirmDel'))) return; try { await api(withToken({action: 'delete', ids: [id]})); toast(t('x.deleted')); closeDetail(); await loadList(); } catch (e) { toast(e.message, true); } });
+  await loadPhotos(bids.concat(aids));
+  const pair = $('#dPair'); if (pair && CUR === id) { pair.innerHTML = pairHTML(bids.map(i => PHC[i]).filter(Boolean), aids.map(i => PHC[i]).filter(Boolean)); wirePeek('#dPair'); }
+}
+function closeDetail() { $('#dlg').hidden = true; CUR = null; }
+async function refreshAfter(keep) { const id = CUR; await loadList(); if (keep && id) openDetail(id); else closeDetail(); }
+
+/* ---------- log a finding ---------- */
+function syncDue() { const r = $('#f_risk').value; $('#f_due').value = addDays(todayISO(), DUE_DAYS[r] || 0); }
+async function submitLog() {
+  const ic = $('#f_ic').value === OTHER_CO ? $('#f_ic2').value.trim().toUpperCase() : $('#f_ic').value;
+  const loc = $('#f_loc').value === '__other' ? $('#f_loc2').value.trim() : $('#f_loc').value;
+  const fields = {ic, location: loc, category: $('#f_cat').value, risk: $('#f_risk').value, dueDate: $('#f_due').value, description: $('#f_desc').value.trim()};
+  if (!fields.ic || !fields.location || !fields.category || !fields.dueDate || fields.description.length < 10) return toast(t('v.fields'), true);
+  if (!PB.log.length) return toast(t('v.photo'), true);
+  const b = $('#btnLog'); b.disabled = true; toast(t('m.sending'));
+  try {
+    const j = await api(withToken({action: 'create', fields, before: PB.log}), 90000);
+    PB.log = []; renderPB('log'); $('#f_desc').value = ''; $('#f_loc').value = ''; $('#f_loc2').hidden = true; $('#f_cat').value = '';
+    const msg = j.mail.sent ? t('log.mailSent', {n: j.mail.sent}) : (j.mail.quota ? t('log.quota') : t('log.noMail'));
+    const dn = $('#logDone'); dn.hidden = false;
+    dn.innerHTML = '<h2>' + esc(t('log.done')) + ': ' + esc(j.id) + '</h2><div class="box ' + (j.mail.sent ? 'ok' : 'warn') + '">' + esc(msg) + '</div><div class="hint">' + esc(t('log.link')) + '</div><input readonly value="' + esc(j.link) + '" onclick="this.select()"><div class="row" style="margin-top:8px"><a class="btn" target="_blank" rel="noopener" style="text-decoration:none" href="https://wa.me/?text=' + encodeURIComponent('[' + j.id + '] ' + j.link) + '">' + esc(t('x.wa')) + '</a><button class="btn pri" id="logAgain">' + esc(t('log.another')) + '</button></div>';
+    $('#logAgain').onclick = () => { dn.hidden = true; window.scrollTo(0, 0); };
+    await loadList();
+  } catch (e) { toast(e.message, true); } finally { b.disabled = false; }
+}
+
+/* ---------- report ---------- */
+let REPORT = [];
+async function buildReport() {
+  const ic = $('#rp_ic').value, st = $('#rp_st').value, from = $('#rp_from').value, to = $('#rp_to').value;
+  let rows = ROWS.filter(r => (!ic || r.ic === ic) && (!from || String(r.createdAt).slice(0, 10) >= from) && (!to || String(r.createdAt).slice(0, 10) <= to));
+  if (st === 'verified') rows = rows.filter(r => r.status === 'Verified'); else if (st === 'closed') rows = rows.filter(r => r.status === 'Verified' || r.status === 'Closed by IC');
+  rows.sort((a, b) => String(a.id).localeCompare(String(b.id)));
+  REPORT = rows;
+  const out = $('#reportOut'), closed = rows.filter(r => r.closedAt), ver = rows.filter(r => r.status === 'Verified'), op = rows.filter(isOpen), late = rows.filter(isLate);
+  const avg = closed.length ? (closed.reduce((a, r) => a + Math.max(0, daysBetween(String(r.createdAt).slice(0, 10), String(r.closedAt).slice(0, 10))), 0) / closed.length).toFixed(1) : '–';
+  const period = (from || to) ? (fmtDate(from) || '…') + ' – ' + (fmtDate(to) || '…') : t('rp.all');
+  out.innerHTML = '<div class="rep"><div class="rh"><div><h2>' + esc(t('rp.head')) + '</h2><div class="hint">Sei Mangkei · ' + esc(t('rp.company')) + ': <b>' + esc(ic || t('l.allIc')) + '</b> · ' + esc(t('rp.period')) + ': ' + esc(period) + ' · ' + esc(t('rp.generated')) + ': ' + esc(fmtDate(todayISO())) + '</div></div><div class="brand" style="width:110px"><img src="wordmark.png" alt="EcoOils"><div class="proj" style="font-size:11px"><span>P</span><span>R</span><span>O</span><span>J</span><span>E</span><span>C</span><span>T</span></div></div></div>' +
+    '<div class="sum"><div><b>' + rows.length + '</b>' + esc(t('rp.logged')) + '</div><div><b>' + closed.length + '</b>' + esc(t('rp.closedN')) + '</div><div><b>' + ver.length + '</b>' + esc(t('rp.verN')) + '</div><div><b>' + op.length + '</b>' + esc(t('rp.openN')) + '</div><div><b>' + late.length + '</b>' + esc(t('rp.overN')) + '</div><div><b>' + avg + '</b>' + esc(t('rp.avg')) + '</div></div>' +
+    (rows.length ? rows.map(r => '<div class="fnd" id="rf_' + esc(r.id) + '"><div class="fh"><div><b>' + esc(r.id) + '</b> · ' + esc(r.ic) + ' · ' + esc(r.location) + '</div><div>' + chip(r) + '</div></div><div class="hint"><span class="risk ' + esc(r.risk) + '"></span>' + esc(t('r.' + r.risk)) + ' · ' + esc(catLabel(r.category)) + ' · ' + esc(t('d.logged')) + ' ' + esc(fmtDate(String(r.createdAt).slice(0, 10))) + ' · ' + esc(t('d.due')) + ' ' + esc(fmtDate(r.dueDate)) + (r.closedAt ? ' · ' + esc(t('d.closed')) + ' ' + esc(fmtDate(String(r.closedAt).slice(0, 10))) + ' (' + esc(r.closedBy) + ')' : '') + '</div><p style="margin:6px 0">' + esc(r.description) + (r.closeNote ? '<br><i>' + esc(t('d.note')) + ': ' + esc(r.closeNote) + '</i>' : '') + '</p><div class="pair"><div class="hint">…</div></div></div>').join('') : '<div class="hint">' + esc(t('rp.empty')) + '</div>') + '</div>';
+  $('#rpPrint').disabled = true;
+  const ids = []; rows.forEach(r => { ids.push(...idsOf(r.beforePhotos).slice(0, 3), ...idsOf(r.afterPhotos).slice(-3)); });
+  const need = ids.filter(i => !(i in PHC)); let done = 0;
+  for (let i = 0; i < need.length; i += 3) { await loadPhotos(need.slice(i, i + 3)); done = Math.min(need.length, i + 3); $('#rpProg').textContent = t('rp.loading', {a: done, b: need.length}); }
+  rows.forEach(r => { const box = $('#rf_' + CSS.escape(r.id) + ' .pair'); if (box) box.innerHTML = pairHTML(idsOf(r.beforePhotos).slice(0, 3).map(i => PHC[i]).filter(Boolean), idsOf(r.afterPhotos).slice(-3).map(i => PHC[i]).filter(Boolean)); });
+  wirePeek('#reportOut'); $('#rpProg').textContent = t('rp.ready'); $('#rpPrint').disabled = !rows.length;
+}
+function csvReport() {
+  const rows = REPORT.length ? REPORT : ROWS, cols = ['id', 'createdAt', 'ic', 'location', 'category', 'risk', 'description', 'dueDate', 'status', 'closedBy', 'closedAt', 'closeNote', 'verifiedBy', 'verifiedAt', 'hseNote', 'reopenCount'];
+  const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const csv = '﻿' + [cols.join(',')].concat(rows.map(r => cols.map(c => q(r[c])).join(','))).join('\r\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8'})); a.download = 'walkthrough-' + todayISO() + '.csv'; document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* ---------- contacts and digest ---------- */
+async function loadContacts() { const j = await api(withToken({action: 'contactsList'})); CONTACTS = j.contacts; window.DG = j; renderContacts(); }
+function renderContacts() {
+  const g = {}; CONTACTS.forEach(c => (g[c.ic] = g[c.ic] || []).push(c));
+  $('#ctList').innerHTML = CONTACTS.length ? Object.keys(g).sort().map(ic => '<div class="card"><h2>' + esc(ic) + '</h2>' + g[ic].map(c => '<div class="ct"><div><b>' + esc(c.name) + '</b> <small>' + esc(c.email) + ' · ' + esc(c.role === 'PM' ? t('ct.pm') : t('ct.hsse')) + '</small></div><div class="row"><button class="btn" data-e="' + esc(c.id) + '">' + esc(t('btn.edit')) + '</button><button class="btn danger" data-d="' + esc(c.id) + '">' + esc(t('btn.delete')) + '</button></div></div>').join('') + '</div>').join('') : '<div class="hint">' + esc(t('ct.none')) + '</div>';
+  $$('#ctList [data-e]').forEach(b => b.onclick = () => { const c = CONTACTS.find(x => x.id === b.dataset.e); EDITING = c.id; const known = COMPANIES.includes(c.ic); $('#c_ic').value = known ? c.ic : OTHER_CO; $('#c_ic2').hidden = known; $('#c_ic2').value = known ? '' : c.ic; $('#c_role').value = c.role === 'PM' ? 'PM' : 'HSSE'; $('#c_name').value = c.name; $('#c_email').value = c.email; $('#ctCancel').hidden = false; window.scrollTo(0, 0); });
+  $$('#ctList [data-d]').forEach(b => b.onclick = async () => { try { await api(withToken({action: 'ctDelete', ids: [b.dataset.d]})); await loadContacts(); } catch (e) { toast(e.message, true); } });
+  const dg = window.DG; if (dg) $('#dgInfo').textContent = (dg.digestOn ? t('dg.on') : t('dg.off')) + (dg.digestLast ? ' · ' + dg.digestLast : '');
+}
+async function saveContact() {
+  const ic = $('#c_ic').value === OTHER_CO ? $('#c_ic2').value.trim().toUpperCase() : $('#c_ic').value;
+  const contact = {id: EDITING, ic, role: $('#c_role').value, name: $('#c_name').value.trim(), email: $('#c_email').value.trim()};
+  if (!ic || !contact.name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(contact.email)) return toast(t('ct.bad'), true);
+  try { await api(withToken({action: 'ctSave', contact})); EDITING = ''; $('#c_name').value = ''; $('#c_email').value = ''; $('#ctCancel').hidden = true; toast(t('x.saved')); await loadContacts(); } catch (e) { toast(e.message, true); }
+}
+
+/* ---------- IC close-out page ---------- */
+function renderIC() {
+  const f = IC.f, open = f.status === 'Open' || f.status === 'Reopened';
+  $('#icId').textContent = f.id;
+  const late = open && String(f.dueDate).slice(0, 10) < IC.today;
+  $('#icChip').innerHTML = '<span class="chip ' + (late ? 'Overdue' : f.status.replace(/ /g, '')) + '">' + esc(t('s.' + (late ? 'Overdue' : f.status))) + '</span>';
+  const kv = [[t('f.ic'), f.ic], [t('f.loc'), f.location], [t('f.cat'), catLabel(f.category)], [t('f.risk'), t('r.' + f.risk)], [t('d.due'), fmtDate(f.dueDate)], [t('d.finding'), f.description]];
+  $('#icKv').innerHTML = kv.map(p => '<dt>' + esc(p[0]) + '</dt><dd>' + esc(p[1]) + '</dd>').join('');
+  const hse = $('#icHse'); hse.hidden = !(f.status === 'Reopened' && f.hseNote); hse.textContent = f.status === 'Reopened' ? t('ic.sentBack') + ' ' + (f.hseNote || '') : '';
+  $('#icPair').innerHTML = pairHTML(IC.before, IC.after); wirePeek('#icPair');
+  $('#icForm').hidden = !open;
+  const dn = $('#icDone'); dn.hidden = open && !IC.done; if (!open) dn.textContent = f.status === 'Verified' ? t('ic.verified') : t('ic.waiting'); if (IC.done) dn.textContent = t('ic.done');
+}
+async function startIC(c) {
+  show('ic');
+  try { IC = await api({action: 'icView', c}, 45000); IC.c = c; $('#icLoading').hidden = true; $('#icBody').hidden = false; renderIC(); renderPB('ic'); }
+  catch (e) { IC = null; $('#icLoading').hidden = true; const er = $('#icErr'); er.hidden = false; er.textContent = e.message; }
+}
+async function sendIC() {
+  const name = $('#ic_name').value.trim();
+  if (name.length < 2) return toast(t('ic.needName'), true);
+  if (!PB.ic.length) return toast(t('ic.needPhoto'), true);
+  const b = $('#icSend'); b.disabled = true; toast(t('m.sending'));
+  try { await api({action: 'icClose', c: IC.c, closedBy: name, note: $('#ic_note').value, after: PB.ic}, 90000); IC.done = true; IC.f.status = 'Closed by IC'; IC.after = PB.ic.slice(); PB.ic = []; renderIC(); window.scrollTo(0, 0); }
+  catch (e) { toast(e.message, true); b.disabled = false; }
+}
+
+/* ---------- boot ---------- */
+function bind() {
+  $$('#lang button').forEach(b => b.onclick = () => { LANG = b.dataset.l; try { localStorage.setItem('wt_lang', LANG); } catch (e) {} applyLang(); renderPB('log'); renderPB('ic'); renderPB('onb'); });
+  $('#apiSave').onclick = () => { const v = $('#apiUrl').value.trim(); if (/^https:\/\/script\.google\.com\/macros\/s\/[^ ]+\/exec$/.test(v)) { try { localStorage.setItem('wt_api', v); } catch (e) {} location.reload(); } else toast('URL?', true); };
+  $$('#tabs button[data-t]').forEach(b => b.onclick = () => { $$('#tabs button[data-t]').forEach(x => x.classList.toggle('on', x === b)); $$('.tab').forEach(s => s.classList.toggle('on', s.id === 'tab-' + b.dataset.t)); });
+  $('#btnLogout').onclick = async () => { try { await api({action: 'logout', token: TOKEN}); } catch (e) {} logoutUI(); };
+  $('#btnLogin').onclick = doLogin; $('#l_pin').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  $('#btnForgot').onclick = () => { $('#loginBox').hidden = true; $('#resetBox').hidden = false; };
+  $('#btnBack').onclick = () => { $('#loginBox').hidden = false; $('#resetBox').hidden = true; };
+  $('#btnSendCode').onclick = async () => { try { await api({action: 'requestReset', email: $('#l_email').value}); toast(t('m.codeSent')); } catch (e) { toast(e.message, true); } };
+  $('#btnSetPin').onclick = async () => { const p = $('#r_pin').value; if (!/^\d{6}$/.test(p)) return toast(t('m.pin6'), true); if (p !== $('#r_pin2').value) return toast(t('m.pinMismatch'), true);
+    try { await api({action: 'setPin', email: $('#l_email').value, code: $('#r_code').value, pin: p}); toast(t('m.pinSet')); $('#r_pin').value = $('#r_pin2').value = $('#r_code').value = ''; $('#btnBack').click(); } catch (e) { toast(e.message, true); } };
+  ['#fl_ic', '#fl_st'].forEach(s => $(s).onchange = renderList); $('#fl_q').oninput = renderList;
+  $('#f_ic').onchange = () => $('#f_ic2').hidden = $('#f_ic').value !== OTHER_CO; $('#f_loc').onchange = () => $('#f_loc2').hidden = $('#f_loc').value !== '__other'; $('#c_ic').onchange = () => $('#c_ic2').hidden = $('#c_ic').value !== OTHER_CO;
+  $('#f_risk').onchange = syncDue; $('#btnLog').onclick = submitLog;
+  $('#rpBuild').onclick = buildReport; $('#rpPrint').onclick = () => window.print(); $('#rpCsv').onclick = csvReport;
+  $('#ctSave').onclick = saveContact; $('#ctCancel').onclick = () => { EDITING = ''; $('#c_name').value = ''; $('#c_email').value = ''; $('#ctCancel').hidden = true; };
+  $('#dgNow').onclick = async () => { try { const j = await api(withToken({action: 'digestNow'}), 60000); const n = (j.results || []).filter(x => x.status === 'sent').length; toast(n ? t('dg.sent', {n}) : t('dg.nothing'), !n); } catch (e) { toast(e.message, true); } };
+  $('#icSend').onclick = sendIC;
+  $('#dlg').addEventListener('click', e => { if (e.target.id === 'dlg') closeDetail(); });
+}
+(async function init() {
+  $('#ver').textContent = 'v' + APP_VERSION;
+  bind(); fillSelects(); applyLang(); syncDue(); renderPB('log');
+  try { const em = localStorage.getItem('wt_email'); if (em) $('#l_email').value = em; } catch (e) {}
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if (!apiUrl()) $('#noapi').hidden = false;
+  const c = new URLSearchParams(location.search).get('c');
+  if (c) { await startIC(c); return; }
+  if (TOKEN) { try { await enterAdmin(); return; } catch (e) { TOKEN = ''; } }
+  show('login');
+})();
+</script>
+</body>
+</html>
