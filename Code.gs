@@ -1,4 +1,4 @@
-const VERSION = '1.0.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.1.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -15,6 +15,7 @@ const C_COLS = ['id', 'ic', 'name', 'email', 'role', 'updatedAt'];
 const DATE_COLS = ['dueDate'];
 const RISKS = ['High', 'Medium', 'Low'];
 const OPEN_STATUS = ['Open', 'Reopened'];
+const DEVICE_DAYS = 60; // "keep me signed in on this device" lasts this many days
 
 /* ---------- entry points ---------- */
 function doGet(e) {
@@ -32,7 +33,8 @@ function doPost(e) {
       case 'requestReset': return json_(requestReset_(req));
       case 'setPin': return json_(setPin_(req));
       case 'login': return json_(login_(req));
-      case 'logout': CacheService.getScriptCache().remove('sess_' + req.token); return json_({ ok: true });
+      case 'resume': return json_(resume_(req));
+      case 'logout': CacheService.getScriptCache().remove('sess_' + req.token); if (req.device) revokeDevices_('', s_(req.device, 100)); return json_({ ok: true });
       case 'icView': return json_(icView_(req));
       case 'icClose': return json_(icClose_(req));
       case 'list': requireAdmin_(req); return json_(list_());
@@ -211,6 +213,7 @@ function setPin_(r) {
   }
   cache.remove('reset_' + email);
   PropertiesService.getScriptProperties().setProperty('PIN_' + email, hash_('pin|' + email + '|' + r.pin));
+  revokeDevices_(email, ''); // a PIN reset signs the email out of every remembered device
   return { ok: true };
 }
 
@@ -224,6 +227,33 @@ function login_(r) {
   cache.remove(fk);
   const token = Utilities.getUuid() + Utilities.getUuid();
   cache.put('sess_' + token, email, 21600);
+  return { ok: true, token: token, email: email, device: r.remember ? newDevice_(email) : '' };
+}
+
+/* Remembered devices: a random token is kept (hashed) in Script Properties for DEVICE_DAYS, so the browser can ask for a new session without the PIN. */
+function newDevice_(email) {
+  const p = PropertiesService.getScriptProperties(), all = p.getProperties(), now = Date.now();
+  Object.keys(all).forEach(function (k) { if (k.indexOf('DEV_') === 0 && Number(String(all[k]).split('|')[1]) < now) p.deleteProperty(k); });
+  const dev = Utilities.getUuid() + Utilities.getUuid();
+  p.setProperty('DEV_' + hash_('dev|' + dev), email + '|' + (now + DEVICE_DAYS * 86400000));
+  return dev;
+}
+
+// With dev: removes that one device. Without dev: removes every device of the email.
+function revokeDevices_(email, dev) {
+  const p = PropertiesService.getScriptProperties();
+  if (dev) { p.deleteProperty('DEV_' + hash_('dev|' + dev)); return; }
+  const all = p.getProperties();
+  Object.keys(all).forEach(function (k) { if (k.indexOf('DEV_') === 0 && String(all[k]).split('|')[0] === email) p.deleteProperty(k); });
+}
+
+function resume_(r) {
+  const key = 'DEV_' + hash_('dev|' + s_(r.device, 100)), v = prop_(key);
+  if (!v) throw new Error('SESSION');
+  const parts = v.split('|'), email = parts[0];
+  if (Number(parts[1]) < Date.now() || !isAdminEmail_(email)) { PropertiesService.getScriptProperties().deleteProperty(key); throw new Error('SESSION'); }
+  const token = Utilities.getUuid() + Utilities.getUuid();
+  CacheService.getScriptCache().put('sess_' + token, email, 21600);
   return { ok: true, token: token, email: email };
 }
 

@@ -151,6 +151,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
   <div id="loginBox">
    <label class="f"><span data-i="a.email"></span><input id="l_email" type="email" autocomplete="username"></label>
    <label class="f" style="margin-top:8px"><span data-i="a.pin"></span><input id="l_pin" type="password" inputmode="numeric" maxlength="6" autocomplete="current-password"></label>
+   <label class="f" style="flex-direction:row;align-items:center;gap:8px;margin-top:10px"><input type="checkbox" id="l_remember" checked style="width:auto"><span data-i="a.remember"></span></label>
    <div class="row" style="margin-top:10px"><button class="btn pri" id="btnLogin" data-i="a.loginBtn"></button><button class="btn ghost" id="btnForgot" data-i="a.forgot"></button></div>
   </div>
   <div id="resetBox" hidden>
@@ -236,7 +237,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
 <script>
 const LOCS = ["ADMINISTRATION BUILDING", "BLOCK 6 B SOUTH EAST CORNER", "BLOCK 6B", "BLOCK 6B EAST GATE", "BOILER / CHIMNEY AREA", "CONTROL ROOM, MCC ROOM", "COOLING TOWER", "DDE TREATMENT PLANT (DTP)", "DIESEL TANK", "DIRTY COOLING TOWER", "DRY AND LIQUID CHEMICAL STORAGE", "ECOOILS WARE HOUSE", "EFFLUENT TREATMENT PLANT (ETP)", "ELECTRICAL SUBSTATION (PLN)", "EXTRACTION PLANT", "FA PLANT", "FIRE WATER PUMP HOUSE", "FIRE WATER TANK", "GSB OFFICE", "HEXANE AND DIESEL RECEIVING BAY", "HEXANE TANK", "KKS OFFICE", "LOADING/UNLOADING AREA (PUMP HOUSE)", "MCC BUILDING", "NORTH-WEST CORNER BLOCK 6A", "OFFICE VEHICLE PARKING AREA", "OIL POLISHING PLANT", "PBS OFFICE", "PIPE RACK", "PRE TREATMENT UNIT (PTU)", "RAW WATER PIT", "SCHEDULED & DOMESTIC WASTE SHED", "SECURITY BUILDING", "SECURITY POST", "SILO", "TANK FARM", "TRUCK PARKING AREA", "VAPOR ABSORPTION MACHINE (VAM) SHED", "WAREHOUSE", "WAREHOUSE BLOCK B", "WASTE WATER TREATMENT PLANT (WWTP)", "WATER TANK", "WATER TREATMENT PLANT (WTP) AND WATER TANKS", "WEIGHT BRIDGE", "WEN OFFICE", "WORKSHOP AREA"];
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.1.0';
 const API_URL = 'https://script.google.com/macros/s/AKfycbydZ7RylbsTJqJdq_zZEXees36X6u5wT7U0z59Oh1caOwZltMX8fp4xOAFRUwzW9oDO/exec';
 const COMPANIES = ['PT. ECOOILS', 'PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS', 'PT. SOS'];
 const OTHER_CO = 'OTHER (TYPE YOUR COMPANY NAME)';
@@ -259,7 +260,7 @@ const D = {
 'api.missing':['The app is not connected to its backend yet. Paste the Apps Script web app address:','Aplikasi belum terhubung ke backend. Tempel alamat web app Apps Script:','Aplikasi belum disambung ke backend. Tampal alamat web app Apps Script:'],
 'btn.save':['Save','Simpan','Simpan'],'btn.cancel':['Cancel','Batal','Batal'],'btn.close':['Close','Tutup','Tutup'],'btn.edit':['Edit','Ubah','Ubah'],'btn.delete':['Delete','Hapus','Padam'],
 'tab.list':['Findings','Temuan','Dapatan'],'tab.log':['Log a finding','Catat temuan','Catat dapatan'],'tab.report':['Report','Laporan','Laporan'],'tab.contacts':['Contacts','Kontak','Kenalan'],
-'a.login':['HSSE sign-in','Masuk HSSE','Log masuk HSSE'],'a.email':['Email','Email','Emel'],'a.pin':['PIN (6 digits)','PIN (6 digit)','PIN (6 digit)'],'a.loginBtn':['Sign in','Masuk','Log masuk'],
+'a.login':['HSSE sign-in','Masuk HSSE','Log masuk HSSE'],'a.email':['Email','Email','Emel'],'a.pin':['PIN (6 digits)','PIN (6 digit)','PIN (6 digit)'],'a.remember':['Keep me signed in on this device for 60 days','Biarkan saya tetap masuk di perangkat ini selama 60 hari','Kekalkan saya log masuk pada peranti ini selama 60 hari'],'a.loginBtn':['Sign in','Masuk','Log masuk'],
 'a.forgot':['Forgot PIN / set PIN','Lupa PIN / atur PIN','Lupa PIN / tetapkan PIN'],'a.resetInfo':['We email a 6-digit code to your HSSE address. Enter it with a new 6-digit PIN.','Kami mengirim kode 6 digit ke email HSSE Anda. Masukkan kode itu dengan PIN baru 6 digit.','Kami menghantar kod 6 digit ke emel HSSE anda. Masukkan kod itu bersama PIN baharu 6 digit.'],
 'a.sendCode':['Email me a code','Kirim kode ke email saya','Hantar kod ke emel saya'],'a.code':['6-digit code from the email','Kode 6 digit dari email','Kod 6 digit daripada emel'],'a.newPin':['New PIN (6 digits)','PIN baru (6 digit)','PIN baharu (6 digit)'],
 'a.newPin2':['Repeat the new PIN','Ulangi PIN baru','Ulang PIN baharu'],'a.setPin':['Set PIN','Atur PIN','Tetapkan PIN'],'a.back':['Back to sign-in','Kembali ke masuk','Kembali ke log masuk'],'a.logout':['Sign out','Keluar','Log keluar'],
@@ -338,19 +339,28 @@ function applyLang() {
 
 /* ---------- api ---------- */
 function apiUrl() { let l = ''; try { l = localStorage.getItem('wt_api') || ''; } catch (e) {} return API_URL || new URLSearchParams(location.search).get('api') || l; }
-async function api(body, ms) {
+async function api(body, ms, retried) {
   const u = apiUrl(); if (!u) throw new Error('NOAPI');
   const ac = new AbortController(), tm = ms ? setTimeout(() => ac.abort(), ms) : 0;
   try {
     const r = await fetch(u, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(body), signal:ac.signal});
     const j = await r.json(); if (!j.ok) throw new Error(j.error || 'Error'); return j;
   } catch (e) {
-    if (e.message === 'SESSION') { logoutUI(); throw new Error(t('e.session')); }
+    if (e.message === 'SESSION') {
+      if (!retried && DEVICE && body.token && await resume()) { body.token = TOKEN; return api(body, ms, true); }
+      logoutUI(); throw new Error(t('e.session'));
+    }
     if (e.message === 'NOAPI') { $('#noapi').hidden = false; throw new Error(t('e.noapi')); }
     throw e;
   } finally { clearTimeout(tm); }
 }
 const withToken = o => Object.assign({token: TOKEN}, o);
+let DEVICE = ''; try { DEVICE = localStorage.getItem('wt_dev') || ''; } catch (e) {}
+function clearDevice() { DEVICE = ''; try { localStorage.removeItem('wt_dev'); } catch (e) {} }
+async function resume() {
+  try { const j = await api({action: 'resume', device: DEVICE}, 30000, true); TOKEN = j.token; try { sessionStorage.setItem('wt_tok', TOKEN); } catch (e) {} return true; }
+  catch (e) { clearDevice(); return false; }
+}
 
 /* ---------- photos: peek overlay, drag and drop, + button ---------- */
 function peek(src) { $('#peek img').src = src; $('#peek').hidden = false; }
@@ -419,10 +429,11 @@ function show(v) { $('#vIC').hidden = v !== 'ic'; $('#vLogin').hidden = v !== 'l
 async function doLogin() {
   const pin = $('#l_pin').value;
   if (!/^\d{6}$/.test(pin)) return toast(t('m.pin6'), true);
-  try { const j = await api({action: 'login', email: $('#l_email').value, pin}); TOKEN = j.token; try { sessionStorage.setItem('wt_tok', TOKEN); localStorage.setItem('wt_email', j.email); } catch (e) {} $('#l_pin').value = ''; await enterAdmin(); }
+  try { const j = await api({action: 'login', email: $('#l_email').value, pin, remember: $('#l_remember').checked}); TOKEN = j.token; try { sessionStorage.setItem('wt_tok', TOKEN); localStorage.setItem('wt_email', j.email); } catch (e) {}
+    if (j.device) { DEVICE = j.device; try { localStorage.setItem('wt_dev', DEVICE); } catch (e) {} } else clearDevice(); $('#l_pin').value = ''; await enterAdmin(); }
   catch (e) { toast(e.message, true); }
 }
-async function enterAdmin() { show('adm'); await Promise.all([loadList(), loadContacts()]); }
+async function enterAdmin() { show('adm'); try { setTab(localStorage.getItem('wt_tab') || 'list'); } catch (e) {} await Promise.all([loadList(), loadContacts()]); }
 
 /* ---------- findings list ---------- */
 async function loadList() { const j = await api(withToken({action: 'list'})); ROWS = j.rows; TODAY = j.today || TODAY; fillSelects(); renderList(); }
@@ -575,11 +586,16 @@ async function sendIC() {
 }
 
 /* ---------- boot ---------- */
+function setTab(n) {
+  if (!$('#tab-' + n)) n = 'list';
+  $$('#tabs button[data-t]').forEach(x => x.classList.toggle('on', x.dataset.t === n)); $$('.tab').forEach(s => s.classList.toggle('on', s.id === 'tab-' + n));
+  try { localStorage.setItem('wt_tab', n); } catch (e) {}
+}
 function bind() {
   $$('#lang button').forEach(b => b.onclick = () => { LANG = b.dataset.l; try { localStorage.setItem('wt_lang', LANG); } catch (e) {} applyLang(); renderPB('log'); renderPB('ic'); renderPB('onb'); });
   $('#apiSave').onclick = () => { const v = $('#apiUrl').value.trim(); if (/^https:\/\/script\.google\.com\/macros\/s\/[^ ]+\/exec$/.test(v)) { try { localStorage.setItem('wt_api', v); } catch (e) {} location.reload(); } else toast('URL?', true); };
-  $$('#tabs button[data-t]').forEach(b => b.onclick = () => { $$('#tabs button[data-t]').forEach(x => x.classList.toggle('on', x === b)); $$('.tab').forEach(s => s.classList.toggle('on', s.id === 'tab-' + b.dataset.t)); });
-  $('#btnLogout').onclick = async () => { try { await api({action: 'logout', token: TOKEN}); } catch (e) {} logoutUI(); };
+  $$('#tabs button[data-t]').forEach(b => b.onclick = () => setTab(b.dataset.t));
+  $('#btnLogout').onclick = async () => { try { await api({action: 'logout', token: TOKEN, device: DEVICE}); } catch (e) {} clearDevice(); logoutUI(); };
   $('#btnLogin').onclick = doLogin; $('#l_pin').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
   $('#btnForgot').onclick = () => { $('#loginBox').hidden = true; $('#resetBox').hidden = false; };
   $('#btnBack').onclick = () => { $('#loginBox').hidden = false; $('#resetBox').hidden = true; };
@@ -603,6 +619,7 @@ function bind() {
   if (!apiUrl()) $('#noapi').hidden = false;
   const c = new URLSearchParams(location.search).get('c');
   if (c) { await startIC(c); return; }
+  if (!TOKEN && DEVICE) await resume();
   if (TOKEN) { try { await enterAdmin(); return; } catch (e) { TOKEN = ''; } }
   show('login');
 })();
