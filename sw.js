@@ -1,5 +1,5 @@
 // Service worker: keeps the app shell fast. HTML is network-first (so updates arrive), images are cache-first. API calls are never cached.
-const CACHE = 'wt-v1.6.1';
+const CACHE = 'wt-v1.7.0';
 self.addEventListener('install', e => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then(c => c.addAll(['wordmark.png'])).catch(() => {})); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {

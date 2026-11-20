@@ -38,9 +38,10 @@ nav.tabs .sp{flex:1}
 .perms small{display:block;color:var(--mut)}
 .ur{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);flex-wrap:wrap}.ur:first-child{border-top:0}
 .ur .tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.ur .tags span{background:var(--okbg);color:var(--ok);border-radius:10px;padding:1px 9px;font-size:12px}.ur.off{opacity:.55}
-.uadd{display:grid;grid-template-columns:1fr 1.4fr auto;gap:6px;margin-top:6px}.uadd .btn{min-height:40px}
+.uadd{display:grid;grid-template-columns:1fr 1.4fr 1fr auto;align-items:start;gap:6px;margin-top:6px}.uadd .btn{min-height:40px}
 @media(max-width:620px){.uadd{grid-template-columns:1fr}}
 .utw{padding:0;overflow-x:auto}
+.ut select{font-size:12px;padding:3px 4px;min-height:28px;max-width:130px}
 table.ut{border-collapse:collapse;width:100%;font-size:13px}
 .ut th,.ut td{padding:3px 5px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
 .ut th{font-weight:600;font-size:11px;color:var(--mut);letter-spacing:.03em;position:sticky;top:0;background:#fff}
@@ -196,7 +197,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 <section id="vAdm" hidden>
  <div class="logbar"><button class="btn pri" id="btnNewFinding"><span aria-hidden="true">+</span> <span data-i="tab.log"></span></button></div>
  <nav class="tabs" id="tabs" style="margin-top:0">
-  <button data-t="list" class="on" data-i="tab.list"></button><button data-t="report" data-i="tab.report"></button><button data-t="contacts" data-i="tab.contacts"></button><button data-t="users" data-i="tab.users"></button>
+  <button data-t="list" class="on" data-i="tab.list"></button><button data-t="report" data-i="tab.report"></button><button data-t="users" data-i="tab.users"></button>
   <span class="sp"></span><button id="btnLogout" data-i="a.logout"></button>
  </nav>
 
@@ -241,30 +242,17 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
  <section id="tab-users" class="tab">
   <div class="card"><h2 data-i="us.title"></h2>
    <p class="hint" data-i="us.help"></p>
-   <div class="uadd"><input id="u_name" maxlength="120" data-ph="ct.name"><input id="u_email" type="email" maxlength="120" data-ph="a.email"><button class="btn pri" id="uAdd" data-i="us.add"></button></div>
+   <div class="uadd"><input id="u_name" maxlength="120" data-ph="ct.name"><input id="u_email" type="email" maxlength="120" data-ph="a.email"><div><select id="u_co" aria-label="Company"></select><input id="u_co2" maxlength="60" style="margin-top:6px;text-transform:uppercase" data-ph="ph.otherCo" hidden></div><button class="btn pri" id="uAdd" data-i="us.add"></button></div>
    <p class="hint" data-i="us.preset" style="margin-top:6px"></p>
   </div>
   <div class="card utw"><div id="uList"></div></div>
- </section>
-
- <section id="tab-contacts" class="tab">
-  <div class="card"><h2 data-i="ct.title"></h2>
-   <p class="hint" data-i="ct.help"></p>
-   <div class="grid">
-    <label class="f"><span><span data-i="f.ic"></span> <b>*</b></span><select id="c_ic"></select><input id="c_ic2" maxlength="60" style="margin-top:6px;text-transform:uppercase" data-ph="ph.otherCo" hidden></label>
-    <label class="f"><span><span data-i="ct.role"></span> <b>*</b></span><select id="c_role"></select></label>
-    <label class="f"><span><span data-i="ct.name"></span> <b>*</b></span><input id="c_name" maxlength="120"></label>
-    <label class="f"><span><span data-i="a.email"></span> <b>*</b></span><input id="c_email" type="email" maxlength="120"></label>
-   </div>
-   <div class="row end" style="margin-top:10px"><button class="btn" id="ctCancel" data-i="btn.cancel" hidden></button><button class="btn pri" id="ctSave" data-i="btn.save"></button></div>
-  </div>
-  <div id="ctList"></div>
   <div class="card"><h2 data-i="dg.title"></h2>
    <p class="hint" data-i="dg.help"></p>
    <div id="dgInfo" class="hint"></div>
    <div class="row" style="margin-top:8px"><button class="btn" id="dgNow" data-i="dg.now"></button></div>
   </div>
  </section>
+
 </section>
 </main>
 
@@ -274,7 +262,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
 <script>
 const LOCS = ["ADMINISTRATION BUILDING", "BLOCK 6 B SOUTH EAST CORNER", "BLOCK 6B", "BLOCK 6B EAST GATE", "BOILER / CHIMNEY AREA", "CONTROL ROOM, MCC ROOM", "COOLING TOWER", "DDE TREATMENT PLANT (DTP)", "DIESEL TANK", "DIRTY COOLING TOWER", "DRY AND LIQUID CHEMICAL STORAGE", "ECOOILS WARE HOUSE", "EFFLUENT TREATMENT PLANT (ETP)", "ELECTRICAL SUBSTATION (PLN)", "EXTRACTION PLANT", "FA PLANT", "FIRE WATER PUMP HOUSE", "FIRE WATER TANK", "GSB OFFICE", "HEXANE AND DIESEL RECEIVING BAY", "HEXANE TANK", "KKS OFFICE", "LOADING/UNLOADING AREA (PUMP HOUSE)", "MCC BUILDING", "NORTH-WEST CORNER BLOCK 6A", "OFFICE VEHICLE PARKING AREA", "OIL POLISHING PLANT", "PBS OFFICE", "PIPE RACK", "PRE TREATMENT UNIT (PTU)", "RAW WATER PIT", "SCHEDULED & DOMESTIC WASTE SHED", "SECURITY BUILDING", "SECURITY POST", "SILO", "TANK FARM", "TRUCK PARKING AREA", "VAPOR ABSORPTION MACHINE (VAM) SHED", "WAREHOUSE", "WAREHOUSE BLOCK B", "WASTE WATER TREATMENT PLANT (WWTP)", "WATER TANK", "WATER TREATMENT PLANT (WTP) AND WATER TANKS", "WEIGHT BRIDGE", "WEN OFFICE", "WORKSHOP AREA"];
-const APP_VERSION = '1.6.1';
+const APP_VERSION = '1.7.0';
 const API_URL = 'https://script.google.com/macros/s/AKfycbydZ7RylbsTJqJdq_zZEXees36X6u5wT7U0z59Oh1caOwZltMX8fp4xOAFRUwzW9oDO/exec';
 const COMPANIES = ['PT. ECOOILS', 'PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS', 'PT. SOS'];
 const OTHER_CO = 'OTHER (TYPE YOUR COMPANY NAME)';
@@ -298,11 +286,12 @@ const D = {
 'btn.save':['Save','Simpan','Simpan'],'btn.cancel':['Cancel','Batal','Batal'],'btn.close':['Close','Tutup','Tutup'],'btn.edit':['Edit','Ubah','Ubah'],'btn.delete':['Delete','Hapus','Padam'],
 'tab.list':['Findings','Temuan','Dapatan'],'tab.log':['Log a finding','Catat temuan','Catat dapatan'],'tab.users':['Users','Pengguna','Pengguna'],
 'us.title':['Who can use this app','Siapa yang boleh memakai aplikasi ini','Siapa yang boleh menggunakan aplikasi ini'],
-'us.help':['Add each EcoOils person and tick what they may do. They sign in with their own email and a PIN they set themselves (Forgot PIN). Changes apply at once.','Tambahkan setiap orang EcoOils dan centang apa yang boleh dilakukan. Mereka masuk dengan email sendiri dan PIN yang mereka atur sendiri (Forgot PIN). Perubahan langsung berlaku.','Tambah setiap orang EcoOils dan tandakan apa yang dibenarkan. Mereka log masuk dengan e-mel sendiri dan PIN yang mereka tetapkan sendiri (Forgot PIN). Perubahan berkuat kuasa serta-merta.'],
+'us.help':['Add every person here, EcoOils or contractor, pick their company and tick what they may do. Tick Contractor findings for the contractor people who get the finding emails. They sign in with their own email and a PIN they set themselves (Forgot PIN). Changes apply at once.','Tambahkan setiap orang di sini, EcoOils atau kontraktor, pilih perusahaannya dan centang apa yang boleh dilakukan. Centang Temuan kontraktor untuk orang kontraktor yang menerima email temuan. Mereka masuk dengan email sendiri dan PIN yang mereka atur sendiri (Forgot PIN). Perubahan langsung berlaku.','Tambah setiap orang di sini, EcoOils atau kontraktor, pilih syarikat dan tandakan apa yang dibenarkan. Tanda Dapatan kontraktor untuk orang kontraktor yang menerima e-mel dapatan. Mereka log masuk dengan e-mel sendiri dan PIN yang mereka tetapkan sendiri (Forgot PIN). Perubahan berkuat kuasa serta-merta.'],
 'us.add':['Add person','Tambah orang','Tambah orang'],
-'us.preset':['A new person starts with: Read, PDF, Log, Verify, Resend, See contacts and the Closed by IC email. Tick or untick any box and it saves at once.','Orang baru mulai dengan: Baca, PDF, Catat, Verifikasi, Kirim ulang, Lihat kontak dan email Ditutup IC. Centang atau hapus centang dan langsung tersimpan.','Orang baharu bermula dengan: Baca, PDF, Log, Sahkan, Hantar semula, Lihat kenalan dan e-mel Ditutup IC. Tanda atau nyahtanda dan terus disimpan.'],
-'us.grpAccess':['What they can do in the app','Yang dapat dilakukan di aplikasi','Yang boleh dilakukan dalam aplikasi'],'us.grpMail':['Gets an email copy of','Menerima salinan email','Menerima salinan e-mel'],
+'us.preset':['An EcoOils person starts with Read, PDF, Log, Verify and Resend. A contractor person starts with Contractor findings only (no app access). No email copies. Tick or untick any box and it saves at once.','Orang EcoOils mulai dengan Baca, PDF, Catat, Verifikasi dan Kirim ulang. Orang kontraktor mulai hanya dengan Temuan kontraktor (tanpa akses aplikasi). Tanpa salinan email. Centang atau hapus centang dan langsung tersimpan.','Orang EcoOils bermula dengan Baca, PDF, Log, Sahkan dan Hantar semula. Orang kontraktor bermula dengan Dapatan kontraktor sahaja (tiada akses aplikasi). Tiada salinan e-mel. Tanda atau nyahtanda dan terus disimpan.'],
+'us.grpAccess':['What they can do in the app','Yang dapat dilakukan di aplikasi','Yang boleh dilakukan dalam aplikasi'],'us.grpMail':['Gets email','Menerima email','Menerima e-mel'],
 'us.ownerMail':['gets every email','menerima semua email','menerima semua e-mel'],
+'pc.company':['Company','Perusahaan','Syarikat'],'pc.ic':['Contractor findings','Temuan kontraktor','Dapatan kontraktor'],'us.needCo':['Pick the company first.','Pilih perusahaan dulu.','Pilih syarikat dahulu.'],'us.otherQ':['Company name:','Nama perusahaan:','Nama syarikat:'],'us.grpMail2':['Gets email','Menerima email','Menerima e-mel'],
 'pc.nNew':['New finding','Temuan baru','Dapatan baharu'],'pc.nDigest':['Daily summary','Ringkasan harian','Ringkasan harian'],'pc.nClose':['Closed by IC','Ditutup IC','Ditutup IC'],
 'pc.view':['Read','Baca','Baca'],'pc.pdf':['PDF','PDF','PDF'],'pc.csv':['CSV','CSV','CSV'],'pc.log':['Log','Catat','Log'],'pc.verify':['Verify','Verifikasi','Sahkan'],'pc.resend':['Resend','Kirim ulang','Hantar semula'],'pc.contactsView':['Contacts','Kontak','Kenalan'],'pc.contacts':['Edit contacts','Ubah kontak','Ubah kenalan'],'pc.delete':['Delete','Hapus','Padam'],'pc.users':['Users','Pengguna','Pengguna'],'pc.active':['On','Aktif','Aktif'],
 'us.can':['This person can:','Orang ini boleh:','Orang ini boleh:'],
@@ -332,7 +321,7 @@ const D = {
 'ph.otherCo':['Type company name','Ketik nama perusahaan','Taip nama syarikat'],'ph.otherLoc':['Type the location','Ketik lokasi','Taip lokasi'],'p.take':['Take photo','Ambil foto','Ambil gambar'],'p.up':['Upload photo','Unggah foto','Muat naik foto'],'p.hint':['Up to 3 photos. You can also drag photos here.','Maksimal 3 foto. Anda juga bisa menyeret foto ke sini.','Maksimum 3 gambar. Anda juga boleh seret gambar ke sini.'],'p.drop':['Drop photos here or tap to choose','Letakkan foto di sini atau ketuk untuk memilih','Letakkan foto di sini atau ketik untuk memilih'],
 'log.title':['Log a walkthrough finding','Catat temuan walkthrough','Catat dapatan walkthrough'],'log.send':['Log finding and email the company','Catat temuan dan kirim email ke perusahaan','Catat dapatan dan hantar emel ke syarikat'],
 'log.done':['Finding logged','Temuan dicatat','Dapatan dicatat'],'log.mailSent':['Email sent to {n} contact(s) with the BEFORE photo and the close-out link.','Email dikirim ke {n} kontak beserta foto SEBELUM dan tautan penutupan.','Emel dihantar kepada {n} kenalan bersama foto SEBELUM dan pautan penutupan.'],
-'log.noMail':['No email contact for this company yet, so nothing was sent. Add one under Contacts, or send the link below by WhatsApp.','Belum ada kontak email untuk perusahaan ini, jadi belum ada yang terkirim. Tambahkan di Kontak, atau kirim tautan di bawah lewat WhatsApp.','Belum ada kenalan emel untuk syarikat ini, jadi tiada yang dihantar. Tambah di Kenalan, atau hantar pautan di bawah melalui WhatsApp.'],
+'log.noMail':['No email contact for this company yet, so nothing was sent. Add one in the Users tab (company + Contractor findings), or send the link below by WhatsApp.','Belum ada kontak email untuk perusahaan ini, jadi belum ada yang terkirim. Tambahkan di tab Pengguna (perusahaan + Temuan kontraktor), atau kirim tautan di bawah lewat WhatsApp.','Belum ada kenalan emel untuk syarikat ini, jadi tiada yang dihantar. Tambah di tab Pengguna (syarikat + Dapatan kontraktor), atau hantar pautan di bawah melalui WhatsApp.'],
 'log.quota':['The daily email limit was reached. Send the link below by WhatsApp.','Batas email harian tercapai. Kirim tautan di bawah lewat WhatsApp.','Had emel harian dicapai. Hantar pautan di bawah melalui WhatsApp.'],
 'log.another':['Log another','Catat lagi','Catat lagi'],'log.link':['Close-out link','Tautan penutupan','Pautan penutupan'],
 'v.fields':['Fill in company, location, category, risk, date and a description of at least 10 characters.','Isi perusahaan, lokasi, kategori, risiko, tanggal dan deskripsi minimal 10 karakter.','Isi syarikat, lokasi, kategori, risiko, tarikh dan penerangan sekurang-kurangnya 10 aksara.'],
@@ -391,7 +380,7 @@ function applyLang() {
   $$('[data-i]').forEach(e => e.textContent = t(e.dataset.i));
   $$('[data-ph]').forEach(e => e.placeholder = t(e.dataset.ph));
   $$('#lang button').forEach(b => b.classList.toggle('on', b.dataset.l === LANG));
-  fillSelects(); if (!$('#vAdm').hidden) { renderList(); renderContacts(); }
+  fillSelects(); if (!$('#vAdm').hidden) { renderList(); renderDigest(); }
   if (IC) renderIC(); if (!$('#dlg').hidden && CUR) openDetail(CUR);
 }
 
@@ -468,17 +457,16 @@ async function addFiles(kind, files) {
 function setSel(sel, opts, keep) { const e = $(sel), cur = keep === undefined ? e.value : keep; e.innerHTML = opts.map(o => '<option value="' + esc(o[0]) + '">' + esc(o[1]) + '</option>').join(''); if ([...e.options].some(o => o.value === cur)) e.value = cur; }
 function fillSelects() {
   const coOpts = [['', '—'], ...COMPANIES.map(c => [c, c]), [OTHER_CO, OTHER_CO]];
-  setSel('#f_ic', coOpts); setSel('#c_ic', coOpts);
+  setSel('#f_ic', coOpts); setSel('#u_co', coOpts);
   setSel('#f_loc', [['', '—'], ...LOCS.map(x => [x, x]), ['__other', '…']]);
   setSel('#f_cat', [['', '—'], ...CATS.map(c => [c[0], c[LI()]])]);
   setSel('#f_risk', RISKS.map(r => [r, t('r.' + r)]), $('#f_risk').value || 'Medium');
-  setSel('#c_role', [['HSSE', t('ct.hsse')], ['PM', t('ct.pm')], ['ADMIN', t('ct.admin')]]);
   setSel('#fl_st', [['', t('l.allSt')], ...STATUSES.map(s => [s, t('s.' + s)])]);
   setSel('#rp_st', [['all', t('rp.all')], ['closed', t('rp.closedAny')], ['verified', t('rp.closed')]]);
   const ics = [...new Set(ROWS.map(r => r.ic))].sort();
   setSel('#fl_ic', [['', t('l.allIc')], ...ics.map(c => [c, c])]);
   setSel('#rp_ic', [['', t('l.allIc')], ...ics.map(c => [c, c])]);
-  $('#f_ic2').hidden = $('#f_ic').value !== OTHER_CO; $('#f_loc2').hidden = $('#f_loc').value !== '__other'; $('#c_ic2').hidden = $('#c_ic').value !== OTHER_CO;
+  $('#f_ic2').hidden = $('#f_ic').value !== OTHER_CO; $('#f_loc2').hidden = $('#f_loc').value !== '__other';
 }
 
 /* ---------- state ---------- */
@@ -502,21 +490,20 @@ async function doLogin() {
 let ME = {perms: [], admin: false};
 const can = p => ME.perms.indexOf(p) >= 0;
 function applyPerms() {
-  const need = {list: 'view', report: 'view', contacts: 'contactsView', users: 'users'};
-  $$('#tabs button[data-t]').forEach(b => b.hidden = !(can(need[b.dataset.t]) || (b.dataset.t === 'contacts' && can('contacts'))));
+  const need = {list: 'view', report: 'view', users: 'users'};
+  $$('#tabs button[data-t]').forEach(b => b.hidden = !can(need[b.dataset.t]));
   $('#rpPrint').hidden = !can('pdf'); $('#rpCsv').hidden = !can('csv');
-  const ce = can('contacts'); $('#ctSave').closest('.card').hidden = !ce; $('#dgNow').closest('.card').hidden = !ce;
   $('#btnNewFinding').hidden = !can('log');
 }
-function firstTab() { return can('view') ? 'list' : can('log') ? 'log' : (can('contactsView') || can('contacts')) ? 'contacts' : can('users') ? 'users' : 'none'; }
+function firstTab() { return can('view') ? 'list' : can('log') ? 'log' : can('users') ? 'users' : 'none'; }
 async function enterAdmin() {
   show('adm');
-  try { const m = await api(withToken({action: 'me'})); ME = {perms: m.perms || [], admin: !!m.admin}; } catch (e) { if (e.message === t('e.session')) throw e; ME = e.message === 'Unknown action' ? {perms: ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'contactsView', 'contacts', 'delete'], admin: true} : {perms: [], admin: false}; } // an older backend only had owners
+  try { const m = await api(withToken({action: 'me'})); ME = {perms: m.perms || [], admin: !!m.admin}; } catch (e) { if (e.message === t('e.session')) throw e; ME = e.message === 'Unknown action' ? {perms: ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'delete'], admin: true} : {perms: [], admin: false}; } // an older backend only had owners
   applyPerms();
   let want = 'list'; try { want = localStorage.getItem('wt_tab') || 'list'; } catch (e) {}
-  const need = {list: 'view', report: 'view', contacts: 'contactsView', users: 'users', log: 'log'};
-  setTab(need[want] && (can(need[want]) || (want === 'contacts' && can('contacts'))) ? want : firstTab());
-  const jobs = []; if (can('view')) jobs.push(loadList()); if (can('contactsView') || can('contacts')) jobs.push(loadContacts()); if (can('users')) jobs.push(loadUsers());
+  const need = {list: 'view', report: 'view', users: 'users', log: 'log'};
+  setTab(need[want] && can(need[want]) ? want : firstTab());
+  const jobs = []; if (can('view')) jobs.push(loadList()); if (can('users')) jobs.push(loadUsers());
   await Promise.all(jobs);
 }
 
@@ -628,60 +615,56 @@ function csvReport() {
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8'})); a.download = 'walkthrough-' + todayISO() + '.csv'; document.body.appendChild(a); a.click(); a.remove();
 }
 
-/* ---------- contacts and digest ---------- */
-async function loadContacts() { const j = await api(withToken({action: 'contactsList'})); CONTACTS = j.contacts; window.DG = j; renderContacts(); }
-function renderContacts() {
-  const g = {}; CONTACTS.forEach(c => (g[c.ic] = g[c.ic] || []).push(c));
-  $('#ctList').innerHTML = CONTACTS.length ? Object.keys(g).sort().map(ic => '<div class="card"><h2>' + esc(ic) + '</h2>' + g[ic].map(c => '<div class="ct"><div><b>' + esc(c.name) + '</b> <small>' + esc(c.email) + ' · ' + esc(c.role === 'PM' ? t('ct.pm') : c.role === 'ADMIN' ? t('ct.admin') : t('ct.hsse')) + '</small></div><div class="row"><button class="btn" data-e="' + esc(c.id) + '">' + esc(t('btn.edit')) + '</button><button class="btn danger" data-d="' + esc(c.id) + '">' + esc(t('btn.delete')) + '</button></div></div>').join('') + '</div>').join('') : '<div class="hint">' + esc(t('ct.none')) + '</div>';
-  if (!can('contacts')) $$('#ctList [data-e],#ctList [data-d]').forEach(b => b.hidden = true);
-  $$('#ctList [data-e]').forEach(b => b.onclick = () => { const c = CONTACTS.find(x => x.id === b.dataset.e); EDITING = c.id; const known = COMPANIES.includes(c.ic); $('#c_ic').value = known ? c.ic : OTHER_CO; $('#c_ic2').hidden = known; $('#c_ic2').value = known ? '' : c.ic; $('#c_role').value = c.role === 'PM' ? 'PM' : 'HSSE'; $('#c_name').value = c.name; $('#c_email').value = c.email; $('#ctCancel').hidden = false; window.scrollTo(0, 0); });
-  $$('#ctList [data-d]').forEach(b => b.onclick = async () => { try { await api(withToken({action: 'ctDelete', ids: [b.dataset.d]})); await loadContacts(); } catch (e) { toast(e.message, true); } });
-  const dg = window.DG; if (dg) $('#dgInfo').textContent = (dg.digestOn ? t('dg.on') : t('dg.off')) + (dg.digestLast ? ' · ' + dg.digestLast : '');
-}
-async function saveContact() {
-  const ic = $('#c_ic').value === OTHER_CO ? $('#c_ic2').value.trim().toUpperCase() : $('#c_ic').value;
-  const contact = {id: EDITING, ic, role: $('#c_role').value, name: $('#c_name').value.trim(), email: $('#c_email').value.trim()};
-  if (!ic || !contact.name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(contact.email)) return toast(t('ct.bad'), true);
-  try { await api(withToken({action: 'ctSave', contact})); EDITING = ''; $('#c_name').value = ''; $('#c_email').value = ''; $('#ctCancel').hidden = true; toast(t('x.saved')); await loadContacts(); } catch (e) { toast(e.message, true); }
-}
+/* ---------- daily digest info (shown in the Users tab) ---------- */
+function renderDigest() { const dg = window.DG; if (dg) $('#dgInfo').textContent = (dg.digestOn ? t('dg.on') : t('dg.off')) + (dg.digestLast ? ' · ' + dg.digestLast : ''); }
 
 /* ---------- users and access: one compact table, a tick saves at once ---------- */
-const PERM_KEYS = ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'contactsView', 'contacts', 'delete', 'users', 'nNew', 'nDigest', 'nClose'];
-const NOTIFY_KEYS = ['nNew', 'nDigest', 'nClose'];
-const PERM_DEFAULT = ['view', 'pdf', 'log', 'verify', 'resend', 'contactsView']; // no email copies by default (saves quota)
+const PERM_KEYS = ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'delete', 'users', 'ic', 'nNew', 'nDigest', 'nClose'];
+const NOTIFY_KEYS = ['ic', 'nNew', 'nDigest', 'nClose'];
+const PERM_DEFAULT = ['view', 'pdf', 'log', 'verify', 'resend']; // EcoOils person. No email copies by default (saves quota)
+const IC_COMPANIES = ['PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS']; // contractor person: starts with Contractor findings only
 let USERS = [], OWNERS = [];
-async function loadUsers() { const j = await api(withToken({action: 'usersList'})); USERS = j.users; OWNERS = j.owners; renderUsers(); }
+async function loadUsers() { const j = await api(withToken({action: 'usersList'})); USERS = j.users; OWNERS = j.owners; window.DG = j; renderUsers(); renderDigest(); }
+function coOptions(cur) { const l = COMPANIES.slice(); if (cur && !l.includes(cur)) l.push(cur); return '<option value=""' + (cur ? '' : ' selected') + '>—</option>' + l.map(c => '<option value="' + esc(c) + '"' + (c === cur ? ' selected' : '') + '>' + esc(c) + '</option>').join('') + '<option value="__other">' + esc(OTHER_CO.split(' (')[0]) + '…</option>'; }
 function renderUsers() {
   const cols = PERM_KEYS.filter(p => p !== 'users' || ME.admin);
   const nA = cols.filter(p => !NOTIFY_KEYS.includes(p)).length;
-  const head = '<tr class="grp"><th></th><th colspan="' + nA + '">' + esc(t('us.grpAccess')) + '</th><th colspan="3" class="nb">' + esc(t('us.grpMail')) + '</th><th colspan="2"></th></tr><tr><th></th>' + cols.map(p => '<th' + (p === 'nNew' ? ' class="nb"' : '') + '>' + esc(t('pc.' + p)) + '</th>').join('') + '<th>' + esc(t('pc.active')) + '</th><th></th></tr>';
-  const owners = OWNERS.map(e => '<tr><td>' + esc(e) + '<small class="own">' + esc(t('us.owner')) + ' · ' + esc(t('us.ownerMail')) + '</small></td><td colspan="' + (cols.length + 2) + '"></td></tr>').join('');
-  const rows = USERS.map(u => '<tr class="' + (u.active ? '' : 'off') + '" data-u="' + esc(u.email) + '"><td title="' + esc(u.email) + '">' + esc(u.name) + '<small>' + esc(u.email) + '</small></td>' +
-    cols.map(p => '<td' + (p === 'nNew' ? ' class="nb"' : '') + '><input type="checkbox" data-p="' + p + '"' + (u.perms.includes(p) ? ' checked' : '') + '></td>').join('') +
+  const head = '<tr class="grp"><th colspan="2"></th><th colspan="' + nA + '">' + esc(t('us.grpAccess')) + '</th><th colspan="4" class="nb">' + esc(t('us.grpMail')) + '</th><th colspan="2"></th></tr><tr><th></th><th>' + esc(t('pc.company')) + '</th>' + cols.map(p => '<th' + (p === 'ic' ? ' class="nb"' : '') + '>' + esc(t('pc.' + p)) + '</th>').join('') + '<th>' + esc(t('pc.active')) + '</th><th></th></tr>';
+  const owners = OWNERS.map(e => '<tr><td>' + esc(e) + '<small class="own">' + esc(t('us.owner')) + ' · ' + esc(t('us.ownerMail')) + '</small></td><td colspan="' + (cols.length + 3) + '"></td></tr>').join('');
+  const rows = USERS.map(u => '<tr class="' + (u.active ? '' : 'off') + '" data-u="' + esc(u.email) + '"><td title="' + esc(u.email) + '">' + esc(u.name) + '<small>' + esc(u.email) + '</small></td><td><select data-co>' + coOptions(u.company) + '</select></td>' +
+    cols.map(p => '<td' + (p === 'ic' ? ' class="nb"' : '') + '><input type="checkbox" data-p="' + p + '"' + (u.perms.includes(p) ? ' checked' : '') + '></td>').join('') +
     '<td><input type="checkbox" data-p="_active"' + (u.active ? ' checked' : '') + '></td><td><button class="x" data-ud="' + esc(u.email) + '" title="' + esc(t('btn.delete')) + '">×</button></td></tr>').join('');
-  $('#uList').innerHTML = '<table class="ut">' + head + owners + (rows || '<tr><td colspan="' + (cols.length + 3) + '" class="hint" style="text-align:left;padding:10px">' + esc(t('us.none')) + '</td></tr>') + '</table>';
+  $('#uList').innerHTML = '<table class="ut">' + head + owners + (rows || '<tr><td colspan="' + (cols.length + 4) + '" class="hint" style="text-align:left;padding:10px">' + esc(t('us.none')) + '</td></tr>') + '</table>';
+  $$('#uList tr[data-u] select[data-co]').forEach(s => s.onchange = () => {
+    const tr = s.closest('tr'), u = USERS.find(x => x.email === tr.dataset.u); let v = s.value;
+    if (v === '__other') { v = (prompt(t('us.otherQ')) || '').trim().toUpperCase(); if (!v) { s.value = u.company || ''; return; } s.innerHTML = coOptions(v); }
+    saveUserRow(tr.dataset.u, tr, v);
+  });
   $$('#uList tr[data-u] input').forEach(i => i.onchange = () => {
     const tr = i.closest('tr');
     const set = (p, v) => { const e = tr.querySelector('input[data-p="' + p + '"]'); if (e) e.checked = v; };
     const NEEDS_VIEW = ['pdf', 'csv', 'verify', 'resend', 'delete'];
     if (i.checked && NEEDS_VIEW.includes(i.dataset.p)) set('view', true);
-    if (i.checked && i.dataset.p === 'contacts') set('contactsView', true);
+    if (i.checked && i.dataset.p === 'ic') { const uu = USERS.find(x => x.email === tr.dataset.u); if (!uu.company && !tr.querySelector('select[data-co]').value) { i.checked = false; return toast(t('us.needCo'), true); } }
     if (!i.checked && i.dataset.p === 'view') NEEDS_VIEW.forEach(p => set(p, false));
     saveUserRow(tr.dataset.u, tr);
   });
   $$('#uList [data-ud]').forEach(b => b.onclick = async () => { if (!confirm(t('us.confirmDel'))) return; try { await api(withToken({action: 'userDelete', email: b.dataset.ud})); await loadUsers(); } catch (e) { toast(e.message, true); } });
 }
-async function saveUserRow(email, tr) {
+async function saveUserRow(email, tr, company) {
   const u = USERS.find(x => x.email === email); if (!u) return;
+  if (company === undefined) company = tr.querySelector('select[data-co]').value === '__other' ? u.company : tr.querySelector('select[data-co]').value;
   const perms = PERM_KEYS.filter(p => { const e = tr.querySelector('input[data-p="' + p + '"]'); return e ? e.checked : u.perms.includes(p); });
   const active = tr.querySelector('input[data-p=_active]').checked;
-  try { await api(withToken({action: 'userSave', user: {name: u.name, email, perms, active}})); u.perms = perms; u.active = active; tr.classList.toggle('off', !active); toast(t('x.saved')); }
+  try { await api(withToken({action: 'userSave', user: {name: u.name, email, company, perms, active}})); u.perms = perms; u.active = active; u.company = company; tr.classList.toggle('off', !active); toast(t('x.saved')); }
   catch (e) { toast(e.message, true); await loadUsers(); }
 }
 async function addUser() {
-  const user = {name: $('#u_name').value.trim(), email: $('#u_email').value.trim(), active: true, perms: PERM_DEFAULT};
+  const co = $('#u_co').value === OTHER_CO ? $('#u_co2').value.trim().toUpperCase() : $('#u_co').value;
+  const user = {name: $('#u_name').value.trim(), email: $('#u_email').value.trim(), company: co, active: true, perms: IC_COMPANIES.includes(co) ? ['ic'] : PERM_DEFAULT.slice()};
   if (!user.name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(user.email)) return toast(t('ct.bad'), true);
-  try { const j = await api(withToken({action: 'userSave', user})); $('#u_name').value = ''; $('#u_email').value = ''; toast(j.mailed ? t('us.invited') : t('x.saved')); await loadUsers(); } catch (e) { toast(e.message, true); }
+  if (!co) return toast(t('us.needCo'), true);
+  try { const j = await api(withToken({action: 'userSave', user})); $('#u_name').value = ''; $('#u_email').value = ''; $('#u_co').value = ''; $('#u_co2').hidden = true; toast(j.mailed ? t('us.invited') : t('x.saved')); await loadUsers(); } catch (e) { toast(e.message, true); }
 }
 
 /* ---------- IC close-out page ---------- */
@@ -731,11 +714,11 @@ function bind() {
   $('#btnSetPin').onclick = async () => { const p = $('#r_pin').value; if (!/^\d{6}$/.test(p)) return toast(t('m.pin6'), true); if (p !== $('#r_pin2').value) return toast(t('m.pinMismatch'), true);
     try { await api({action: 'setPin', email: $('#l_email').value, code: $('#r_code').value, pin: p}); toast(t('m.pinSet')); $('#r_pin').value = $('#r_pin2').value = $('#r_code').value = ''; $('#btnBack').click(); } catch (e) { toast(e.message, true); } };
   ['#fl_ic', '#fl_st'].forEach(s => $(s).onchange = renderList); $('#fl_q').oninput = renderList;
-  $('#f_ic').onchange = () => $('#f_ic2').hidden = $('#f_ic').value !== OTHER_CO; $('#f_loc').onchange = () => $('#f_loc2').hidden = $('#f_loc').value !== '__other'; $('#c_ic').onchange = () => $('#c_ic2').hidden = $('#c_ic').value !== OTHER_CO;
+  $('#f_ic').onchange = () => $('#f_ic2').hidden = $('#f_ic').value !== OTHER_CO; $('#f_loc').onchange = () => $('#f_loc2').hidden = $('#f_loc').value !== '__other';
   $('#f_risk').onchange = syncDue; $('#btnLog').onclick = submitLog;
   $('#rpBuild').onclick = buildReport; $('#rpPrint').onclick = () => window.print(); $('#rpCsv').onclick = csvReport;
   $('#uAdd').onclick = addUser;
-  $('#ctSave').onclick = saveContact; $('#ctCancel').onclick = () => { EDITING = ''; $('#c_name').value = ''; $('#c_email').value = ''; $('#ctCancel').hidden = true; };
+  $('#u_co').onchange = () => { $('#u_co2').hidden = $('#u_co').value !== OTHER_CO; };
   $('#dgNow').onclick = async () => { try { const j = await api(withToken({action: 'digestNow'}), 60000); const n = (j.results || []).filter(x => x.status === 'sent').length; toast(n ? t('dg.sent', {n}) : t('dg.nothing'), !n); } catch (e) { toast(e.message, true); } };
   $('#icSend').onclick = sendIC;
   $('#dlg').addEventListener('click', e => { if (e.target.id === 'dlg') closeDetail(); });

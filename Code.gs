@@ -1,4 +1,4 @@
-const VERSION = '1.6.1'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.7.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -10,16 +10,17 @@ const F_NAME = 'Findings';
 const F_COLS = ['id', 'createdAt', 'ic', 'location', 'category', 'risk', 'description', 'dueDate', 'status',
   'beforePhotos', 'afterPhotos', 'closeNote', 'closedBy', 'closedAt', 'verifiedBy', 'verifiedAt', 'hseNote',
   'reopenCount', 'loggedBy', 'updatedAt'];
-const C_NAME = 'Contacts';
+const C_NAME = 'Contacts'; // OLD tab: only read once, to move its people into the Users tab (migrateContacts_). Not used any more.
 const C_COLS = ['id', 'ic', 'name', 'email', 'role', 'updatedAt'];
 const U_NAME = 'Users';
-const U_COLS = ['id', 'name', 'perms', 'active', 'updatedAt']; // id = the person's email (lowercase)
+const U_COLS = ['id', 'name', 'perms', 'active', 'updatedAt', 'company']; // id = the person's email (lowercase)
 // What a ticked box allows. Owners (ADMIN_EMAILS) always have everything.
 // view=read, pdf=print/PDF report, csv=CSV export, log=log findings, verify=verify/send back/close/edit, resend=resend email,
-// contactsView=see contacts, contacts=edit contacts + run digest, delete=delete findings, users=manage users.
+// delete=delete findings, users=manage users (also runs the daily digest by hand).
+// ic = this person is the contractor's contact: they are emailed the findings of their company (set the Company in the Users tab).
 // Email copies (not app access): nNew = a copy of every new finding sent to the contractor, nDigest = a copy of the daily summary,
 // nClose = the "closed by IC, please check" email and the High-risk reminder. Owners (ADMIN_EMAILS) always get all three.
-const PERMS = ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'contactsView', 'contacts', 'delete', 'users', 'nNew', 'nDigest', 'nClose'];
+const PERMS = ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'delete', 'users', 'ic', 'nNew', 'nDigest', 'nClose'];
 const DATE_COLS = ['dueDate'];
 const RISKS = ['High', 'Medium', 'Low'];
 const OPEN_STATUS = ['Open', 'Reopened'];
@@ -54,10 +55,7 @@ function doPost(e) {
       case 'adminClose': return json_(adminClose_(req, requirePerm_(req, 'verify')));
       case 'delete': requirePerm_(req, 'delete'); return json_(delete_(req));
       case 'resend': requirePerm_(req, 'resend'); return json_(resend_(req));
-      case 'contactsList': requirePerm_(req, ['contactsView', 'contacts']); return json_(contactsList_());
-      case 'ctSave': requirePerm_(req, 'contacts'); return json_(ctSave_(req));
-      case 'ctDelete': requirePerm_(req, 'contacts'); return json_(ctDelete_(req));
-      case 'digestNow': requirePerm_(req, 'contacts'); return json_(digest_({ force: true }));
+      case 'digestNow': requirePerm_(req, 'users'); return json_(digest_({ force: true }));
       case 'usersList': requirePerm_(req, 'users'); return json_(usersList_());
       case 'userSave': return json_(userSave_(req, requirePerm_(req, 'users')));
       case 'userDelete': requirePerm_(req, 'users'); return json_(userDelete_(req));
@@ -138,7 +136,6 @@ function findRow_(sh, id) {
 }
 
 function findings_() { return cached_('findings', 60, function () { return readTab_(F_NAME, F_COLS); }); }
-function contacts_() { return cached_('contacts', 300, function () { return readTab_(C_NAME, C_COLS); }); }
 
 function writeRow_(sh, row, o, cols) { sh.getRange(row, 1, 1, cols.length).setValues([cols.map(function (c) { return o[c] == null ? '' : o[c]; })]); }
 
@@ -294,9 +291,16 @@ function requirePerm_(r, perm) {
 }
 
 /* ---------- users and what they may do (Users tab) ---------- */
+function digestInfo_() {
+  const trig = (function () { try { return ScriptApp.getProjectTriggers().some(function (t) { return t.getHandlerFunction() === 'autoDigest'; }); } catch (e) { return null; } })();
+  return { digestOn: trig, digestDays: prop_('DIGEST_DAYS') || 'Mon,Tue,Wed,Thu,Fri,Sat', digestLast: prop_('DIGEST_LAST') || '' };
+}
+
 function usersList_() {
-  return { ok: true, perms: PERMS, owners: adminEmails_(), users: users_().map(function (u) {
-    return { email: String(u.id), name: u.name, perms: String(u.perms || '').split(',').filter(Boolean), active: String(u.active) !== 'false' && String(u.active) !== 'FALSE' };
+  try { if (migrateContacts_()) clearCache_(); } catch (e) { Logger.log('migrateContacts ' + e); }
+  const d = digestInfo_();
+  return { ok: true, perms: PERMS, owners: adminEmails_(), digestOn: d.digestOn, digestDays: d.digestDays, digestLast: d.digestLast, users: users_().map(function (u) {
+    return { email: String(u.id), name: u.name, company: String(u.company || ''), perms: String(u.perms || '').split(',').filter(Boolean), active: String(u.active) !== 'false' && String(u.active) !== 'FALSE' };
   }) };
 }
 
@@ -307,12 +311,14 @@ function userSave_(r, caller) {
   const me = userInfo_(caller);
   let perms = (u.perms || []).filter(function (x) { return PERMS.indexOf(x) >= 0; });
   if (perms.indexOf('users') >= 0 && !me.admin) throw new Error('Only an owner can give the Users access.');
+  const company = s_(u.company, 60).toUpperCase();
+  if (perms.indexOf('ic') >= 0 && !company) throw new Error('Pick the company first: contractor emails go to the company the person belongs to.');
   const active = u.active === false ? 'false' : 'true';
   return withLock_(function () {
     const sh = tab_(U_NAME, U_COLS), row = findRow_(sh, email), isNew = row < 0;
     const old = isNew ? null : sh.getRange(row, 1, 1, U_COLS.length).getValues()[0];
     if (!isNew && !me.admin && String(old[2]).split(',').indexOf('users') >= 0) perms = perms.concat(['users']).filter(function (x, i, a) { return a.indexOf(x) === i; }); // a non-owner cannot strip the Users access
-    const o = { id: email, name: name, perms: perms.join(','), active: active, updatedAt: new Date().toISOString() };
+    const o = { id: email, name: name, company: company, perms: perms.join(','), active: active, updatedAt: new Date().toISOString() };
     if (isNew) appendRows_(sh, [U_COLS.map(function (k) { return o[k]; })]); else writeRow_(sh, row, o, U_COLS);
     clearCache_();
     if (active === 'false') revokeDevices_(email, '');
@@ -495,41 +501,48 @@ function icClose_(r) {
   return { ok: true };
 }
 
-/* ---------- contacts: who receives findings for each company ---------- */
-function contactsList_() {
-  const trig = (function () { try { return ScriptApp.getProjectTriggers().some(function (t) { return t.getHandlerFunction() === 'autoDigest'; }); } catch (e) { return null; } })();
-  return { ok: true, contacts: contacts_(), digestOn: trig, digestDays: prop_('DIGEST_DAYS') || 'Mon,Tue,Wed,Thu,Fri,Sat', digestLast: prop_('DIGEST_LAST') || '' };
+/* ---------- contractor contacts now live in the Users tab (Company + the "Contractor findings" tick) ---------- */
+// One-time move of the old Contacts tab into Users. Safe to run again: it only adds or fills in, and marks itself done.
+// Old role HSSE (HSSE Manager / Site Lead) -> ticked "Contractor findings". Old PM and Admin people -> kept on file, nothing ticked.
+function migrateContacts_() {
+  if (prop_('CONTACTS_MIGRATED') === '1') return 0;
+  const ss = SpreadsheetApp.openById(prop_('SHEET_ID')), old = ss.getSheetByName(C_NAME);
+  let moved = 0;
+  if (old && old.getLastRow() >= 2) {
+    const rows = old.getRange(2, 1, old.getLastRow() - 1, C_COLS.length).getValues();
+    withLock_(function () {
+      const sh = tab_(U_NAME, U_COLS);
+      rows.forEach(function (v) {
+        const name = String(v[2] || '').trim(), email = String(v[3] || '').toLowerCase().trim(), ic = String(v[1] || '').toUpperCase().trim(), role = String(v[4] || 'HSSE');
+        if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || isAdminEmail_(email)) return;
+        const wantIc = role !== 'PM' && role !== 'ADMIN', row = findRow_(sh, email);
+        if (row < 0) {
+          const o = { id: email, name: name || email, company: ic, perms: wantIc ? 'ic' : '', active: 'true', updatedAt: new Date().toISOString() };
+          appendRows_(sh, [U_COLS.map(function (k) { return o[k]; })]); moved++;
+        } else {
+          const cur = sh.getRange(row, 1, 1, U_COLS.length).getValues()[0], o = {};
+          U_COLS.forEach(function (k, i) { o[k] = cur[i]; });
+          const p = String(o.perms || '').split(',').filter(Boolean);
+          if (!String(o.company || '').trim()) o.company = ic;
+          if (wantIc && p.indexOf('ic') < 0 && String(o.company).toUpperCase().trim() === ic) p.push('ic');
+          o.perms = p.join(','); o.updatedAt = new Date().toISOString();
+          writeRow_(sh, row, o, U_COLS); moved++;
+        }
+      });
+    });
+  }
+  PropertiesService.getScriptProperties().setProperty('CONTACTS_MIGRATED', '1');
+  return moved;
 }
 
-function ctSave_(r) {
-  const c = r.contact || {}, email = s_(c.email, 120).toLowerCase(), ic = s_(c.ic, 60).toUpperCase(), name = s_(c.name, 120);
-  if (!ic || !name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Error('Company, name and a valid email are required');
-  const role = c.role === 'PM' ? 'PM' : c.role === 'ADMIN' ? 'ADMIN' : 'HSSE';
-  return withLock_(function () {
-    const sh = tab_(C_NAME, C_COLS), row = c.id ? findRow_(sh, c.id) : -1;
-    const o = { id: row > 0 ? c.id : 'CT-' + Utilities.getUuid().slice(0, 6).toUpperCase(), ic: ic, name: name, email: email, role: role, updatedAt: new Date().toISOString() };
-    if (row > 0) writeRow_(sh, row, o, C_COLS); else appendRows_(sh, [C_COLS.map(function (k) { return o[k]; })]);
-    clearCache_();
-    return { ok: true, id: o.id };
-  });
-}
-
-function ctDelete_(r) {
-  return withLock_(function () {
-    const sh = tab_(C_NAME, C_COLS);
-    (r.ids || []).forEach(function (id) { const row = findRow_(sh, id); if (row > 0) sh.deleteRow(row); });
-    clearCache_();
-    return { ok: true };
-  });
-}
-
-/* Who is emailed for a company. Only contacts with role HSSE (HSSE Manager and Site Leads) are emailed.
-   ADMIN contacts are kept on file but never emailed. PM contacts are copied only if Script Property CC_PM = 1 (default: off). */
+/* Who is emailed for a company: active people whose Company matches and who have "Contractor findings" ticked in the Users tab.
+   Owners (ADMIN_EMAILS) are never contractor recipients. They get copies through the ticks (copies_). */
 function recipients_(ic) {
-  const cs = contacts_().filter(function (c) { return String(c.ic).toUpperCase() === String(ic).toUpperCase() && c.email; });
-  const hs = cs.filter(function (c) { return c.role !== 'PM' && c.role !== 'ADMIN'; });
-  const pm = prop_('CC_PM') === '1' ? cs.filter(function (c) { return c.role === 'PM'; }) : [];
-  return { to: hs.map(function (c) { return c.email; }), pm: pm.map(function (c) { return c.email; }), names: hs.map(function (c) { return c.name; }) };
+  const want = String(ic).toUpperCase().trim();
+  const hs = users_().filter(function (u) {
+    return u.id && String(u.active) !== 'false' && String(u.active) !== 'FALSE' && String(u.company || '').toUpperCase().trim() === want && String(u.perms || '').split(',').indexOf('ic') >= 0;
+  });
+  return { to: hs.map(function (u) { return String(u.id).toLowerCase(); }), names: hs.map(function (u) { return u.name || u.id; }) };
 }
 
 /* ---------- email ---------- */
@@ -585,7 +598,7 @@ function notifyNew_(o) {
   const en = 'Dear ' + rc.names.join(', ') + ',\n\nA site walkthrough finding has been raised for ' + o.ic + '.\n\nRef: ' + o.id + '\nRisk: ' + o.risk + '\nLocation: ' + o.location + '\nCategory: ' + o.category + '\nFinding: ' + o.description + '\nClose by: ' + fmtD_(o.dueDate) + '\n\nThe BEFORE photo is attached. Please fix it, then open the link below, add the AFTER photo and your name, and submit:\n' + link;
   const id = 'Yth. ' + rc.names.join(', ') + ',\n\nTemuan walkthrough lokasi kerja telah dicatat untuk ' + o.ic + '.\n\nNo. Ref: ' + o.id + '\nRisiko: ' + o.risk + '\nLokasi: ' + o.location + '\nKategori: ' + o.category + '\nTemuan: ' + o.description + '\nTutup sebelum: ' + fmtD_(o.dueDate) + '\n\nFoto SEBELUM terlampir. Mohon diperbaiki, lalu buka tautan di bawah, tambahkan foto SESUDAH dan nama Anda, kemudian kirim:\n' + link;
   const att = idsOf_(o.beforePhotos).map(function (fid) { try { return DriveApp.getFileById(fid).getBlob(); } catch (e) { return null; } }).filter(Boolean);
-  const cc = (o.risk === 'High' ? rc.pm : []).concat(copies_('nNew')).join(',');
+  const cc = copies_('nNew').join(',');
   const ok = send_({ to: rc.to.join(','), cc: cc, subject: subject, body: en + '\n\n----------\n\n' + id + SIG, attachments: att });
   return { sent: ok ? rc.to.length : 0, noContacts: false, quota: !ok };
 }
@@ -597,7 +610,7 @@ function notifyReopen_(o) {
   const subject = '[Walkthrough ' + o.id + '] Not accepted, please redo / Belum diterima, mohon ulangi - ' + o.location;
   const en = 'HSSE has not accepted the close-out of ' + o.id + ' (' + o.location + ').\nReason: ' + o.hseNote + '\nNew close-by date: ' + fmtD_(o.dueDate) + '\nPlease fix it and submit a new AFTER photo here:\n' + link;
   const id = 'HSSE belum menerima penutupan ' + o.id + ' (' + o.location + ').\nAlasan: ' + o.hseNote + '\nBatas penutupan: ' + fmtD_(o.dueDate) + '\nMohon perbaiki dan kirim foto SESUDAH yang baru di sini:\n' + link;
-  send_({ to: rc.to.join(','), cc: rc.pm.join(','), subject: subject, body: en + '\n\n----------\n\n' + id + SIG });
+  send_({ to: rc.to.join(','), subject: subject, body: en + '\n\n----------\n\n' + id + SIG });
 }
 
 /* Who gets an email copy: the owners plus every active person with that box ticked in the Users tab. */
@@ -686,7 +699,7 @@ function digest_(opt) {
     const subject = '[Walkthrough] Open findings / Temuan terbuka - ' + ic + ': ' + items.length + ' open, ' + late.length + ' overdue (' + fmtD_(today) + ')';
     const body = 'Dear ' + rc.names.join(', ') + ',\n\nOpen walkthrough findings for ' + ic + ': ' + items.length + ' (overdue: ' + late.length + ').\nOpen each link, add the AFTER photo and submit to close it.\n\n' + lines +
       '\n\n----------\n\nTemuan walkthrough yang masih terbuka untuk ' + ic + ': ' + items.length + ' (lewat tenggat: ' + late.length + ').\nBuka setiap tautan, tambahkan foto SESUDAH lalu kirim untuk menutup.' + SIG;
-    const cc = (late.length ? rc.pm : []).concat(copies_('nDigest')).join(',');
+    const cc = copies_('nDigest').join(',');
     const ok = send_({ to: rc.to.join(','), cc: cc, subject: subject, body: body });
     results.push({ ic: ic, status: ok ? 'sent' : 'quota', open: items.length, overdue: late.length });
   });
@@ -716,7 +729,8 @@ function setup() {
   const p = PropertiesService.getScriptProperties();
   const ss = p.getProperty('SHEET_ID') ? SpreadsheetApp.openById(p.getProperty('SHEET_ID')) : SpreadsheetApp.create('EcoOils Project - Site Walkthrough');
   p.setProperty('SHEET_ID', ss.getId());
-  tab_(F_NAME, F_COLS); tab_(C_NAME, C_COLS); tab_(U_NAME, U_COLS);
+  tab_(F_NAME, F_COLS); tab_(U_NAME, U_COLS);
+  try { Logger.log('Contacts moved to Users: ' + migrateContacts_()); } catch (e) { Logger.log('migrate ' + e); }
   if (!p.getProperty('FOLDER_ID')) p.setProperty('FOLDER_ID', DriveApp.createFolder('EcoOils Project - Walkthrough photos').getId());
   if (!p.getProperty('ADMIN_EMAILS')) p.setProperty('ADMIN_EMAILS', 'Ignatius.Ambrosio@ecooils.com.my');
   if (!p.getProperty('PIN_SALT')) p.setProperty('PIN_SALT', Utilities.getUuid());
