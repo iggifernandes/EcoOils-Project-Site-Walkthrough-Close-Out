@@ -51,6 +51,7 @@ table.ut{border-collapse:collapse;width:100%;font-size:13px}
 .ut .x{background:none;border:0;color:#b3261e;font-size:18px;cursor:pointer;padding:0 6px;min-height:30px}
 .pbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}.pbtns .btn{flex:1 1 140px;min-height:46px}
 [id^=pb_].over{outline:2px dashed var(--green);outline-offset:3px;border-radius:8px}
+.ut th.nb,.ut td.nb:first-of-type{border-left:1px solid var(--line)}.ut td.nb{border-left:1px solid var(--line)}.ut tr.grp th{font-size:10px;text-transform:uppercase;border-bottom:0;padding-top:6px}
 @media(max-width:620px){.logbar .btn{width:100%}}
 @media(min-width:1600px){:root{--maxw:1500px}body{font-size:16px}}
 @media(max-width:480px){nav.tabs{padding:0 4px}nav.tabs button{padding:10px 8px;font-size:14px;letter-spacing:.02em}}
@@ -273,7 +274,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
 <script>
 const LOCS = ["ADMINISTRATION BUILDING", "BLOCK 6 B SOUTH EAST CORNER", "BLOCK 6B", "BLOCK 6B EAST GATE", "BOILER / CHIMNEY AREA", "CONTROL ROOM, MCC ROOM", "COOLING TOWER", "DDE TREATMENT PLANT (DTP)", "DIESEL TANK", "DIRTY COOLING TOWER", "DRY AND LIQUID CHEMICAL STORAGE", "ECOOILS WARE HOUSE", "EFFLUENT TREATMENT PLANT (ETP)", "ELECTRICAL SUBSTATION (PLN)", "EXTRACTION PLANT", "FA PLANT", "FIRE WATER PUMP HOUSE", "FIRE WATER TANK", "GSB OFFICE", "HEXANE AND DIESEL RECEIVING BAY", "HEXANE TANK", "KKS OFFICE", "LOADING/UNLOADING AREA (PUMP HOUSE)", "MCC BUILDING", "NORTH-WEST CORNER BLOCK 6A", "OFFICE VEHICLE PARKING AREA", "OIL POLISHING PLANT", "PBS OFFICE", "PIPE RACK", "PRE TREATMENT UNIT (PTU)", "RAW WATER PIT", "SCHEDULED & DOMESTIC WASTE SHED", "SECURITY BUILDING", "SECURITY POST", "SILO", "TANK FARM", "TRUCK PARKING AREA", "VAPOR ABSORPTION MACHINE (VAM) SHED", "WAREHOUSE", "WAREHOUSE BLOCK B", "WASTE WATER TREATMENT PLANT (WWTP)", "WATER TANK", "WATER TREATMENT PLANT (WTP) AND WATER TANKS", "WEIGHT BRIDGE", "WEN OFFICE", "WORKSHOP AREA"];
-const APP_VERSION = '1.5.1';
+const APP_VERSION = '1.6.0';
 const API_URL = 'https://script.google.com/macros/s/AKfycbydZ7RylbsTJqJdq_zZEXees36X6u5wT7U0z59Oh1caOwZltMX8fp4xOAFRUwzW9oDO/exec';
 const COMPANIES = ['PT. ECOOILS', 'PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS', 'PT. SOS'];
 const OTHER_CO = 'OTHER (TYPE YOUR COMPANY NAME)';
@@ -299,7 +300,10 @@ const D = {
 'us.title':['Who can use this app','Siapa yang boleh memakai aplikasi ini','Siapa yang boleh menggunakan aplikasi ini'],
 'us.help':['Add each EcoOils person and tick what they may do. They sign in with their own email and a PIN they set themselves (Forgot PIN). Changes apply at once.','Tambahkan setiap orang EcoOils dan centang apa yang boleh dilakukan. Mereka masuk dengan email sendiri dan PIN yang mereka atur sendiri (Forgot PIN). Perubahan langsung berlaku.','Tambah setiap orang EcoOils dan tandakan apa yang dibenarkan. Mereka log masuk dengan e-mel sendiri dan PIN yang mereka tetapkan sendiri (Forgot PIN). Perubahan berkuat kuasa serta-merta.'],
 'us.add':['Add person','Tambah orang','Tambah orang'],
-'us.preset':['A new person starts with: Read, PDF, Log, Verify, Resend and See contacts. Tick or untick any box and it saves at once.','Orang baru mulai dengan: Baca, PDF, Catat, Verifikasi, Kirim ulang dan Lihat kontak. Centang atau hapus centang dan langsung tersimpan.','Orang baharu bermula dengan: Baca, PDF, Log, Sahkan, Hantar semula dan Lihat kenalan. Tanda atau nyahtanda dan terus disimpan.'],
+'us.preset':['A new person starts with: Read, PDF, Log, Verify, Resend, See contacts and the Closed by IC email. Tick or untick any box and it saves at once.','Orang baru mulai dengan: Baca, PDF, Catat, Verifikasi, Kirim ulang, Lihat kontak dan email Ditutup IC. Centang atau hapus centang dan langsung tersimpan.','Orang baharu bermula dengan: Baca, PDF, Log, Sahkan, Hantar semula, Lihat kenalan dan e-mel Ditutup IC. Tanda atau nyahtanda dan terus disimpan.'],
+'us.grpAccess':['What they can do in the app','Yang dapat dilakukan di aplikasi','Yang boleh dilakukan dalam aplikasi'],'us.grpMail':['Gets an email copy of','Menerima salinan email','Menerima salinan e-mel'],
+'us.ownerMail':['gets every email','menerima semua email','menerima semua e-mel'],
+'pc.nNew':['New finding','Temuan baru','Dapatan baharu'],'pc.nDigest':['Daily summary','Ringkasan harian','Ringkasan harian'],'pc.nClose':['Closed by IC','Ditutup IC','Ditutup IC'],
 'pc.view':['Read','Baca','Baca'],'pc.pdf':['PDF','PDF','PDF'],'pc.csv':['CSV','CSV','CSV'],'pc.log':['Log','Catat','Log'],'pc.verify':['Verify','Verifikasi','Sahkan'],'pc.resend':['Resend','Kirim ulang','Hantar semula'],'pc.contactsView':['Contacts','Kontak','Kenalan'],'pc.contacts':['Edit contacts','Ubah kontak','Ubah kenalan'],'pc.delete':['Delete','Hapus','Padam'],'pc.users':['Users','Pengguna','Pengguna'],'pc.active':['On','Aktif','Aktif'],
 'us.can':['This person can:','Orang ini boleh:','Orang ini boleh:'],
 'us.active':['Access is on (untick to switch off without deleting)','Akses aktif (hapus centang untuk mematikan tanpa menghapus)','Akses aktif (nyahtanda untuk matikan tanpa padam)'],
@@ -642,16 +646,18 @@ async function saveContact() {
 }
 
 /* ---------- users and access: one compact table, a tick saves at once ---------- */
-const PERM_KEYS = ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'contactsView', 'contacts', 'delete', 'users'];
-const PERM_DEFAULT = ['view', 'pdf', 'log', 'verify', 'resend', 'contactsView'];
+const PERM_KEYS = ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'contactsView', 'contacts', 'delete', 'users', 'nNew', 'nDigest', 'nClose'];
+const NOTIFY_KEYS = ['nNew', 'nDigest', 'nClose'];
+const PERM_DEFAULT = ['view', 'pdf', 'log', 'verify', 'resend', 'contactsView', 'nClose'];
 let USERS = [], OWNERS = [];
 async function loadUsers() { const j = await api(withToken({action: 'usersList'})); USERS = j.users; OWNERS = j.owners; renderUsers(); }
 function renderUsers() {
   const cols = PERM_KEYS.filter(p => p !== 'users' || ME.admin);
-  const head = '<tr><th></th>' + cols.map(p => '<th>' + esc(t('pc.' + p)) + '</th>').join('') + '<th>' + esc(t('pc.active')) + '</th><th></th></tr>';
-  const owners = OWNERS.map(e => '<tr><td>' + esc(e) + '<small class="own">' + esc(t('us.owner')) + '</small></td><td colspan="' + (cols.length + 2) + '"></td></tr>').join('');
+  const nA = cols.filter(p => !NOTIFY_KEYS.includes(p)).length;
+  const head = '<tr class="grp"><th></th><th colspan="' + nA + '">' + esc(t('us.grpAccess')) + '</th><th colspan="3" class="nb">' + esc(t('us.grpMail')) + '</th><th colspan="2"></th></tr><tr><th></th>' + cols.map(p => '<th' + (p === 'nNew' ? ' class="nb"' : '') + '>' + esc(t('pc.' + p)) + '</th>').join('') + '<th>' + esc(t('pc.active')) + '</th><th></th></tr>';
+  const owners = OWNERS.map(e => '<tr><td>' + esc(e) + '<small class="own">' + esc(t('us.owner')) + ' · ' + esc(t('us.ownerMail')) + '</small></td><td colspan="' + (cols.length + 2) + '"></td></tr>').join('');
   const rows = USERS.map(u => '<tr class="' + (u.active ? '' : 'off') + '" data-u="' + esc(u.email) + '"><td title="' + esc(u.email) + '">' + esc(u.name) + '<small>' + esc(u.email) + '</small></td>' +
-    cols.map(p => '<td><input type="checkbox" data-p="' + p + '"' + (u.perms.includes(p) ? ' checked' : '') + '></td>').join('') +
+    cols.map(p => '<td' + (p === 'nNew' ? ' class="nb"' : '') + '><input type="checkbox" data-p="' + p + '"' + (u.perms.includes(p) ? ' checked' : '') + '></td>').join('') +
     '<td><input type="checkbox" data-p="_active"' + (u.active ? ' checked' : '') + '></td><td><button class="x" data-ud="' + esc(u.email) + '" title="' + esc(t('btn.delete')) + '">×</button></td></tr>').join('');
   $('#uList').innerHTML = '<table class="ut">' + head + owners + (rows || '<tr><td colspan="' + (cols.length + 3) + '" class="hint" style="text-align:left;padding:10px">' + esc(t('us.none')) + '</td></tr>') + '</table>';
   $$('#uList tr[data-u] input').forEach(i => i.onchange = () => {

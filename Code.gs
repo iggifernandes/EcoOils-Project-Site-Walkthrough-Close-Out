@@ -1,4 +1,4 @@
-const VERSION = '1.5.1'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.6.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -17,7 +17,9 @@ const U_COLS = ['id', 'name', 'perms', 'active', 'updatedAt']; // id = the perso
 // What a ticked box allows. Owners (ADMIN_EMAILS) always have everything.
 // view=read, pdf=print/PDF report, csv=CSV export, log=log findings, verify=verify/send back/close/edit, resend=resend email,
 // contactsView=see contacts, contacts=edit contacts + run digest, delete=delete findings, users=manage users.
-const PERMS = ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'contactsView', 'contacts', 'delete', 'users'];
+// Email copies (not app access): nNew = a copy of every new finding sent to the contractor, nDigest = a copy of the daily summary,
+// nClose = the "closed by IC, please check" email and the High-risk reminder. Owners (ADMIN_EMAILS) always get all three.
+const PERMS = ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'contactsView', 'contacts', 'delete', 'users', 'nNew', 'nDigest', 'nClose'];
 const DATE_COLS = ['dueDate'];
 const RISKS = ['High', 'Medium', 'Low'];
 const OPEN_STATUS = ['Open', 'Reopened'];
@@ -583,7 +585,7 @@ function notifyNew_(o) {
   const en = 'Dear ' + rc.names.join(', ') + ',\n\nA site walkthrough finding has been raised for ' + o.ic + '.\n\nRef: ' + o.id + '\nRisk: ' + o.risk + '\nLocation: ' + o.location + '\nCategory: ' + o.category + '\nFinding: ' + o.description + '\nClose by: ' + fmtD_(o.dueDate) + '\n\nThe BEFORE photo is attached. Please fix it, then open the link below, add the AFTER photo and your name, and submit:\n' + link;
   const id = 'Yth. ' + rc.names.join(', ') + ',\n\nTemuan walkthrough lokasi kerja telah dicatat untuk ' + o.ic + '.\n\nNo. Ref: ' + o.id + '\nRisiko: ' + o.risk + '\nLokasi: ' + o.location + '\nKategori: ' + o.category + '\nTemuan: ' + o.description + '\nTutup sebelum: ' + fmtD_(o.dueDate) + '\n\nFoto SEBELUM terlampir. Mohon diperbaiki, lalu buka tautan di bawah, tambahkan foto SESUDAH dan nama Anda, kemudian kirim:\n' + link;
   const att = idsOf_(o.beforePhotos).map(function (fid) { try { return DriveApp.getFileById(fid).getBlob(); } catch (e) { return null; } }).filter(Boolean);
-  const cc = (o.risk === 'High' ? rc.pm : []).concat(adminEmails_()).join(',');
+  const cc = (o.risk === 'High' ? rc.pm : []).concat(copies_('nNew')).join(',');
   const ok = send_({ to: rc.to.join(','), cc: cc, subject: subject, body: en + '\n\n----------\n\n' + id + SIG, attachments: att });
   return { sent: ok ? rc.to.length : 0, noContacts: false, quota: !ok };
 }
@@ -598,15 +600,16 @@ function notifyReopen_(o) {
   send_({ to: rc.to.join(','), cc: rc.pm.join(','), subject: subject, body: en + '\n\n----------\n\n' + id + SIG });
 }
 
-/* Who checks a closed finding: the owners plus every active person with the Verify box ticked. */
-function verifiers_() {
+/* Who gets an email copy: the owners plus every active person with that box ticked in the Users tab. */
+function copies_(perm) {
   const out = adminEmails_().slice();
   users_().forEach(function (u) {
     const p = String(u.perms || '').split(',');
-    if (p.indexOf('verify') >= 0 && String(u.active) !== 'false' && String(u.active) !== 'FALSE' && out.indexOf(String(u.id).toLowerCase()) < 0) out.push(String(u.id).toLowerCase());
+    if (p.indexOf(perm) >= 0 && String(u.active) !== 'false' && String(u.active) !== 'FALSE' && out.indexOf(String(u.id).toLowerCase()) < 0) out.push(String(u.id).toLowerCase());
   });
   return out;
 }
+function verifiers_() { return copies_('nClose'); }
 function autoDays_() { const v = prop_('AUTO_VERIFY_DAYS'); return v === null || v === '' ? 2 : Number(v) || 0; }
 function autoRisks_() { return (prop_('AUTO_VERIFY_RISKS') || 'Low,Medium').split(',').map(function (x) { return x.trim(); }); }
 
@@ -683,7 +686,7 @@ function digest_(opt) {
     const subject = '[Walkthrough] Open findings / Temuan terbuka - ' + ic + ': ' + items.length + ' open, ' + late.length + ' overdue (' + fmtD_(today) + ')';
     const body = 'Dear ' + rc.names.join(', ') + ',\n\nOpen walkthrough findings for ' + ic + ': ' + items.length + ' (overdue: ' + late.length + ').\nOpen each link, add the AFTER photo and submit to close it.\n\n' + lines +
       '\n\n----------\n\nTemuan walkthrough yang masih terbuka untuk ' + ic + ': ' + items.length + ' (lewat tenggat: ' + late.length + ').\nBuka setiap tautan, tambahkan foto SESUDAH lalu kirim untuk menutup.' + SIG;
-    const cc = (late.length ? rc.pm : []).concat(adminEmails_()).join(',');
+    const cc = (late.length ? rc.pm : []).concat(copies_('nDigest')).join(',');
     const ok = send_({ to: rc.to.join(','), cc: cc, subject: subject, body: body });
     results.push({ ic: ic, status: ok ? 'sent' : 'quota', open: items.length, overdue: late.length });
   });
