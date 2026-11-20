@@ -38,9 +38,13 @@ nav.tabs .sp{flex:1}
 .perms small{display:block;color:var(--mut)}
 .ur{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);flex-wrap:wrap}.ur:first-child{border-top:0}
 .ur .tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.ur .tags span{background:var(--okbg);color:var(--ok);border-radius:10px;padding:1px 9px;font-size:12px}.ur.off{opacity:.55}
-.uadd{display:grid;grid-template-columns:1fr 1.4fr 1fr auto;align-items:start;gap:6px;margin-top:6px}.uadd .btn{min-height:40px}
+.uadd{display:grid;grid-template-columns:1fr 1.4fr 1fr auto;align-items:start;gap:6px}.uadd .btn{min-height:36px}.uadd input,.uadd select{min-height:36px;padding:4px 8px}
+.ubar{padding:8px 10px;margin-bottom:6px}.udg{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}.udg .btn.sm{min-height:28px;padding:2px 10px;font-size:12px}
+.uhelp{margin-left:auto}.uhelp summary{cursor:pointer;color:var(--mut);font-size:12px;list-style:none;border:1px solid var(--line);border-radius:50%;width:20px;height:20px;text-align:center;line-height:18px}.uhelp[open]{flex-basis:100%}.uhelp p{margin:4px 0}
+.onUsers .titlebar{display:none}.onUsers .logbar{margin-top:6px}.onUsers .logbar .btn{min-height:34px;padding:0 16px;font-size:14px}.onUsers nav.tabs{margin-top:4px}.onUsers nav.tabs button{min-height:38px;padding:6px 14px}
+.ustatic .utw{max-height:calc(100dvh - 235px);min-height:240px;overflow:auto}
 @media(max-width:620px){.uadd{grid-template-columns:1fr}}
-.utw{padding:0;overflow-x:auto}
+.utw{padding:0;overflow-x:auto;margin-top:0}
 .ut select{font-size:12px;padding:3px 4px;min-height:28px;max-width:130px}
 table.ut{border-collapse:collapse;width:100%;font-size:13px}
 .ut th,.ut td{padding:3px 5px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -239,18 +243,12 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
   <div id="reportOut"></div>
  </section>
 
- <section id="tab-users" class="tab">
-  <div class="card"><h2 data-i="us.title"></h2>
-   <p class="hint" data-i="us.help"></p>
+ <section id="tab-users" class="tab ustatic">
+  <div class="card ubar">
    <div class="uadd"><input id="u_name" maxlength="120" data-ph="ct.name"><input id="u_email" type="email" maxlength="120" data-ph="a.email"><div><select id="u_co" aria-label="Company"></select><input id="u_co2" maxlength="60" style="margin-top:6px;text-transform:uppercase" data-ph="ph.otherCo" hidden></div><button class="btn pri" id="uAdd" data-i="us.add"></button></div>
-   <p class="hint" data-i="us.preset" style="margin-top:6px"></p>
+   <div class="udg"><span id="dgInfo" class="hint"></span><button class="btn sm" id="dgNow" data-i="dg.now"></button><details class="uhelp"><summary>?</summary><p class="hint" data-i="us.help"></p><p class="hint" data-i="us.preset"></p><p class="hint" data-i="dg.help"></p></details></div>
   </div>
   <div class="card utw"><div id="uList"></div></div>
-  <div class="card"><h2 data-i="dg.title"></h2>
-   <p class="hint" data-i="dg.help"></p>
-   <div id="dgInfo" class="hint"></div>
-   <div class="row" style="margin-top:8px"><button class="btn" id="dgNow" data-i="dg.now"></button></div>
-  </div>
  </section>
 
 </section>
@@ -262,7 +260,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
 <script>
 const LOCS = ["ADMINISTRATION BUILDING", "BLOCK 6 B SOUTH EAST CORNER", "BLOCK 6B", "BLOCK 6B EAST GATE", "BOILER / CHIMNEY AREA", "CONTROL ROOM, MCC ROOM", "COOLING TOWER", "DDE TREATMENT PLANT (DTP)", "DIESEL TANK", "DIRTY COOLING TOWER", "DRY AND LIQUID CHEMICAL STORAGE", "ECOOILS WARE HOUSE", "EFFLUENT TREATMENT PLANT (ETP)", "ELECTRICAL SUBSTATION (PLN)", "EXTRACTION PLANT", "FA PLANT", "FIRE WATER PUMP HOUSE", "FIRE WATER TANK", "GSB OFFICE", "HEXANE AND DIESEL RECEIVING BAY", "HEXANE TANK", "KKS OFFICE", "LOADING/UNLOADING AREA (PUMP HOUSE)", "MCC BUILDING", "NORTH-WEST CORNER BLOCK 6A", "OFFICE VEHICLE PARKING AREA", "OIL POLISHING PLANT", "PBS OFFICE", "PIPE RACK", "PRE TREATMENT UNIT (PTU)", "RAW WATER PIT", "SCHEDULED & DOMESTIC WASTE SHED", "SECURITY BUILDING", "SECURITY POST", "SILO", "TANK FARM", "TRUCK PARKING AREA", "VAPOR ABSORPTION MACHINE (VAM) SHED", "WAREHOUSE", "WAREHOUSE BLOCK B", "WASTE WATER TREATMENT PLANT (WWTP)", "WATER TANK", "WATER TREATMENT PLANT (WTP) AND WATER TANKS", "WEIGHT BRIDGE", "WEN OFFICE", "WORKSHOP AREA"];
-const APP_VERSION = '1.7.0';
+const APP_VERSION = '1.7.1';
 const API_URL = 'https://script.google.com/macros/s/AKfycbydZ7RylbsTJqJdq_zZEXees36X6u5wT7U0z59Oh1caOwZltMX8fp4xOAFRUwzW9oDO/exec';
 const COMPANIES = ['PT. ECOOILS', 'PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS', 'PT. SOS'];
 const OTHER_CO = 'OTHER (TYPE YOUR COMPANY NAME)';
@@ -699,6 +697,7 @@ function setTab(n) {
   if (!$('#tab-' + n)) n = 'list';
   if (n === 'none') { $$('.tab').forEach(s => s.classList.remove('on')); return; }
   $$('#tabs button[data-t]').forEach(x => x.classList.toggle('on', x.dataset.t === n)); $('#btnNewFinding').classList.toggle('on', n === 'log'); $$('.tab').forEach(s => s.classList.toggle('on', s.id === 'tab-' + n));
+  document.body.classList.toggle('onUsers', n === 'users');
   try { localStorage.setItem('wt_tab', n); } catch (e) {}
 }
 function bind() {
