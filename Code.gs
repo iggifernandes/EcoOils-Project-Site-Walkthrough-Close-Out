@@ -1,4 +1,4 @@
-const VERSION = '1.7.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.8.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -18,9 +18,9 @@ const U_COLS = ['id', 'name', 'perms', 'active', 'updatedAt', 'company']; // id 
 // view=read, pdf=print/PDF report, csv=CSV export, log=log findings, verify=verify/send back/close/edit, resend=resend email,
 // delete=delete findings, users=manage users (also runs the daily digest by hand).
 // ic = this person is the contractor's contact: they are emailed the findings of their company (set the Company in the Users tab).
-// Email copies (not app access): nNew = a copy of every new finding sent to the contractor, nDigest = a copy of the daily summary,
+// Email copies (not app access): nNew = a copy of every new finding sent to the contractor, nDigest = a copy of the daily summary, nWeekly = the weekly summary (one email, Monday by default, Script Property WEEKLY_DAY),
 // nClose = the "closed by IC, please check" email and the High-risk reminder. Owners (ADMIN_EMAILS) always get all three.
-const PERMS = ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'delete', 'users', 'ic', 'nNew', 'nDigest', 'nClose'];
+const PERMS = ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'delete', 'users', 'ic', 'nNew', 'nDigest', 'nWeekly', 'nClose'];
 const DATE_COLS = ['dueDate'];
 const RISKS = ['High', 'Medium', 'Low'];
 const OPEN_STATUS = ['Open', 'Reopened'];
@@ -55,6 +55,7 @@ function doPost(e) {
       case 'adminClose': return json_(adminClose_(req, requirePerm_(req, 'verify')));
       case 'delete': requirePerm_(req, 'delete'); return json_(delete_(req));
       case 'resend': requirePerm_(req, 'resend'); return json_(resend_(req));
+      case 'weeklyNow': requirePerm_(req, 'users'); return json_(weekly_({ force: true }));
       case 'digestNow': requirePerm_(req, 'users'); return json_(digest_({ force: true }));
       case 'usersList': requirePerm_(req, 'users'); return json_(usersList_());
       case 'userSave': return json_(userSave_(req, requirePerm_(req, 'users')));
@@ -708,7 +709,42 @@ function digest_(opt) {
 }
 
 /* A daily trigger calls this; it only sends on the days in script property DIGEST_DAYS (default Mon to Sat). */
+/* Weekly summary: last 7 days by company, sent to everyone with the "Weekly summary" box ticked (plus the owners). */
+function weekly_(opt) {
+  opt = opt || {};
+  const today = todayIso_();
+  if (!opt.force && prop_('WEEKLY_LAST') === today) return { ok: true, sent: 0, skipped: 'already sent today' };
+  const to = copies_('nWeekly');
+  if (!to.length) return { ok: true, sent: 0, noRecipients: true };
+  const wk = Utilities.formatDate(new Date(Date.now() - 7 * 86400000), 'Asia/Jakarta', 'yyyy-MM-dd');
+  const all = findings_(), by = {};
+  function row(ic) { return by[ic] = by[ic] || { logged: 0, closed: 0, verified: 0, open: 0, late: 0, high: [] }; }
+  all.forEach(function (o) {
+    const r = row(o.ic);
+    if (String(o.createdAt).slice(0, 10) >= wk) r.logged++;
+    if (o.closedAt && String(o.closedAt).slice(0, 10) >= wk) r.closed++;
+    if (o.verifiedAt && String(o.verifiedAt).slice(0, 10) >= wk) r.verified++;
+    if (OPEN_STATUS.indexOf(o.status) >= 0) { r.open++; if (o.dueDate < today) { r.late++; if (o.risk === 'High') r.high.push(o.id + ' ' + o.location); } }
+  });
+  const ics = Object.keys(by).sort();
+  const T = { logged: 0, closed: 0, verified: 0, open: 0, late: 0 };
+  const lines = ics.map(function (ic) {
+    const r = by[ic]; Object.keys(T).forEach(function (k) { T[k] += r[k]; });
+    return ic + ': logged ' + r.logged + ', closed by IC ' + r.closed + ', verified ' + r.verified + ', open now ' + r.open + ', overdue ' + r.late;
+  });
+  const hi = [];
+  ics.forEach(function (ic) { by[ic].high.forEach(function (x) { hi.push('- ' + ic + ' ' + x); }); });
+  const period = fmtD_(wk) + ' - ' + fmtD_(today);
+  const body = 'Weekly walkthrough summary, ' + period + '\n\nAll companies: logged ' + T.logged + ', closed by IC ' + T.closed + ', verified ' + T.verified + ', open now ' + T.open + ', overdue ' + T.late + '\n\n' + (lines.join('\n') || 'No findings yet.') +
+    (hi.length ? '\n\nHigh-risk items overdue:\n' + hi.join('\n') : '') + '\n\nOpen the app: ' + APP_URL +
+    '\n\n----------\n\nRingkasan walkthrough mingguan, ' + period + '. Dicatat ' + T.logged + ', ditutup IC ' + T.closed + ', diverifikasi ' + T.verified + ', masih terbuka ' + T.open + ', terlambat ' + T.late + '. Rincian per perusahaan ada di bagian Inggris di atas.' + SIG;
+  const ok = send_({ to: to.join(','), subject: 'Weekly walkthrough summary ' + period + ' / Ringkasan mingguan', body: body });
+  if (ok) PropertiesService.getScriptProperties().setProperty('WEEKLY_LAST', today);
+  return { ok: true, sent: ok ? to.length : 0, quota: !ok };
+}
+
 function autoDigest() {
+  try { if (Utilities.formatDate(new Date(), 'Asia/Jakarta', 'EEE') === (prop_('WEEKLY_DAY') || 'Mon')) Logger.log('weekly ' + JSON.stringify(weekly_({}))); } catch (e) { console.error('weekly: ' + e); }
   try { Logger.log('autoVerify ' + JSON.stringify(autoVerify_()) + ' pendingHigh ' + pendingHighReminder_()); } catch (e) { console.error('autoVerify: ' + e); }
   const days = (prop_('DIGEST_DAYS') || 'Mon,Tue,Wed,Thu,Fri,Sat').split(',').map(function (x) { return x.trim(); });
   if (days.indexOf(Utilities.formatDate(new Date(), 'Asia/Jakarta', 'EEE')) < 0) return;

@@ -246,7 +246,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
  <section id="tab-users" class="tab ustatic">
   <div class="card ubar">
    <div class="uadd"><input id="u_name" maxlength="120" data-ph="ct.name"><input id="u_email" type="email" maxlength="120" data-ph="a.email"><div><select id="u_co" aria-label="Company"></select><input id="u_co2" maxlength="60" style="margin-top:6px;text-transform:uppercase" data-ph="ph.otherCo" hidden></div><button class="btn pri" id="uAdd" data-i="us.add"></button></div>
-   <div class="udg"><span id="dgInfo" class="hint"></span><button class="btn sm" id="dgNow" data-i="dg.now"></button><details class="uhelp"><summary>?</summary><p class="hint" data-i="us.help"></p><p class="hint" data-i="us.preset"></p><p class="hint" data-i="dg.help"></p></details></div>
+   <div class="udg"><span id="dgInfo" class="hint"></span><button class="btn sm" id="dgNow" data-i="dg.now"></button><button class="btn sm" id="wkNow" data-i="dg.weekly"></button><details class="uhelp"><summary>?</summary><p class="hint" data-i="us.help"></p><p class="hint" data-i="us.preset"></p><p class="hint" data-i="dg.help"></p></details></div>
   </div>
   <div class="card utw"><div id="uList"></div></div>
  </section>
@@ -260,7 +260,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
 <script>
 const LOCS = ["ADMINISTRATION BUILDING", "BLOCK 6 B SOUTH EAST CORNER", "BLOCK 6B", "BLOCK 6B EAST GATE", "BOILER / CHIMNEY AREA", "CONTROL ROOM, MCC ROOM", "COOLING TOWER", "DDE TREATMENT PLANT (DTP)", "DIESEL TANK", "DIRTY COOLING TOWER", "DRY AND LIQUID CHEMICAL STORAGE", "ECOOILS WARE HOUSE", "EFFLUENT TREATMENT PLANT (ETP)", "ELECTRICAL SUBSTATION (PLN)", "EXTRACTION PLANT", "FA PLANT", "FIRE WATER PUMP HOUSE", "FIRE WATER TANK", "GSB OFFICE", "HEXANE AND DIESEL RECEIVING BAY", "HEXANE TANK", "KKS OFFICE", "LOADING/UNLOADING AREA (PUMP HOUSE)", "MCC BUILDING", "NORTH-WEST CORNER BLOCK 6A", "OFFICE VEHICLE PARKING AREA", "OIL POLISHING PLANT", "PBS OFFICE", "PIPE RACK", "PRE TREATMENT UNIT (PTU)", "RAW WATER PIT", "SCHEDULED & DOMESTIC WASTE SHED", "SECURITY BUILDING", "SECURITY POST", "SILO", "TANK FARM", "TRUCK PARKING AREA", "VAPOR ABSORPTION MACHINE (VAM) SHED", "WAREHOUSE", "WAREHOUSE BLOCK B", "WASTE WATER TREATMENT PLANT (WWTP)", "WATER TANK", "WATER TREATMENT PLANT (WTP) AND WATER TANKS", "WEIGHT BRIDGE", "WEN OFFICE", "WORKSHOP AREA"];
-const APP_VERSION = '1.7.1';
+const APP_VERSION = '1.8.0';
 const API_URL = 'https://script.google.com/macros/s/AKfycbydZ7RylbsTJqJdq_zZEXees36X6u5wT7U0z59Oh1caOwZltMX8fp4xOAFRUwzW9oDO/exec';
 const COMPANIES = ['PT. ECOOILS', 'PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS', 'PT. SOS'];
 const OTHER_CO = 'OTHER (TYPE YOUR COMPANY NAME)';
@@ -290,6 +290,7 @@ const D = {
 'us.grpAccess':['What they can do in the app','Yang dapat dilakukan di aplikasi','Yang boleh dilakukan dalam aplikasi'],'us.grpMail':['Gets email','Menerima email','Menerima e-mel'],
 'us.ownerMail':['gets every email','menerima semua email','menerima semua e-mel'],
 'pc.company':['Company','Perusahaan','Syarikat'],'pc.ic':['Contractor findings','Temuan kontraktor','Dapatan kontraktor'],'us.needCo':['Pick the company first.','Pilih perusahaan dulu.','Pilih syarikat dahulu.'],'us.otherQ':['Company name:','Nama perusahaan:','Nama syarikat:'],'us.grpMail2':['Gets email','Menerima email','Menerima e-mel'],
+'pc.nWeekly':['Weekly summary','Ringkasan mingguan','Ringkasan mingguan'],'dg.weekly':['Send weekly summary now','Kirim ringkasan mingguan sekarang','Hantar ringkasan mingguan sekarang'],'dg.weeklySent':['Weekly summary sent to {n} person(s)','Ringkasan mingguan terkirim ke {n} orang','Ringkasan mingguan dihantar kepada {n} orang'],'dg.weeklyNone':['Nobody is ticked for the weekly summary.','Belum ada yang dicentang untuk ringkasan mingguan.','Tiada yang ditanda untuk ringkasan mingguan.'],
 'pc.nNew':['New finding','Temuan baru','Dapatan baharu'],'pc.nDigest':['Daily summary','Ringkasan harian','Ringkasan harian'],'pc.nClose':['Closed by IC','Ditutup IC','Ditutup IC'],
 'pc.view':['Read','Baca','Baca'],'pc.pdf':['PDF','PDF','PDF'],'pc.csv':['CSV','CSV','CSV'],'pc.log':['Log','Catat','Log'],'pc.verify':['Verify','Verifikasi','Sahkan'],'pc.resend':['Resend','Kirim ulang','Hantar semula'],'pc.contactsView':['Contacts','Kontak','Kenalan'],'pc.contacts':['Edit contacts','Ubah kontak','Ubah kenalan'],'pc.delete':['Delete','Hapus','Padam'],'pc.users':['Users','Pengguna','Pengguna'],'pc.active':['On','Aktif','Aktif'],
 'us.can':['This person can:','Orang ini boleh:','Orang ini boleh:'],
@@ -617,8 +618,8 @@ function csvReport() {
 function renderDigest() { const dg = window.DG; if (dg) $('#dgInfo').textContent = (dg.digestOn ? t('dg.on') : t('dg.off')) + (dg.digestLast ? ' · ' + dg.digestLast : ''); }
 
 /* ---------- users and access: one compact table, a tick saves at once ---------- */
-const PERM_KEYS = ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'delete', 'users', 'ic', 'nNew', 'nDigest', 'nClose'];
-const NOTIFY_KEYS = ['ic', 'nNew', 'nDigest', 'nClose'];
+const PERM_KEYS = ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'delete', 'users', 'ic', 'nNew', 'nDigest', 'nWeekly', 'nClose'];
+const NOTIFY_KEYS = ['ic', 'nNew', 'nDigest', 'nWeekly', 'nClose'];
 const PERM_DEFAULT = ['view', 'pdf', 'log', 'verify', 'resend']; // EcoOils person. No email copies by default (saves quota)
 const IC_COMPANIES = ['PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS']; // contractor person: starts with Contractor findings only
 let USERS = [], OWNERS = [];
@@ -627,7 +628,7 @@ function coOptions(cur) { const l = COMPANIES.slice(); if (cur && !l.includes(cu
 function renderUsers() {
   const cols = PERM_KEYS.filter(p => p !== 'users' || ME.admin);
   const nA = cols.filter(p => !NOTIFY_KEYS.includes(p)).length;
-  const head = '<tr class="grp"><th colspan="2"></th><th colspan="' + nA + '">' + esc(t('us.grpAccess')) + '</th><th colspan="4" class="nb">' + esc(t('us.grpMail')) + '</th><th colspan="2"></th></tr><tr><th></th><th>' + esc(t('pc.company')) + '</th>' + cols.map(p => '<th' + (p === 'ic' ? ' class="nb"' : '') + '>' + esc(t('pc.' + p)) + '</th>').join('') + '<th>' + esc(t('pc.active')) + '</th><th></th></tr>';
+  const head = '<tr class="grp"><th colspan="2"></th><th colspan="' + nA + '">' + esc(t('us.grpAccess')) + '</th><th colspan="5" class="nb">' + esc(t('us.grpMail')) + '</th><th colspan="2"></th></tr><tr><th></th><th>' + esc(t('pc.company')) + '</th>' + cols.map(p => '<th' + (p === 'ic' ? ' class="nb"' : '') + '>' + esc(t('pc.' + p)) + '</th>').join('') + '<th>' + esc(t('pc.active')) + '</th><th></th></tr>';
   const owners = OWNERS.map(e => '<tr><td>' + esc(e) + '<small class="own">' + esc(t('us.owner')) + ' · ' + esc(t('us.ownerMail')) + '</small></td><td colspan="' + (cols.length + 3) + '"></td></tr>').join('');
   const rows = USERS.map(u => '<tr class="' + (u.active ? '' : 'off') + '" data-u="' + esc(u.email) + '"><td title="' + esc(u.email) + '">' + esc(u.name) + '<small>' + esc(u.email) + '</small></td><td><select data-co>' + coOptions(u.company) + '</select></td>' +
     cols.map(p => '<td' + (p === 'ic' ? ' class="nb"' : '') + '><input type="checkbox" data-p="' + p + '"' + (u.perms.includes(p) ? ' checked' : '') + '></td>').join('') +
@@ -719,6 +720,7 @@ function bind() {
   $('#uAdd').onclick = addUser;
   $('#u_co').onchange = () => { $('#u_co2').hidden = $('#u_co').value !== OTHER_CO; };
   $('#dgNow').onclick = async () => { try { const j = await api(withToken({action: 'digestNow'}), 60000); const n = (j.results || []).filter(x => x.status === 'sent').length; toast(n ? t('dg.sent', {n}) : t('dg.nothing'), !n); } catch (e) { toast(e.message, true); } };
+  $('#wkNow').onclick = async () => { try { const j = await api(withToken({action: 'weeklyNow'}), 60000); toast(j.sent ? t('dg.weeklySent', {n: j.sent}) : t('dg.weeklyNone'), !j.sent); } catch (e) { toast(e.message, true); } };
   $('#icSend').onclick = sendIC;
   $('#dlg').addEventListener('click', e => { if (e.target.id === 'dlg') closeDetail(); });
 }
