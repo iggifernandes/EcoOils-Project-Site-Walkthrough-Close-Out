@@ -1,8 +1,9 @@
-const RELAY_VERSION = '1.0.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const RELAY_VERSION = '1.1.0'; // LINE 1 = the only version line in this file. Bump on every change.
 /* EcoOils Walkthrough - Mail Relay. Deploy this under ptecooilsmentari@gmail.com ONLY.
    It does one job: send an email that the main Walkthrough script hands to it, so the mail goes out
    from this account and uses this account's daily quota. Nothing else is stored or exposed.
    Setup: 1) run setup() once and allow permissions; 2) copy the secret it logs;
+   Optional: add Script Property REPLY_TO (your company email) so every reply is forced there, whatever the main script sends.
    3) Deploy > New deployment > Web app: Execute as Me, access Anyone; 4) copy the /exec URL. */
 
 function setup() {
@@ -23,7 +24,8 @@ function doPost(e) {
     if (MailApp.getRemainingDailyQuota() < 3) return out_({ ok: false, error: 'QUOTA' });
     const m = { to: String(r.to), subject: String(r.subject).slice(0, 250), body: String(r.body || ''), name: String(r.name || 'EcoOils Project HSSE') };
     if (r.cc) m.cc = String(r.cc);
-    if (r.replyTo) m.replyTo = String(r.replyTo);
+    const rt = PropertiesService.getScriptProperties().getProperty('REPLY_TO') || r.replyTo;
+    if (rt) m.replyTo = String(rt);
     if (r.attachments && r.attachments.length) {
       m.attachments = r.attachments.map(function (a) { return Utilities.newBlob(Utilities.base64Decode(a.b64), a.type || 'image/jpeg', a.name || 'photo.jpg'); });
     }
