@@ -1,4 +1,4 @@
-const VERSION = '1.4.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.5.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -596,11 +596,60 @@ function notifyReopen_(o) {
   send_({ to: rc.to.join(','), cc: rc.pm.join(','), subject: subject, body: en + '\n\n----------\n\n' + id + SIG });
 }
 
+/* Who checks a closed finding: the owners plus every active person with the Verify box ticked. */
+function verifiers_() {
+  const out = adminEmails_().slice();
+  users_().forEach(function (u) {
+    const p = String(u.perms || '').split(',');
+    if (p.indexOf('verify') >= 0 && String(u.active) !== 'false' && String(u.active) !== 'FALSE' && out.indexOf(String(u.id).toLowerCase()) < 0) out.push(String(u.id).toLowerCase());
+  });
+  return out;
+}
+function autoDays_() { const v = prop_('AUTO_VERIFY_DAYS'); return v === null || v === '' ? 2 : Number(v) || 0; }
+function autoRisks_() { return (prop_('AUTO_VERIFY_RISKS') || 'Low,Medium').split(',').map(function (x) { return x.trim(); }); }
+
 function notifyClosed_(o) {
-  const to = adminEmails_().join(',');
+  const to = verifiers_().join(',');
   if (!to) return;
-  send_({ to: to, subject: '[Walkthrough ' + o.id + '] Closed by ' + o.ic + ', please verify - ' + o.location,
-    body: o.id + ' (' + o.location + ') was closed by ' + o.closedBy + ' (' + o.ic + ').\nNote: ' + (o.closeNote || '-') + '\n\nOpen the app > Findings to check the before and after photos, then Verify or send it back:\n' + APP_URL });
+  const auto = autoDays_() > 0 && autoRisks_().indexOf(o.risk) >= 0;
+  const rule = auto ? 'If nobody sends it back within ' + autoDays_() + ' day(s), it is verified automatically.' : 'Risk ' + o.risk + ' always needs a person to verify it.';
+  send_({ to: to, subject: '[Walkthrough ' + o.id + '] Closed by ' + o.ic + ', please check - ' + o.location,
+    body: o.id + ' (' + o.location + ') was closed by ' + o.closedBy + ' (' + o.ic + ').\nRisk: ' + o.risk + '\nNote: ' + (o.closeNote || '-') + '\n\nOpen the app > Findings to check the before and after photos, then Verify or send it back:\n' + APP_URL + '\n\n' + rule + ' Anyone on this email can do it; the first person to act settles it.' + SIG });
+}
+
+/* Runs every day from autoDigest. Medium and Low findings closed by the IC are verified automatically once nobody has sent them back
+   for AUTO_VERIFY_DAYS (default 2). High always waits for a person. Set AUTO_VERIFY_DAYS = 0 to switch this off,
+   AUTO_VERIFY_RISKS to change which risks (default Low,Medium). */
+function autoVerify_() {
+  const days = autoDays_(), risks = autoRisks_();
+  if (days <= 0) return { verified: 0, off: true };
+  const cutoff = Date.now() - days * 86400000;
+  let n = 0;
+  withLock_(function () {
+    const sh = tab_(F_NAME, F_COLS);
+    readTab_(F_NAME, F_COLS).forEach(function (f) {
+      if (f.status !== 'Closed by IC' || risks.indexOf(f.risk) < 0 || !f.closedAt) return;
+      const t = new Date(String(f.closedAt)).getTime();
+      if (!t || t > cutoff) return;
+      const row = findRow_(sh, f.id); if (row < 0) return;
+      const o = readRow_(sh, row), now = new Date().toISOString();
+      o.status = 'Verified'; o.verifiedBy = 'Auto-verified (no objection in ' + days + ' day(s))'; o.verifiedAt = now; o.updatedAt = now;
+      writeRow_(sh, row, o, F_COLS); n++;
+    });
+    if (n) clearCache_();
+  });
+  return { verified: n };
+}
+
+/* High-risk findings the IC closed more than a day ago that nobody has checked: one reminder to the people who can verify. */
+function pendingHighReminder_() {
+  const cutoff = Date.now() - 86400000;
+  const w = findings_().filter(function (f) { return f.status === 'Closed by IC' && f.risk === 'High' && f.closedAt && new Date(String(f.closedAt)).getTime() <= cutoff; });
+  if (!w.length) return 0;
+  const to = verifiers_().join(','); if (!to) return 0;
+  send_({ to: to, subject: '[Walkthrough] ' + w.length + ' High-risk close-out(s) waiting for a check',
+    body: w.map(function (f) { return f.id + ' - ' + f.ic + ' - ' + f.location; }).join('\n') + '\n\nOpen the app > Findings, check the photos, then Verify or send back:\n' + APP_URL + '\nHigh risk is never verified automatically.' + SIG });
+  return w.length;
 }
 
 function resend_(r) {
@@ -642,6 +691,7 @@ function digest_(opt) {
 
 /* A daily trigger calls this; it only sends on the days in script property DIGEST_DAYS (default Mon to Sat). */
 function autoDigest() {
+  try { Logger.log('autoVerify ' + JSON.stringify(autoVerify_()) + ' pendingHigh ' + pendingHighReminder_()); } catch (e) { console.error('autoVerify: ' + e); }
   const days = (prop_('DIGEST_DAYS') || 'Mon,Tue,Wed,Thu,Fri,Sat').split(',').map(function (x) { return x.trim(); });
   if (days.indexOf(Utilities.formatDate(new Date(), 'Asia/Jakarta', 'EEE')) < 0) return;
   Logger.log(JSON.stringify(digest_({})));
