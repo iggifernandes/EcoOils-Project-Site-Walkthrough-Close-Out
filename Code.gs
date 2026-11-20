@@ -1,4 +1,4 @@
-const VERSION = '1.3.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.4.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -15,7 +15,9 @@ const C_COLS = ['id', 'ic', 'name', 'email', 'role', 'updatedAt'];
 const U_NAME = 'Users';
 const U_COLS = ['id', 'name', 'perms', 'active', 'updatedAt']; // id = the person's email (lowercase)
 // What a ticked box allows. Owners (ADMIN_EMAILS) always have everything.
-const PERMS = ['view', 'log', 'verify', 'contacts', 'delete', 'users'];
+// view=read, pdf=print/PDF report, csv=CSV export, log=log findings, verify=verify/send back/close/edit, resend=resend email,
+// contactsView=see contacts, contacts=edit contacts + run digest, delete=delete findings, users=manage users.
+const PERMS = ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'contactsView', 'contacts', 'delete', 'users'];
 const DATE_COLS = ['dueDate'];
 const RISKS = ['High', 'Medium', 'Low'];
 const OPEN_STATUS = ['Open', 'Reopened'];
@@ -49,11 +51,11 @@ function doPost(e) {
       case 'verify': return json_(setStatus_(req, requirePerm_(req, 'verify')));
       case 'adminClose': return json_(adminClose_(req, requirePerm_(req, 'verify')));
       case 'delete': requirePerm_(req, 'delete'); return json_(delete_(req));
-      case 'resend': requirePerm_(req, 'verify'); return json_(resend_(req));
-      case 'contactsList': requirePerm_(req, 'contacts'); return json_(contactsList_());
+      case 'resend': requirePerm_(req, 'resend'); return json_(resend_(req));
+      case 'contactsList': requirePerm_(req, ['contactsView', 'contacts']); return json_(contactsList_());
       case 'ctSave': requirePerm_(req, 'contacts'); return json_(ctSave_(req));
       case 'ctDelete': requirePerm_(req, 'contacts'); return json_(ctDelete_(req));
-      case 'digestNow': requirePerm_(req, 'verify'); return json_(digest_({ force: true }));
+      case 'digestNow': requirePerm_(req, 'contacts'); return json_(digest_({ force: true }));
       case 'usersList': requirePerm_(req, 'users'); return json_(usersList_());
       case 'userSave': return json_(userSave_(req, requirePerm_(req, 'users')));
       case 'userDelete': requirePerm_(req, 'users'); return json_(userDelete_(req));
@@ -284,7 +286,8 @@ function requirePerm_(r, perm) {
   if (!e) throw new Error('SESSION');
   const i = userInfo_(e);
   if (!i) throw new Error('SESSION'); // access was removed
-  if (perm && i.perms.indexOf(perm) < 0) throw new Error('You do not have access to this. Ask the HSSE Manager.');
+  const need = perm ? [].concat(perm) : [];
+  if (need.length && !need.some(function (p) { return i.perms.indexOf(p) >= 0; })) throw new Error('You do not have access to this. Ask the HSSE Manager.');
   return e;
 }
 
