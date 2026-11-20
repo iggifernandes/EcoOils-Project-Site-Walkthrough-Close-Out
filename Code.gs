@@ -1,4 +1,4 @@
-const VERSION = '1.1.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.2.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -195,8 +195,7 @@ function requestReset_(r) {
   if (isAdminEmail_(email)) {
     const code = '' + Math.floor(100000 + Math.random() * 900000);
     cache.put('reset_' + email, hash_('code|' + email + '|' + code), 900);
-    MailApp.sendEmail(email, 'EcoOils Walkthrough - PIN reset code',
-      'Your one-time code is ' + code + '. It expires in 15 minutes.\nIf you did not ask for it, ignore this email.');
+    mail_({ to: email, subject: 'EcoOils Walkthrough - PIN reset code', body: 'Your one-time code is ' + code + '. It expires in 15 minutes.\nIf you did not ask for it, ignore this email.', name: 'EcoOils Project HSSE' });
   }
   return { ok: true }; // same answer either way
 }
@@ -458,14 +457,46 @@ function recipients_(ic) {
 /* ---------- email ---------- */
 const SIG = '\n\nThank you / Terima kasih,\nHSSE - EcoOils Project, Sei Mangkei';
 function send_(opt) {
-  if (MailApp.getRemainingDailyQuota() < 3) return false;
   const m = { to: opt.to, subject: opt.subject, body: opt.body, name: 'EcoOils Project HSSE' };
   if (opt.cc) m.cc = opt.cc;
   if (opt.attachments && opt.attachments.length) m.attachments = opt.attachments;
   const reply = prop_('REPLY_TO') || adminEmails_()[0];
   if (reply) m.replyTo = reply;
-  MailApp.sendEmail(m);
+  return mail_(m);
+}
+
+/* One door for every email. If Script Properties RELAY_URL + RELAY_SECRET are set, the mail is
+   handed to the Mail Relay script (owned by ptecooilsmentari@gmail.com) so it is sent from that
+   account and uses ITS daily quota. If they are not set, it sends from this account as before.
+   If the relay fails, nothing is sent from this account unless RELAY_FALLBACK = 1. */
+function mail_(m) {
+  const url = prop_('RELAY_URL'), secret = prop_('RELAY_SECRET');
+  if (url && secret) {
+    try {
+      const payload = { secret: secret, to: m.to, cc: m.cc || '', subject: m.subject, body: m.body, replyTo: m.replyTo || '', name: m.name || '', attachments: [] };
+      (m.attachments || []).forEach(function (b) {
+        payload.attachments.push({ name: b.getName(), type: b.getContentType(), b64: Utilities.base64Encode(b.getBytes()) });
+      });
+      const res = UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', payload: JSON.stringify(payload), muteHttpExceptions: true, followRedirects: true });
+      const j = JSON.parse(res.getContentText() || '{}');
+      if (j && j.ok) return true;
+      console.error('Relay refused: ' + (j && j.error));
+    } catch (e) { console.error('Relay error: ' + e); }
+    if (prop_('RELAY_FALLBACK') !== '1') return false;
+  }
+  if (MailApp.getRemainingDailyQuota() < 3) return false;
+  const l = { to: m.to, subject: m.subject, body: m.body, name: m.name || 'EcoOils Project HSSE' };
+  if (m.cc) l.cc = m.cc;
+  if (m.replyTo) l.replyTo = m.replyTo;
+  if (m.attachments && m.attachments.length) l.attachments = m.attachments;
+  MailApp.sendEmail(l);
   return true;
+}
+
+/* Run from the editor to prove the relay works: sends a test email to the first admin. */
+function testRelay() {
+  const to = adminEmails_()[0];
+  Logger.log(mail_({ to: to, subject: 'Walkthrough relay test', body: 'If this arrived from ptecooilsmentari@gmail.com, the relay works.', name: 'EcoOils Project HSSE' }) ? 'SENT to ' + to : 'NOT SENT - check RELAY_URL / RELAY_SECRET');
 }
 
 function notifyNew_(o) {
