@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#231f20;--mut:#6e6b6c;--line:#dcdcdc;--bg:#f6f6f5;--card:#fff;--green:#44a276;--gdark:#025b40;--yellow:#fbce07;--red:#dd1d21;--navy:#002060;--warn:#8a5a00;--warnbg:#fff4d6;--errbg:#fde8e8;--ok:#1d6b2a;--okbg:#e6f4dc}
+:root{--ink:#231f20;--mut:#6e6b6c;--line:#dcdcdc;--bg:#f6f6f5;--card:#fff;--green:#44a276;--gdark:#025b40;--yellow:#fbce07;--red:#dd1d21;--navy:#002060;--maxw:1180px;--warn:#8a5a00;--warnbg:#fff4d6;--errbg:#fde8e8;--ok:#1d6b2a;--okbg:#e6f4dc}
 *{box-sizing:border-box}[hidden]{display:none!important}
 html,body{margin:0}
 body{font:400 15px/1.45 Jost,system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -22,14 +22,21 @@ header.eh{background:#fff;padding:10px 16px 6px;display:flex;justify-content:spa
 .eh-v{font-size:12px;letter-spacing:.08em;color:var(--mut);line-height:1.2;padding-top:2px;font-variant-numeric:tabular-nums}
 .lang{display:flex}.lang button{background:none;border:0;border-bottom:3px solid transparent;min-width:44px;min-height:40px;padding:0 8px;letter-spacing:.06em;color:var(--mut);cursor:pointer}
 .lang button.on{color:var(--ink);font-weight:600;border-bottom-color:var(--green)}
-.titlebar{padding:18px 16px 4px;max-width:1180px;margin:0 auto}
+.titlebar{padding:18px 16px 4px;max-width:var(--maxw);margin:0 auto}
 h1.pt{margin:0;font:300 24px/1.2 Jost,sans-serif;text-transform:uppercase;letter-spacing:.22em;color:#6e6b6c}
 .sub{color:var(--mut);font-size:13px;letter-spacing:.06em;margin-top:2px}
-nav.tabs{display:flex;gap:2px;max-width:1180px;margin:8px auto 0;padding:0 10px;border-bottom:1px solid var(--line);overflow:auto}
+nav.tabs{display:flex;gap:2px;max-width:var(--maxw);margin:8px auto 0;padding:0 10px;border-bottom:1px solid var(--line);overflow:auto}
 nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;min-height:44px;color:var(--mut);letter-spacing:.06em;cursor:pointer;white-space:nowrap}
 nav.tabs button.on{color:var(--ink);font-weight:600;border-bottom-color:var(--green)}
 nav.tabs .sp{flex:1}
-main{max-width:1180px;margin:0 auto;padding:16px 12px 80px}
+.logbar{max-width:var(--maxw);margin:12px auto 0;padding:0 12px;display:flex;justify-content:flex-end}
+.logbar .btn{min-height:46px;padding:0 22px;font-size:16px;letter-spacing:.06em}
+.logbar .btn.on{box-shadow:0 0 0 3px rgba(68,162,118,.35)}
+@media(max-width:620px){.logbar .btn{width:100%}}
+@media(min-width:1600px){:root{--maxw:1500px}body{font-size:16px}}
+@media(max-width:480px){nav.tabs{padding:0 4px}nav.tabs button{padding:10px 8px;font-size:14px;letter-spacing:.02em}}
+@media(max-width:380px){h1.pt{font-size:19px;letter-spacing:.14em}.card{padding:12px}}
+main{max-width:var(--maxw);margin:0 auto;padding:16px 12px 80px}
 .tab{display:none}.tab.on{display:block}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px}
 .card h2{margin:0 0 10px;font:600 13px/1.2 Jost,sans-serif;text-transform:uppercase;letter-spacing:.14em;color:var(--gdark)}
@@ -167,8 +174,9 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
 <!-- ============ HSSE APP ============ -->
 <section id="vAdm" hidden>
+ <div class="logbar"><button class="btn pri" id="btnNewFinding"><span aria-hidden="true">+</span> <span data-i="tab.log"></span></button></div>
  <nav class="tabs" id="tabs" style="margin-top:0">
-  <button data-t="list" class="on" data-i="tab.list"></button><button data-t="log" data-i="tab.log"></button><button data-t="report" data-i="tab.report"></button><button data-t="contacts" data-i="tab.contacts"></button>
+  <button data-t="list" class="on" data-i="tab.list"></button><button data-t="report" data-i="tab.report"></button><button data-t="contacts" data-i="tab.contacts"></button>
   <span class="sp"></span><button id="btnLogout" data-i="a.logout"></button>
  </nav>
 
@@ -237,7 +245,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
 <script>
 const LOCS = ["ADMINISTRATION BUILDING", "BLOCK 6 B SOUTH EAST CORNER", "BLOCK 6B", "BLOCK 6B EAST GATE", "BOILER / CHIMNEY AREA", "CONTROL ROOM, MCC ROOM", "COOLING TOWER", "DDE TREATMENT PLANT (DTP)", "DIESEL TANK", "DIRTY COOLING TOWER", "DRY AND LIQUID CHEMICAL STORAGE", "ECOOILS WARE HOUSE", "EFFLUENT TREATMENT PLANT (ETP)", "ELECTRICAL SUBSTATION (PLN)", "EXTRACTION PLANT", "FA PLANT", "FIRE WATER PUMP HOUSE", "FIRE WATER TANK", "GSB OFFICE", "HEXANE AND DIESEL RECEIVING BAY", "HEXANE TANK", "KKS OFFICE", "LOADING/UNLOADING AREA (PUMP HOUSE)", "MCC BUILDING", "NORTH-WEST CORNER BLOCK 6A", "OFFICE VEHICLE PARKING AREA", "OIL POLISHING PLANT", "PBS OFFICE", "PIPE RACK", "PRE TREATMENT UNIT (PTU)", "RAW WATER PIT", "SCHEDULED & DOMESTIC WASTE SHED", "SECURITY BUILDING", "SECURITY POST", "SILO", "TANK FARM", "TRUCK PARKING AREA", "VAPOR ABSORPTION MACHINE (VAM) SHED", "WAREHOUSE", "WAREHOUSE BLOCK B", "WASTE WATER TREATMENT PLANT (WWTP)", "WATER TANK", "WATER TREATMENT PLANT (WTP) AND WATER TANKS", "WEIGHT BRIDGE", "WEN OFFICE", "WORKSHOP AREA"];
-const APP_VERSION = '1.2.0';
+const APP_VERSION = '1.2.1';
 const API_URL = 'https://script.google.com/macros/s/AKfycbydZ7RylbsTJqJdq_zZEXees36X6u5wT7U0z59Oh1caOwZltMX8fp4xOAFRUwzW9oDO/exec';
 const COMPANIES = ['PT. ECOOILS', 'PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS', 'PT. SOS'];
 const OTHER_CO = 'OTHER (TYPE YOUR COMPANY NAME)';
@@ -588,13 +596,14 @@ async function sendIC() {
 /* ---------- boot ---------- */
 function setTab(n) {
   if (!$('#tab-' + n)) n = 'list';
-  $$('#tabs button[data-t]').forEach(x => x.classList.toggle('on', x.dataset.t === n)); $$('.tab').forEach(s => s.classList.toggle('on', s.id === 'tab-' + n));
+  $$('#tabs button[data-t]').forEach(x => x.classList.toggle('on', x.dataset.t === n)); $('#btnNewFinding').classList.toggle('on', n === 'log'); $$('.tab').forEach(s => s.classList.toggle('on', s.id === 'tab-' + n));
   try { localStorage.setItem('wt_tab', n); } catch (e) {}
 }
 function bind() {
   $$('#lang button').forEach(b => b.onclick = () => { LANG = b.dataset.l; try { localStorage.setItem('wt_lang', LANG); } catch (e) {} applyLang(); renderPB('log'); renderPB('ic'); renderPB('onb'); });
   $('#apiSave').onclick = () => { const v = $('#apiUrl').value.trim(); if (/^https:\/\/script\.google\.com\/macros\/s\/[^ ]+\/exec$/.test(v)) { try { localStorage.setItem('wt_api', v); } catch (e) {} location.reload(); } else toast('URL?', true); };
   $$('#tabs button[data-t]').forEach(b => b.onclick = () => setTab(b.dataset.t));
+  $('#btnNewFinding').onclick = () => { setTab('log'); window.scrollTo({top: 0, behavior: 'smooth'}); };
   $('#btnLogout').onclick = async () => { try { await api({action: 'logout', token: TOKEN, device: DEVICE}); } catch (e) {} clearDevice(); logoutUI(); };
   $('#btnLogin').onclick = doLogin; $('#l_pin').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
   $('#btnForgot').onclick = () => { $('#loginBox').hidden = true; $('#resetBox').hidden = false; };
