@@ -1,4 +1,4 @@
-const VERSION = '1.6.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.6.1'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -317,7 +317,7 @@ function userSave_(r, caller) {
     clearCache_();
     if (active === 'false') revokeDevices_(email, '');
     let mailed = false;
-    if (isNew && active === 'true') {
+    if (isNew && active === 'true' && prop_('INVITE_EMAIL') === '1') { // off by default: saves relay quota. Tell people the link yourself.
       mailed = mail_({ to: email, subject: 'Site Walkthrough Close-Out - you now have access / Anda kini memiliki akses',
         body: 'Hello ' + name + ',\n\nYou have been given access to the Site Walkthrough Close-Out app.\n1. Open ' + APP_URL + '\n2. Tap "Forgot PIN / set PIN", enter this email address, and set your own 6-digit PIN with the code we email you.\n3. Sign in.' +
           '\n\nHalo ' + name + ',\n\nAnda telah diberi akses ke aplikasi Site Walkthrough Close-Out. Buka ' + APP_URL + ', ketuk "Forgot PIN / set PIN", masukkan email ini, atur PIN 6 digit Anda dengan kode yang kami kirim, lalu masuk.' + SIG, name: 'EcoOils Project HSSE', replyTo: prop_('REPLY_TO') || adminEmails_()[0] });
