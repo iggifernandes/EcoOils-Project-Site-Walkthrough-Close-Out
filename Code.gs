@@ -1,4 +1,4 @@
-const VERSION = '1.5.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.5.1'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -502,7 +502,7 @@ function contactsList_() {
 function ctSave_(r) {
   const c = r.contact || {}, email = s_(c.email, 120).toLowerCase(), ic = s_(c.ic, 60).toUpperCase(), name = s_(c.name, 120);
   if (!ic || !name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Error('Company, name and a valid email are required');
-  const role = c.role === 'PM' ? 'PM' : 'HSSE';
+  const role = c.role === 'PM' ? 'PM' : c.role === 'ADMIN' ? 'ADMIN' : 'HSSE';
   return withLock_(function () {
     const sh = tab_(C_NAME, C_COLS), row = c.id ? findRow_(sh, c.id) : -1;
     const o = { id: row > 0 ? c.id : 'CT-' + Utilities.getUuid().slice(0, 6).toUpperCase(), ic: ic, name: name, email: email, role: role, updatedAt: new Date().toISOString() };
@@ -521,11 +521,13 @@ function ctDelete_(r) {
   });
 }
 
+/* Who is emailed for a company. Only contacts with role HSSE (HSSE Manager and Site Leads) are emailed.
+   ADMIN contacts are kept on file but never emailed. PM contacts are copied only if Script Property CC_PM = 1 (default: off). */
 function recipients_(ic) {
   const cs = contacts_().filter(function (c) { return String(c.ic).toUpperCase() === String(ic).toUpperCase() && c.email; });
-  const hsse = cs.filter(function (c) { return c.role !== 'PM'; }).map(function (c) { return c.email; });
-  const pm = cs.filter(function (c) { return c.role === 'PM'; }).map(function (c) { return c.email; });
-  return { to: hsse.length ? hsse : pm, pm: hsse.length ? pm : [], names: cs.map(function (c) { return c.name; }) };
+  const hs = cs.filter(function (c) { return c.role !== 'PM' && c.role !== 'ADMIN'; });
+  const pm = prop_('CC_PM') === '1' ? cs.filter(function (c) { return c.role === 'PM'; }) : [];
+  return { to: hs.map(function (c) { return c.email; }), pm: pm.map(function (c) { return c.email; }), names: hs.map(function (c) { return c.name; }) };
 }
 
 /* ---------- email ---------- */
