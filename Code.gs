@@ -1,4 +1,4 @@
-const VERSION = '1.2.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.3.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -12,6 +12,10 @@ const F_COLS = ['id', 'createdAt', 'ic', 'location', 'category', 'risk', 'descri
   'reopenCount', 'loggedBy', 'updatedAt'];
 const C_NAME = 'Contacts';
 const C_COLS = ['id', 'ic', 'name', 'email', 'role', 'updatedAt'];
+const U_NAME = 'Users';
+const U_COLS = ['id', 'name', 'perms', 'active', 'updatedAt']; // id = the person's email (lowercase)
+// What a ticked box allows. Owners (ADMIN_EMAILS) always have everything.
+const PERMS = ['view', 'log', 'verify', 'contacts', 'delete', 'users'];
 const DATE_COLS = ['dueDate'];
 const RISKS = ['High', 'Medium', 'Low'];
 const OPEN_STATUS = ['Open', 'Reopened'];
@@ -37,18 +41,22 @@ function doPost(e) {
       case 'logout': CacheService.getScriptCache().remove('sess_' + req.token); if (req.device) revokeDevices_('', s_(req.device, 100)); return json_({ ok: true });
       case 'icView': return json_(icView_(req));
       case 'icClose': return json_(icClose_(req));
-      case 'list': requireAdmin_(req); return json_(list_());
-      case 'photos': requireAdmin_(req); return json_(photos_(req));
-      case 'create': return json_(create_(req, requireAdmin_(req)));
-      case 'update': requireAdmin_(req); return json_(update_(req));
-      case 'verify': return json_(setStatus_(req, requireAdmin_(req)));
-      case 'adminClose': return json_(adminClose_(req, requireAdmin_(req)));
-      case 'delete': requireAdmin_(req); return json_(delete_(req));
-      case 'resend': requireAdmin_(req); return json_(resend_(req));
-      case 'contactsList': requireAdmin_(req); return json_(contactsList_());
-      case 'ctSave': requireAdmin_(req); return json_(ctSave_(req));
-      case 'ctDelete': requireAdmin_(req); return json_(ctDelete_(req));
-      case 'digestNow': requireAdmin_(req); return json_(digest_({ force: true }));
+      case 'me': return json_(me_(req));
+      case 'list': requirePerm_(req, 'view'); return json_(list_());
+      case 'photos': requirePerm_(req, 'view'); return json_(photos_(req));
+      case 'create': return json_(create_(req, requirePerm_(req, 'log')));
+      case 'update': requirePerm_(req, 'verify'); return json_(update_(req));
+      case 'verify': return json_(setStatus_(req, requirePerm_(req, 'verify')));
+      case 'adminClose': return json_(adminClose_(req, requirePerm_(req, 'verify')));
+      case 'delete': requirePerm_(req, 'delete'); return json_(delete_(req));
+      case 'resend': requirePerm_(req, 'verify'); return json_(resend_(req));
+      case 'contactsList': requirePerm_(req, 'contacts'); return json_(contactsList_());
+      case 'ctSave': requirePerm_(req, 'contacts'); return json_(ctSave_(req));
+      case 'ctDelete': requirePerm_(req, 'contacts'); return json_(ctDelete_(req));
+      case 'digestNow': requirePerm_(req, 'verify'); return json_(digest_({ force: true }));
+      case 'usersList': requirePerm_(req, 'users'); return json_(usersList_());
+      case 'userSave': return json_(userSave_(req, requirePerm_(req, 'users')));
+      case 'userDelete': requirePerm_(req, 'users'); return json_(userDelete_(req));
       default: return json_({ ok: false, error: 'Unknown action' });
     }
   } catch (err) {
@@ -88,7 +96,7 @@ function json_(obj) {
 /* ---------- sheet helpers ---------- */
 function prop_(k) { return PropertiesService.getScriptProperties().getProperty(k); }
 function s_(v, max) { return String(v == null ? '' : v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').trim().slice(0, max || 2000); }
-function clearCache_() { CacheService.getScriptCache().removeAll(['findings', 'contacts']); }
+function clearCache_() { CacheService.getScriptCache().removeAll(['findings', 'contacts', 'users']); }
 
 function tab_(name, cols) {
   const ss = SpreadsheetApp.openById(prop_('SHEET_ID'));
@@ -186,13 +194,25 @@ function hash_(s) {
 }
 function adminEmails_() { return (prop_('ADMIN_EMAILS') || '').toLowerCase().split(',').map(function (x) { return x.trim(); }).filter(Boolean); }
 function isAdminEmail_(e) { return adminEmails_().indexOf(String(e).toLowerCase().trim()) >= 0; }
+function users_() { return cached_('users', 300, function () { return readTab_(U_NAME, U_COLS); }); }
+// Who may sign in, and what they may do. null = no access. Looked up on every call, so a change takes effect at once.
+function userInfo_(email) {
+  email = String(email || '').toLowerCase().trim();
+  if (!email) return null;
+  if (isAdminEmail_(email)) return { email: email, admin: true, perms: PERMS.slice(), name: '' };
+  const u = users_().filter(function (x) { return String(x.id).toLowerCase() === email && String(x.active) !== 'false' && String(x.active) !== 'FALSE'; })[0];
+  if (!u) return null;
+  const p = String(u.perms || '').split(',').map(function (x) { return x.trim(); }).filter(function (x) { return PERMS.indexOf(x) >= 0; });
+  return { email: email, admin: false, perms: p, name: u.name || '' };
+}
+function me_(r) { const i = userInfo_(requirePerm_(r, '')); if (!i) throw new Error('SESSION'); return { ok: true, email: i.email, admin: i.admin, perms: i.perms, name: i.name }; }
 
 function requestReset_(r) {
   const email = s_(r.email, 120).toLowerCase(), cache = CacheService.getScriptCache();
   const rk = 'resetrate_' + email, n = Number(cache.get(rk) || 0);
   if (n >= 5) return { ok: true };
   cache.put(rk, String(n + 1), 3600);
-  if (isAdminEmail_(email)) {
+  if (userInfo_(email)) {
     const code = '' + Math.floor(100000 + Math.random() * 900000);
     cache.put('reset_' + email, hash_('code|' + email + '|' + code), 900);
     mail_({ to: email, subject: 'EcoOils Walkthrough - PIN reset code', body: 'Your one-time code is ' + code + '. It expires in 15 minutes.\nIf you did not ask for it, ignore this email.', name: 'EcoOils Project HSSE' });
@@ -221,12 +241,13 @@ function login_(r) {
   const fk = 'fail_' + email, fails = Number(cache.get(fk) || 0);
   if (fails >= 5) throw new Error('Too many attempts. Wait 15 minutes.');
   const stored = prop_('PIN_' + email);
-  if (!isAdminEmail_(email) || !stored) { cache.put(fk, String(fails + 1), 900); throw new Error('No PIN set yet or wrong details. Use "Forgot PIN / set PIN".'); }
+  if (!userInfo_(email) || !stored) { cache.put(fk, String(fails + 1), 900); throw new Error('No PIN set yet or wrong details. Use "Forgot PIN / set PIN".'); }
   if (stored !== hash_('pin|' + email + '|' + r.pin)) { cache.put(fk, String(fails + 1), 900); throw new Error('Wrong PIN'); }
   cache.remove(fk);
   const token = Utilities.getUuid() + Utilities.getUuid();
   cache.put('sess_' + token, email, 21600);
-  return { ok: true, token: token, email: email, device: r.remember ? newDevice_(email) : '' };
+  const inf = userInfo_(email);
+  return { ok: true, token: token, email: email, perms: inf.perms, admin: inf.admin, name: inf.name, device: r.remember ? newDevice_(email) : '' };
 }
 
 /* Remembered devices: a random token is kept (hashed) in Script Properties for DEVICE_DAYS, so the browser can ask for a new session without the PIN. */
@@ -250,16 +271,66 @@ function resume_(r) {
   const key = 'DEV_' + hash_('dev|' + s_(r.device, 100)), v = prop_(key);
   if (!v) throw new Error('SESSION');
   const parts = v.split('|'), email = parts[0];
-  if (Number(parts[1]) < Date.now() || !isAdminEmail_(email)) { PropertiesService.getScriptProperties().deleteProperty(key); throw new Error('SESSION'); }
+  if (Number(parts[1]) < Date.now() || !userInfo_(email)) { PropertiesService.getScriptProperties().deleteProperty(key); throw new Error('SESSION'); }
   const token = Utilities.getUuid() + Utilities.getUuid();
   CacheService.getScriptCache().put('sess_' + token, email, 21600);
-  return { ok: true, token: token, email: email };
+  const inf = userInfo_(email);
+  return { ok: true, token: token, email: email, perms: inf.perms, admin: inf.admin, name: inf.name };
 }
 
-function requireAdmin_(r) {
+// Returns the signed-in email. With a perm name, also checks that the person has that box ticked ('' = just signed in).
+function requirePerm_(r, perm) {
   const e = r.token && CacheService.getScriptCache().get('sess_' + r.token);
   if (!e) throw new Error('SESSION');
+  const i = userInfo_(e);
+  if (!i) throw new Error('SESSION'); // access was removed
+  if (perm && i.perms.indexOf(perm) < 0) throw new Error('You do not have access to this. Ask the HSSE Manager.');
   return e;
+}
+
+/* ---------- users and what they may do (Users tab) ---------- */
+function usersList_() {
+  return { ok: true, perms: PERMS, owners: adminEmails_(), users: users_().map(function (u) {
+    return { email: String(u.id), name: u.name, perms: String(u.perms || '').split(',').filter(Boolean), active: String(u.active) !== 'false' && String(u.active) !== 'FALSE' };
+  }) };
+}
+
+function userSave_(r, caller) {
+  const u = r.user || {}, email = s_(u.email, 120).toLowerCase(), name = s_(u.name, 120);
+  if (!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Error('Name and a valid email are required');
+  if (isAdminEmail_(email)) throw new Error('This email is an owner (ADMIN_EMAILS) and already has full access.');
+  const me = userInfo_(caller);
+  let perms = (u.perms || []).filter(function (x) { return PERMS.indexOf(x) >= 0; });
+  if (perms.indexOf('users') >= 0 && !me.admin) throw new Error('Only an owner can give the Users access.');
+  const active = u.active === false ? 'false' : 'true';
+  return withLock_(function () {
+    const sh = tab_(U_NAME, U_COLS), row = findRow_(sh, email), isNew = row < 0;
+    const old = isNew ? null : sh.getRange(row, 1, 1, U_COLS.length).getValues()[0];
+    if (!isNew && !me.admin && String(old[2]).split(',').indexOf('users') >= 0) perms = perms.concat(['users']).filter(function (x, i, a) { return a.indexOf(x) === i; }); // a non-owner cannot strip the Users access
+    const o = { id: email, name: name, perms: perms.join(','), active: active, updatedAt: new Date().toISOString() };
+    if (isNew) appendRows_(sh, [U_COLS.map(function (k) { return o[k]; })]); else writeRow_(sh, row, o, U_COLS);
+    clearCache_();
+    if (active === 'false') revokeDevices_(email, '');
+    let mailed = false;
+    if (isNew && active === 'true') {
+      mailed = mail_({ to: email, subject: 'Site Walkthrough Close-Out - you now have access / Anda kini memiliki akses',
+        body: 'Hello ' + name + ',\n\nYou have been given access to the Site Walkthrough Close-Out app.\n1. Open ' + APP_URL + '\n2. Tap "Forgot PIN / set PIN", enter this email address, and set your own 6-digit PIN with the code we email you.\n3. Sign in.' +
+          '\n\nHalo ' + name + ',\n\nAnda telah diberi akses ke aplikasi Site Walkthrough Close-Out. Buka ' + APP_URL + ', ketuk "Forgot PIN / set PIN", masukkan email ini, atur PIN 6 digit Anda dengan kode yang kami kirim, lalu masuk.' + SIG, name: 'EcoOils Project HSSE', replyTo: prop_('REPLY_TO') || adminEmails_()[0] });
+    }
+    return { ok: true, mailed: mailed };
+  });
+}
+
+function userDelete_(r) {
+  const email = s_(r.email, 120).toLowerCase();
+  return withLock_(function () {
+    const sh = tab_(U_NAME, U_COLS), row = findRow_(sh, email);
+    if (row > 0) sh.deleteRow(row);
+    clearCache_();
+    PropertiesService.getScriptProperties().deleteProperty('PIN_' + email);
+    revokeDevices_(email, '');
+    return { ok: true };
+  });
 }
 
 /* ---------- close-out link token (derived from the finding id and the secret salt) ---------- */
@@ -587,7 +658,7 @@ function setup() {
   const p = PropertiesService.getScriptProperties();
   const ss = p.getProperty('SHEET_ID') ? SpreadsheetApp.openById(p.getProperty('SHEET_ID')) : SpreadsheetApp.create('EcoOils Project - Site Walkthrough');
   p.setProperty('SHEET_ID', ss.getId());
-  tab_(F_NAME, F_COLS); tab_(C_NAME, C_COLS);
+  tab_(F_NAME, F_COLS); tab_(C_NAME, C_COLS); tab_(U_NAME, U_COLS);
   if (!p.getProperty('FOLDER_ID')) p.setProperty('FOLDER_ID', DriveApp.createFolder('EcoOils Project - Walkthrough photos').getId());
   if (!p.getProperty('ADMIN_EMAILS')) p.setProperty('ADMIN_EMAILS', 'Ignatius.Ambrosio@ecooils.com.my');
   if (!p.getProperty('PIN_SALT')) p.setProperty('PIN_SALT', Utilities.getUuid());

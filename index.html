@@ -32,6 +32,12 @@ nav.tabs .sp{flex:1}
 .logbar{max-width:var(--maxw);margin:12px auto 0;padding:0 12px;display:flex;justify-content:flex-end}
 .logbar .btn{min-height:46px;padding:0 22px;font-size:16px;letter-spacing:.06em}
 .logbar .btn.on{box-shadow:0 0 0 3px rgba(68,162,118,.35)}
+.perms{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px;margin-top:6px}
+.perms label,label.ck{display:flex;gap:10px;align-items:flex-start;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer}
+.perms input,label.ck input{width:20px;height:20px;margin-top:1px;flex:none;accent-color:var(--green)}
+.perms small{display:block;color:var(--mut)}
+.ur{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);flex-wrap:wrap}.ur:first-child{border-top:0}
+.ur .tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.ur .tags span{background:var(--okbg);color:var(--ok);border-radius:10px;padding:1px 9px;font-size:12px}.ur.off{opacity:.55}
 @media(max-width:620px){.logbar .btn{width:100%}}
 @media(min-width:1600px){:root{--maxw:1500px}body{font-size:16px}}
 @media(max-width:480px){nav.tabs{padding:0 4px}nav.tabs button{padding:10px 8px;font-size:14px;letter-spacing:.02em}}
@@ -176,7 +182,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 <section id="vAdm" hidden>
  <div class="logbar"><button class="btn pri" id="btnNewFinding"><span aria-hidden="true">+</span> <span data-i="tab.log"></span></button></div>
  <nav class="tabs" id="tabs" style="margin-top:0">
-  <button data-t="list" class="on" data-i="tab.list"></button><button data-t="report" data-i="tab.report"></button><button data-t="contacts" data-i="tab.contacts"></button>
+  <button data-t="list" class="on" data-i="tab.list"></button><button data-t="report" data-i="tab.report"></button><button data-t="contacts" data-i="tab.contacts"></button><button data-t="users" data-i="tab.users"></button>
   <span class="sp"></span><button id="btnLogout" data-i="a.logout"></button>
  </nav>
 
@@ -218,6 +224,20 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
   <div id="reportOut"></div>
  </section>
 
+ <section id="tab-users" class="tab">
+  <div class="card"><h2 data-i="us.title"></h2>
+   <p class="hint" data-i="us.help"></p>
+   <div class="grid">
+    <label class="f"><span><span data-i="ct.name"></span> <b>*</b></span><input id="u_name" maxlength="120"></label>
+    <label class="f"><span><span data-i="a.email"></span> <b>*</b></span><input id="u_email" type="email" maxlength="120"></label>
+    <div class="w"><div class="hint" data-i="us.can"></div><div id="u_perms" class="perms"></div></div>
+    <label class="w ck"><input type="checkbox" id="u_active" checked> <span data-i="us.active"></span></label>
+   </div>
+   <div class="row end" style="margin-top:10px"><button class="btn" id="uCancel" data-i="btn.cancel" hidden></button><button class="btn pri" id="uSave" data-i="btn.save"></button></div>
+  </div>
+  <div id="uList"></div>
+ </section>
+
  <section id="tab-contacts" class="tab">
   <div class="card"><h2 data-i="ct.title"></h2>
    <p class="hint" data-i="ct.help"></p>
@@ -245,7 +265,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
 <script>
 const LOCS = ["ADMINISTRATION BUILDING", "BLOCK 6 B SOUTH EAST CORNER", "BLOCK 6B", "BLOCK 6B EAST GATE", "BOILER / CHIMNEY AREA", "CONTROL ROOM, MCC ROOM", "COOLING TOWER", "DDE TREATMENT PLANT (DTP)", "DIESEL TANK", "DIRTY COOLING TOWER", "DRY AND LIQUID CHEMICAL STORAGE", "ECOOILS WARE HOUSE", "EFFLUENT TREATMENT PLANT (ETP)", "ELECTRICAL SUBSTATION (PLN)", "EXTRACTION PLANT", "FA PLANT", "FIRE WATER PUMP HOUSE", "FIRE WATER TANK", "GSB OFFICE", "HEXANE AND DIESEL RECEIVING BAY", "HEXANE TANK", "KKS OFFICE", "LOADING/UNLOADING AREA (PUMP HOUSE)", "MCC BUILDING", "NORTH-WEST CORNER BLOCK 6A", "OFFICE VEHICLE PARKING AREA", "OIL POLISHING PLANT", "PBS OFFICE", "PIPE RACK", "PRE TREATMENT UNIT (PTU)", "RAW WATER PIT", "SCHEDULED & DOMESTIC WASTE SHED", "SECURITY BUILDING", "SECURITY POST", "SILO", "TANK FARM", "TRUCK PARKING AREA", "VAPOR ABSORPTION MACHINE (VAM) SHED", "WAREHOUSE", "WAREHOUSE BLOCK B", "WASTE WATER TREATMENT PLANT (WWTP)", "WATER TANK", "WATER TREATMENT PLANT (WTP) AND WATER TANKS", "WEIGHT BRIDGE", "WEN OFFICE", "WORKSHOP AREA"];
-const APP_VERSION = '1.2.1';
+const APP_VERSION = '1.3.0';
 const API_URL = 'https://script.google.com/macros/s/AKfycbydZ7RylbsTJqJdq_zZEXees36X6u5wT7U0z59Oh1caOwZltMX8fp4xOAFRUwzW9oDO/exec';
 const COMPANIES = ['PT. ECOOILS', 'PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS', 'PT. SOS'];
 const OTHER_CO = 'OTHER (TYPE YOUR COMPANY NAME)';
@@ -267,7 +287,21 @@ const D = {
 'app.title':['Site walkthrough close-out','Penutupan temuan walkthrough lokasi','Penutupan dapatan walkthrough tapak'],
 'api.missing':['The app is not connected to its backend yet. Paste the Apps Script web app address:','Aplikasi belum terhubung ke backend. Tempel alamat web app Apps Script:','Aplikasi belum disambung ke backend. Tampal alamat web app Apps Script:'],
 'btn.save':['Save','Simpan','Simpan'],'btn.cancel':['Cancel','Batal','Batal'],'btn.close':['Close','Tutup','Tutup'],'btn.edit':['Edit','Ubah','Ubah'],'btn.delete':['Delete','Hapus','Padam'],
-'tab.list':['Findings','Temuan','Dapatan'],'tab.log':['Log a finding','Catat temuan','Catat dapatan'],'tab.report':['Report','Laporan','Laporan'],'tab.contacts':['Contacts','Kontak','Kenalan'],
+'tab.list':['Findings','Temuan','Dapatan'],'tab.log':['Log a finding','Catat temuan','Catat dapatan'],'tab.users':['Users','Pengguna','Pengguna'],
+'us.title':['Who can use this app','Siapa yang boleh memakai aplikasi ini','Siapa yang boleh menggunakan aplikasi ini'],
+'us.help':['Add each EcoOils person and tick what they may do. They sign in with their own email and a PIN they set themselves (Forgot PIN). Changes apply at once.','Tambahkan setiap orang EcoOils dan centang apa yang boleh dilakukan. Mereka masuk dengan email sendiri dan PIN yang mereka atur sendiri (Forgot PIN). Perubahan langsung berlaku.','Tambah setiap orang EcoOils dan tandakan apa yang dibenarkan. Mereka log masuk dengan e-mel sendiri dan PIN yang mereka tetapkan sendiri (Forgot PIN). Perubahan berkuat kuasa serta-merta.'],
+'us.can':['This person can:','Orang ini boleh:','Orang ini boleh:'],
+'us.active':['Access is on (untick to switch off without deleting)','Akses aktif (hapus centang untuk mematikan tanpa menghapus)','Akses aktif (nyahtanda untuk matikan tanpa padam)'],
+'us.owner':['Owner - full access','Pemilik - akses penuh','Pemilik - akses penuh'],'us.off':['switched off','dimatikan','dimatikan'],'us.none':['No one added yet.','Belum ada yang ditambahkan.','Belum ada yang ditambah.'],
+'us.invited':['Saved. An email with the sign-in steps was sent.','Tersimpan. Email langkah masuk telah dikirim.','Disimpan. E-mel langkah log masuk telah dihantar.'],
+'us.confirmDel':['Remove this person? Their access and PIN are deleted.','Hapus orang ini? Akses dan PIN mereka dihapus.','Padam orang ini? Akses dan PIN mereka dipadam.'],
+'p.view':['See findings, photos and the report','Lihat temuan, foto dan laporan','Lihat dapatan, foto dan laporan'],
+'p.log':['Log new findings (upload before photos)','Catat temuan baru (unggah foto sebelum)','Log dapatan baharu (muat naik foto sebelum)'],
+'p.verify':['Verify, send back, close, edit and resend','Verifikasi, kembalikan, tutup, ubah dan kirim ulang','Sahkan, hantar semula, tutup, ubah dan hantar ulang'],
+'p.contacts':['Manage contractor contacts and the daily digest','Kelola kontak kontraktor dan ringkasan harian','Urus kenalan kontraktor dan ringkasan harian'],
+'p.delete':['Delete findings','Hapus temuan','Padam dapatan'],
+'p.users':['Manage users (only an owner can give this)','Kelola pengguna (hanya pemilik yang dapat memberi ini)','Urus pengguna (hanya pemilik boleh memberi ini)'],
+'tab.report':['Report','Laporan','Laporan'],'tab.contacts':['Contacts','Kontak','Kenalan'],
 'a.login':['HSSE sign-in','Masuk HSSE','Log masuk HSSE'],'a.email':['Email','Email','Emel'],'a.pin':['PIN (6 digits)','PIN (6 digit)','PIN (6 digit)'],'a.remember':['Keep me signed in on this device for 60 days','Biarkan saya tetap masuk di perangkat ini selama 60 hari','Kekalkan saya log masuk pada peranti ini selama 60 hari'],'a.loginBtn':['Sign in','Masuk','Log masuk'],
 'a.forgot':['Forgot PIN / set PIN','Lupa PIN / atur PIN','Lupa PIN / tetapkan PIN'],'a.resetInfo':['We email a 6-digit code to your HSSE address. Enter it with a new 6-digit PIN.','Kami mengirim kode 6 digit ke email HSSE Anda. Masukkan kode itu dengan PIN baru 6 digit.','Kami menghantar kod 6 digit ke emel HSSE anda. Masukkan kod itu bersama PIN baharu 6 digit.'],
 'a.sendCode':['Email me a code','Kirim kode ke email saya','Hantar kod ke emel saya'],'a.code':['6-digit code from the email','Kode 6 digit dari email','Kod 6 digit daripada emel'],'a.newPin':['New PIN (6 digits)','PIN baru (6 digit)','PIN baharu (6 digit)'],
@@ -441,7 +475,24 @@ async function doLogin() {
     if (j.device) { DEVICE = j.device; try { localStorage.setItem('wt_dev', DEVICE); } catch (e) {} } else clearDevice(); $('#l_pin').value = ''; await enterAdmin(); }
   catch (e) { toast(e.message, true); }
 }
-async function enterAdmin() { show('adm'); try { setTab(localStorage.getItem('wt_tab') || 'list'); } catch (e) {} await Promise.all([loadList(), loadContacts()]); }
+let ME = {perms: [], admin: false};
+const can = p => ME.perms.indexOf(p) >= 0;
+function applyPerms() {
+  const need = {list: 'view', report: 'view', contacts: 'contacts', users: 'users'};
+  $$('#tabs button[data-t]').forEach(b => b.hidden = !can(need[b.dataset.t]));
+  $('#btnNewFinding').hidden = !can('log');
+}
+function firstTab() { return can('view') ? 'list' : can('log') ? 'log' : can('contacts') ? 'contacts' : can('users') ? 'users' : 'none'; }
+async function enterAdmin() {
+  show('adm');
+  try { const m = await api(withToken({action: 'me'})); ME = {perms: m.perms || [], admin: !!m.admin}; } catch (e) { if (e.message === t('e.session')) throw e; ME = e.message === 'Unknown action' ? {perms: ['view', 'log', 'verify', 'contacts', 'delete'], admin: true} : {perms: [], admin: false}; } // an older backend only had owners
+  applyPerms(); renderPerms(['view']);
+  let want = 'list'; try { want = localStorage.getItem('wt_tab') || 'list'; } catch (e) {}
+  const need = {list: 'view', report: 'view', contacts: 'contacts', users: 'users', log: 'log'};
+  setTab(need[want] && can(need[want]) ? want : firstTab());
+  const jobs = []; if (can('view')) jobs.push(loadList()); if (can('contacts')) jobs.push(loadContacts()); if (can('users')) jobs.push(loadUsers());
+  await Promise.all(jobs);
+}
 
 /* ---------- findings list ---------- */
 async function loadList() { const j = await api(withToken({action: 'list'})); ROWS = j.rows; TODAY = j.today || TODAY; fillSelects(); renderList(); }
@@ -484,7 +535,8 @@ async function openDetail(id) {
   if (isOpen(r)) acts += '<div class="card"><div class="row"><button class="btn" id="xResend">' + esc(t('x.resend')) + '</button><button class="btn" id="xCopy">' + esc(t('x.copy')) + '</button><a class="btn" id="xWa" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">' + esc(t('x.wa')) + '</a></div></div>' +
     '<div class="card"><h2>' + esc(t('x.update')) + '</h2><div class="row"><select id="xRisk" style="width:auto">' + RISKS.map(k => '<option value="' + k + '"' + (k === r.risk ? ' selected' : '') + '>' + esc(t('r.' + k)) + '</option>').join('') + '</select><input type="date" id="xDue2" style="width:auto" value="' + esc(String(r.dueDate).slice(0, 10)) + '"><button class="btn" id="xUpd">' + esc(t('btn.save')) + '</button></div></div>' +
     '<div class="card"><h2>' + esc(t('x.onBehalf')) + '</h2><p class="hint">' + esc(t('x.onBehalfHelp')) + '</p><label class="f"><span>' + esc(t('x.byWho')) + '</span><input id="xBy" maxlength="120"></label><label class="f" style="margin-top:8px"><span>' + esc(t('ic.note')) + '</span><textarea id="xCn" maxlength="1000"></textarea></label><div class="hint" style="margin-top:8px">' + esc(t('x.afterPh')) + '</div><div id="pb_onb"></div><div class="row end" style="margin-top:10px"><button class="btn pri" id="xOnb">' + esc(t('x.saveClose')) + '</button></div></div>';
-  inn.innerHTML = '<div class="row" style="justify-content:flex-end"><button class="btn" id="xClose">' + esc(t('btn.close')) + '</button></div>' + head + '<dl class="kv">' + kv.map(p => '<dt>' + esc(p[0]) + '</dt><dd>' + (String(p[1]).startsWith('<span class="risk') ? p[1] : esc(p[1])) + '</dd>').join('') + '</dl><div class="pair" id="dPair"><div class="hint">…</div></div><div style="height:12px"></div>' + acts + '<div class="row end"><button class="btn danger" id="xDel">' + esc(t('btn.delete')) + '</button></div>';
+  if (!can('verify')) acts = '';
+  inn.innerHTML = '<div class="row" style="justify-content:flex-end"><button class="btn" id="xClose">' + esc(t('btn.close')) + '</button></div>' + head + '<dl class="kv">' + kv.map(p => '<dt>' + esc(p[0]) + '</dt><dd>' + (String(p[1]).startsWith('<span class="risk') ? p[1] : esc(p[1])) + '</dd>').join('') + '</dl><div class="pair" id="dPair"><div class="hint">…</div></div><div style="height:12px"></div>' + acts + (can('delete') ? '<div class="row end"><button class="btn danger" id="xDel">' + esc(t('btn.delete')) + '</button></div>' : '');
   $('#xClose').onclick = closeDetail;
   PB.onb = []; renderPB('onb');
   const wire = (sel, fn) => { const e = $(sel); if (e) e.onclick = fn; };
@@ -518,7 +570,7 @@ async function submitLog() {
     const dn = $('#logDone'); dn.hidden = false;
     dn.innerHTML = '<h2>' + esc(t('log.done')) + ': ' + esc(j.id) + '</h2><div class="box ' + (j.mail.sent ? 'ok' : 'warn') + '">' + esc(msg) + '</div><div class="hint">' + esc(t('log.link')) + '</div><input readonly value="' + esc(j.link) + '" onclick="this.select()"><div class="row" style="margin-top:8px"><a class="btn" target="_blank" rel="noopener" style="text-decoration:none" href="https://wa.me/?text=' + encodeURIComponent('[' + j.id + '] ' + j.link) + '">' + esc(t('x.wa')) + '</a><button class="btn pri" id="logAgain">' + esc(t('log.another')) + '</button></div>';
     $('#logAgain').onclick = () => { dn.hidden = true; window.scrollTo(0, 0); };
-    await loadList();
+    if (can('view')) await loadList();
   } catch (e) { toast(e.message, true); } finally { b.disabled = false; }
 }
 
@@ -566,6 +618,28 @@ async function saveContact() {
   try { await api(withToken({action: 'ctSave', contact})); EDITING = ''; $('#c_name').value = ''; $('#c_email').value = ''; $('#ctCancel').hidden = true; toast(t('x.saved')); await loadContacts(); } catch (e) { toast(e.message, true); }
 }
 
+/* ---------- users and access ---------- */
+let USERS = [], OWNERS = [], UEDIT = '';
+async function loadUsers() { const j = await api(withToken({action: 'usersList'})); USERS = j.users; OWNERS = j.owners; renderUsers(); }
+function renderPerms(sel) {
+  const PERMS = ['view', 'log', 'verify', 'contacts', 'delete', 'users'].filter(p => p !== 'users' || ME.admin || (sel || []).includes('users'));
+  $('#u_perms').innerHTML = PERMS.map(p => '<label><input type="checkbox" data-p="' + p + '"' + ((sel || []).includes(p) ? ' checked' : '') + (p === 'users' && !ME.admin ? ' disabled' : '') + '><span>' + esc(t('p.' + p)) + '</span></label>').join('');
+  $$('#u_perms input').forEach(i => i.onchange = () => { if (i.checked && ['verify', 'delete'].includes(i.dataset.p)) { const v = $('#u_perms input[data-p=view]'); if (v) v.checked = true; } });
+}
+function renderUsers() {
+  const owners = OWNERS.map(e => '<div class="ur"><div><b>' + esc(e) + '</b><div class="tags"><span>' + esc(t('us.owner')) + '</span></div></div></div>').join('');
+  const rows = USERS.map(u => '<div class="ur' + (u.active ? '' : ' off') + '"><div><b>' + esc(u.name) + '</b> <small>' + esc(u.email) + (u.active ? '' : ' · ' + esc(t('us.off'))) + '</small><div class="tags">' + u.perms.map(p => '<span>' + esc(t('p.' + p)) + '</span>').join('') + '</div></div><div class="row"><button class="btn" data-ue="' + esc(u.email) + '">' + esc(t('btn.edit')) + '</button><button class="btn danger" data-ud="' + esc(u.email) + '">' + esc(t('btn.delete')) + '</button></div></div>').join('');
+  $('#uList').innerHTML = '<div class="card">' + owners + (rows || '<p class="hint">' + esc(t('us.none')) + '</p>') + '</div>';
+  $$('#uList [data-ue]').forEach(b => b.onclick = () => { const u = USERS.find(x => x.email === b.dataset.ue); UEDIT = u.email; $('#u_name').value = u.name; $('#u_email').value = u.email; $('#u_email').disabled = true; $('#u_active').checked = u.active; renderPerms(u.perms); $('#uCancel').hidden = false; window.scrollTo({top: 0, behavior: 'smooth'}); });
+  $$('#uList [data-ud]').forEach(b => b.onclick = async () => { if (!confirm(t('us.confirmDel'))) return; try { await api(withToken({action: 'userDelete', email: b.dataset.ud})); await loadUsers(); } catch (e) { toast(e.message, true); } });
+}
+function resetUserForm() { UEDIT = ''; $('#u_name').value = ''; $('#u_email').value = ''; $('#u_email').disabled = false; $('#u_active').checked = true; $('#uCancel').hidden = true; renderPerms(['view']); }
+async function saveUser() {
+  const user = {name: $('#u_name').value.trim(), email: $('#u_email').value.trim(), active: $('#u_active').checked, perms: $$('#u_perms input:checked').map(i => i.dataset.p)};
+  if (!user.name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(user.email)) return toast(t('ct.bad'), true);
+  try { const j = await api(withToken({action: 'userSave', user})); const wasNew = !UEDIT; resetUserForm(); toast(wasNew && j.mailed ? t('us.invited') : t('x.saved')); await loadUsers(); } catch (e) { toast(e.message, true); }
+}
+
 /* ---------- IC close-out page ---------- */
 function renderIC() {
   const f = IC.f, open = f.status === 'Open' || f.status === 'Reopened';
@@ -596,11 +670,12 @@ async function sendIC() {
 /* ---------- boot ---------- */
 function setTab(n) {
   if (!$('#tab-' + n)) n = 'list';
+  if (n === 'none') { $$('.tab').forEach(s => s.classList.remove('on')); return; }
   $$('#tabs button[data-t]').forEach(x => x.classList.toggle('on', x.dataset.t === n)); $('#btnNewFinding').classList.toggle('on', n === 'log'); $$('.tab').forEach(s => s.classList.toggle('on', s.id === 'tab-' + n));
   try { localStorage.setItem('wt_tab', n); } catch (e) {}
 }
 function bind() {
-  $$('#lang button').forEach(b => b.onclick = () => { LANG = b.dataset.l; try { localStorage.setItem('wt_lang', LANG); } catch (e) {} applyLang(); renderPB('log'); renderPB('ic'); renderPB('onb'); });
+  $$('#lang button').forEach(b => b.onclick = () => { LANG = b.dataset.l; try { localStorage.setItem('wt_lang', LANG); } catch (e) {} applyLang(); try { renderPerms($$('#u_perms input:checked').map(i => i.dataset.p)); if (USERS.length || OWNERS.length) renderUsers(); } catch (e) {} renderPB('log'); renderPB('ic'); renderPB('onb'); });
   $('#apiSave').onclick = () => { const v = $('#apiUrl').value.trim(); if (/^https:\/\/script\.google\.com\/macros\/s\/[^ ]+\/exec$/.test(v)) { try { localStorage.setItem('wt_api', v); } catch (e) {} location.reload(); } else toast('URL?', true); };
   $$('#tabs button[data-t]').forEach(b => b.onclick = () => setTab(b.dataset.t));
   $('#btnNewFinding').onclick = () => { setTab('log'); window.scrollTo({top: 0, behavior: 'smooth'}); };
@@ -615,6 +690,7 @@ function bind() {
   $('#f_ic').onchange = () => $('#f_ic2').hidden = $('#f_ic').value !== OTHER_CO; $('#f_loc').onchange = () => $('#f_loc2').hidden = $('#f_loc').value !== '__other'; $('#c_ic').onchange = () => $('#c_ic2').hidden = $('#c_ic').value !== OTHER_CO;
   $('#f_risk').onchange = syncDue; $('#btnLog').onclick = submitLog;
   $('#rpBuild').onclick = buildReport; $('#rpPrint').onclick = () => window.print(); $('#rpCsv').onclick = csvReport;
+  $('#uSave').onclick = saveUser; $('#uCancel').onclick = resetUserForm; renderPerms(['view']);
   $('#ctSave').onclick = saveContact; $('#ctCancel').onclick = () => { EDITING = ''; $('#c_name').value = ''; $('#c_email').value = ''; $('#ctCancel').hidden = true; };
   $('#dgNow').onclick = async () => { try { const j = await api(withToken({action: 'digestNow'}), 60000); const n = (j.results || []).filter(x => x.status === 'sent').length; toast(n ? t('dg.sent', {n}) : t('dg.nothing'), !n); } catch (e) { toast(e.message, true); } };
   $('#icSend').onclick = sendIC;
