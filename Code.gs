@@ -1,4 +1,4 @@
-const VERSION = '1.14.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.15.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -24,7 +24,7 @@ const POSITIONS = ['hsseDeputy', 'hsseOfficer', 'trainee', 'mgmt', 'icMgr', 'icL
 // Email copies (not app access): nNew = a copy of every new finding sent to the contractor, nDigest = a copy of the daily summary, nWeekly = the weekly summary (one email, Monday by default, Script Property WEEKLY_DAY),
 // nClose = the "closed by IC, please check" email and the High-risk reminder. Owners (ADMIN_EMAILS) always get all three.
 const IC_COMPANIES = ['PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS']; // a person whose Company is one of these only ever sees that company's findings
-const PERMS = ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'close', 'delete', 'users', 'ic', 'nNew', 'nDigest', 'nWeekly', 'nClose'];
+const PERMS = ['view', 'pdf', 'csv', 'dash', 'log', 'verify', 'resend', 'close', 'delete', 'users', 'ic', 'nNew', 'nDigest', 'nWeekly', 'nClose'];
 const DATE_COLS = ['dueDate'];
 const RISKS = ['High', 'Medium', 'Low'];
 const OPEN_STATUS = ['Open', 'Reopened'];

@@ -131,7 +131,21 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 .rep .sum{display:flex;gap:18px;flex-wrap:wrap;margin:8px 0 14px;font-size:13px;color:var(--mut)}.rep .sum b{display:block;font:300 22px/1.1 Jost,sans-serif;color:var(--ink)}
 .rep .fnd{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:12px;break-inside:avoid;page-break-inside:avoid}
 .rep .fh{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+#tab-dash .row{display:flex;flex-wrap:wrap}#dbIc{max-width:220px}.seg{display:flex;gap:0}.seg button{border:1px solid var(--line);background:#fff;padding:8px 14px;cursor:pointer;font:inherit}.seg button:first-child{border-radius:8px 0 0 8px}.seg button:last-child{border-radius:0 8px 8px 0}.seg button.on{background:var(--gdark);color:#fff;border-color:var(--gdark)}
+.dkr{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}.dk{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column}.dk b{font-size:30px;font-weight:300;color:var(--gdark)}.dk span{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}.dk small{color:var(--mut)}.dk .dlink b{font-size:30px}
+.dg{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px;margin-bottom:12px}.dc{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px}.dc h3{margin:0 0 8px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--gdark)}
+.dwarn{background:var(--warnbg);color:var(--warn);border-radius:8px;padding:8px 12px;margin-bottom:12px}.gray{color:var(--mut)}.xs{overflow-x:auto}
+.dlink{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-decoration:underline dotted;min-height:24px}.dlink.warnc{color:var(--red);font-weight:600}
+.dt{width:100%;border-collapse:collapse;font-size:13px}.dt th{text-align:left;font-weight:500;color:var(--mut);padding:4px 6px;font-size:12px}.dt td{padding:5px 6px;border-top:1px solid var(--line);white-space:nowrap}.rowk{cursor:pointer}.rowk:hover{background:var(--bg)}.heat td{text-align:center;min-width:34px}.heat td:first-child{text-align:left}
+.tl{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:var(--mut)}.tl.g{background:var(--green)}.tl.a{background:var(--yellow)}.tl.r{background:var(--red)}
+.wk{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;align-items:end}.wc{text-align:center;font-size:11px;color:var(--mut)}.wc span{display:block}.wb{height:110px;display:flex;align-items:flex-end;justify-content:center;gap:2px}.wb i{width:42%;display:block;min-height:1px}.wb .lg,.sw.lg{background:#9a9a9a}.wb .cl,.sw.cl{background:var(--green)}.sw{display:inline-block;width:10px;height:10px;margin:0 4px 0 8px}
+.stk{display:flex;height:24px;border-radius:6px;overflow:hidden;margin-bottom:6px}.stk i{display:flex;align-items:center;justify-content:center;font-style:normal;font-size:12px;color:#fff}.stk .High,.bb.seg .High{background:var(--red)}.stk .Medium,.bb.seg .Medium{background:var(--yellow);color:#231f20}.stk .Low,.bb.seg .Low{background:var(--green)}
+.hb>div{display:grid;grid-template-columns:34% 1fr 28px;gap:8px;align-items:center;font-size:13px;margin:5px 0}.hb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hb b{text-align:right;font-weight:500}.bb{height:12px;background:var(--bg);border-radius:3px;overflow:hidden}.bb i{display:block;height:100%;background:var(--green)}.bb.seg{display:flex;background:none}
+#dashSheet{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:70;display:flex;align-items:flex-end;justify-content:center}#dashSheet .in{background:#fff;width:min(720px,100%);max-height:80vh;overflow:auto;border-radius:14px 14px 0 0;padding:14px}
+@media(max-width:620px){.dkr{grid-template-columns:1fr 1fr}.dg{grid-template-columns:1fr}}
 @media print{
+  body.printDash .tab#tab-report{display:none!important}body.printDash .tab#tab-dash{display:block!important}body.printDash #tab-dash .noprint{display:none!important}
+  body.printDash .dkr{gap:5px;margin-bottom:5px}body.printDash .dk{padding:5px 8px}body.printDash .dk b{font-size:20px}body.printDash #dashOut{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}body.printDash .dg{display:contents}body.printDash .dkr,body.printDash .dwarn{grid-column:1/-1}body.printDash .dc{padding:5px;break-inside:avoid;margin:0}body.printDash .px,body.printDash .dc .hint:last-child{display:none}body.printDash .dc h3{font-size:9px;margin-bottom:3px}body.printDash .dt td{padding:2px 4px}body.printDash .hb>div{margin:2px 0;font-size:9px}body.printDash .wc small{display:none}body.printDash .dt{font-size:9px}body.printDash .wb{height:60px}body.printDash .hint{font-size:8px}body.printDash .dlink{text-decoration:none}
   @page{size:A4 landscape;margin:8mm}
   body{background:#fff}
   header.eh,.titlebar,nav.tabs,.noprint,#toast,#dlg,#btnNewFinding,.tab:not(#tab-report){display:none!important}
@@ -208,7 +222,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 <section id="vAdm" hidden>
  <div class="logbar"><button class="btn pri" id="btnNewFinding"><span aria-hidden="true">+</span> <span data-i="tab.log"></span></button></div>
  <nav class="tabs" id="tabs" style="margin-top:0">
-  <button data-t="list" class="on" data-i="tab.list"></button><button data-t="report" data-i="tab.report"></button><button data-t="users" data-i="tab.users"></button>
+  <button data-t="list" class="on" data-i="tab.list"></button><button data-t="dash" data-i="tab.dash"></button><button data-t="report" data-i="tab.report"></button><button data-t="users" data-i="tab.users"></button>
   <span class="sp"></span><button id="btnPhone" data-i="a.phone" hidden></button><button id="btnLogout" data-i="a.logout"></button>
  </nav>
 
@@ -237,6 +251,10 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
   <div id="logDone" class="card" hidden></div>
  </section>
 
+ <section id="tab-dash" class="tab">
+  <div class="card noprint"><div class="row" style="justify-content:space-between;align-items:center;gap:8px"><div class="seg" id="dbPer"></div><select id="dbIc"></select><button type="button" class="btn yel" id="dbPrint" data-i="db.print"></button></div><div class="hint" data-i="db.note"></div></div>
+  <div id="dashOut"></div>
+ </section>
  <section id="tab-report" class="tab">
   <div class="card noprint"><h2 data-i="rp.title"></h2>
    <div class="grid">
@@ -267,7 +285,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
 <script>
 const LOCS = ["ADMINISTRATION BUILDING", "BLOCK 6 B SOUTH EAST CORNER", "BLOCK 6B", "BLOCK 6B EAST GATE", "BOILER / CHIMNEY AREA", "CONTROL ROOM, MCC ROOM", "COOLING TOWER", "DDE TREATMENT PLANT (DTP)", "DIESEL TANK", "DIRTY COOLING TOWER", "DRY AND LIQUID CHEMICAL STORAGE", "ECOOILS WARE HOUSE", "EFFLUENT TREATMENT PLANT (ETP)", "ELECTRICAL SUBSTATION (PLN)", "EXTRACTION PLANT", "FA PLANT", "FIRE WATER PUMP HOUSE", "FIRE WATER TANK", "GSB OFFICE", "HEXANE AND DIESEL RECEIVING BAY", "HEXANE TANK", "KKS OFFICE", "LOADING/UNLOADING AREA (PUMP HOUSE)", "MCC BUILDING", "NORTH-WEST CORNER BLOCK 6A", "OFFICE VEHICLE PARKING AREA", "OIL POLISHING PLANT", "PBS OFFICE", "PIPE RACK", "PRE TREATMENT UNIT (PTU)", "RAW WATER PIT", "SCHEDULED & DOMESTIC WASTE SHED", "SECURITY BUILDING", "SECURITY POST", "SILO", "TANK FARM", "TRUCK PARKING AREA", "VAPOR ABSORPTION MACHINE (VAM) SHED", "WAREHOUSE", "WAREHOUSE BLOCK B", "WASTE WATER TREATMENT PLANT (WWTP)", "WATER TANK", "WATER TREATMENT PLANT (WTP) AND WATER TANKS", "WEIGHT BRIDGE", "WEN OFFICE", "WORKSHOP AREA"];
-const APP_VERSION = '1.14.1';
+const APP_VERSION = '1.15.0';
 const API_URL = 'https://script.google.com/macros/s/AKfycbydZ7RylbsTJqJdq_zZEXees36X6u5wT7U0z59Oh1caOwZltMX8fp4xOAFRUwzW9oDO/exec';
 const COMPANIES = ['PT. ECOOILS', 'PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS', 'PT. SOS'];
 const OTHER_CO = 'OTHER (TYPE YOUR COMPANY NAME)';
@@ -301,7 +319,7 @@ const D = {
 'pc.close':['Close (after photo)','Tutup (foto sesudah)','Tutup (foto selepas)'],'pc.position':['Position','Jabatan','Jawatan'],'us.needCoPos':['Pick the company first: this position gets the contractor emails for its company.','Pilih perusahaan dulu: jabatan ini menerima email kontraktor untuk perusahaannya.','Pilih syarikat dahulu: jawatan ini menerima e-mel kontraktor untuk syarikatnya.'],'us.posSet':['Access set from the position. Tick or untick to adjust.','Akses diatur dari jabatan. Centang atau hapus untuk menyesuaikan.','Akses ditetapkan daripada jawatan. Tanda atau nyahtanda untuk melaraskan.'],
 'pos.hsseDeputy':['HSSE Deputy (EcoOils)','Wakil HSSE (EcoOils)','Timbalan HSSE (EcoOils)'],'pos.hsseOfficer':['HSSE Officer (EcoOils)','Petugas HSSE (EcoOils)','Pegawai HSSE (EcoOils)'],'pos.trainee':['HSSE Secondee / Trainee (EcoOils)','Secondee / Trainee HSSE (EcoOils)','Secondee / Pelatih HSSE (EcoOils)'],'pos.mgmt':['Management (view only)','Manajemen (hanya lihat)','Pengurusan (lihat sahaja)'],'pos.icMgr':['IC HSSE Manager','Manajer HSSE IC','Pengurus HSSE IC'],'pos.icLead':['IC Site Lead','Site Lead IC','Site Lead IC'],'pos.icOfficer':['IC HSSE Officer','Petugas HSSE IC','Pegawai HSSE IC'],'pos.icPM':['IC Project Manager','Manajer Proyek IC','Pengurus Projek IC'],'pos.icAdmin':['IC Admin / office (on file only)','Admin / kantor IC (hanya arsip)','Admin / pejabat IC (arkib sahaja)'],
 'pc.nNew':['New finding','Temuan baru','Dapatan baharu'],'pc.nDigest':['Daily summary','Ringkasan harian','Ringkasan harian'],'pc.nClose':['Closed by IC','Ditutup IC','Ditutup IC'],
-'pc.view':['Read','Baca','Baca'],'pc.pdf':['PDF','PDF','PDF'],'pc.csv':['CSV','CSV','CSV'],'pc.log':['Log','Catat','Log'],'pc.verify':['Verify','Verifikasi','Sahkan'],'pc.resend':['Resend','Kirim ulang','Hantar semula'],'pc.contactsView':['Contacts','Kontak','Kenalan'],'pc.contacts':['Edit contacts','Ubah kontak','Ubah kenalan'],'pc.delete':['Delete','Hapus','Padam'],'pc.users':['Users','Pengguna','Pengguna'],'pc.active':['On','Aktif','Aktif'],
+'pc.view':['Read','Baca','Baca'],'pc.pdf':['PDF','PDF','PDF'],'pc.csv':['CSV','CSV','CSV'],'pc.dash':['Dashboard','Dasbor','Papan pemuka'],'pc.log':['Log','Catat','Log'],'pc.verify':['Verify','Verifikasi','Sahkan'],'pc.resend':['Resend','Kirim ulang','Hantar semula'],'pc.contactsView':['Contacts','Kontak','Kenalan'],'pc.contacts':['Edit contacts','Ubah kontak','Ubah kenalan'],'pc.delete':['Delete','Hapus','Padam'],'pc.users':['Users','Pengguna','Pengguna'],'pc.active':['On','Aktif','Aktif'],
 'us.can':['This person can:','Orang ini boleh:','Orang ini boleh:'],
 'us.active':['Access is on (untick to switch off without deleting)','Akses aktif (hapus centang untuk mematikan tanpa menghapus)','Akses aktif (nyahtanda untuk matikan tanpa padam)'],
 'us.owner':['Owner - full access','Pemilik - akses penuh','Pemilik - akses penuh'],'us.off':['switched off','dimatikan','dimatikan'],'us.none':['No one added yet.','Belum ada yang ditambahkan.','Belum ada yang ditambah.'],
@@ -317,7 +335,8 @@ const D = {
 'a.login':['HSSE sign-in','Masuk HSSE','Log masuk HSSE'],'a.email':['Email','Email','Emel'],'a.pin':['PIN (6 digits)','PIN (6 digit)','PIN (6 digit)'],'a.remember':['Keep me signed in on this device for 60 days','Biarkan saya tetap masuk di perangkat ini selama 60 hari','Kekalkan saya log masuk pada peranti ini selama 60 hari'],'a.loginBtn':['Sign in','Masuk','Log masuk'],
 'a.forgot':['Forgot PIN / set PIN','Lupa PIN / atur PIN','Lupa PIN / tetapkan PIN'],'a.resetInfo':['We email a 6-digit code to your HSSE address. Enter it with a new 6-digit PIN.','Kami mengirim kode 6 digit ke email HSSE Anda. Masukkan kode itu dengan PIN baru 6 digit.','Kami menghantar kod 6 digit ke emel HSSE anda. Masukkan kod itu bersama PIN baharu 6 digit.'],
 'a.sendCode':['Email me a code','Kirim kode ke email saya','Hantar kod ke emel saya'],'a.code':['6-digit code from the email','Kode 6 digit dari email','Kod 6 digit daripada emel'],'a.newPin':['New PIN (6 digits)','PIN baru (6 digit)','PIN baharu (6 digit)'],
-'a.newPin2':['Repeat the new PIN','Ulangi PIN baru','Ulang PIN baharu'],'a.setPin':['Set PIN','Atur PIN','Tetapkan PIN'],'a.back':['Back to sign-in','Kembali ke masuk','Kembali ke log masuk'],'pk.mark':['✏ Mark photo','✏ Tandai foto','✏ Tanda foto'],'pk.undo':['Undo','Urungkan','Buat asal'],'pk.clear':['Clear','Hapus','Kosongkan'],'pk.cancel':['Cancel','Batal','Batal'],'pk.done':['✓ Keep marking','✓ Simpan tanda','✓ Simpan tanda'],'pk.saved':['Marked photo saved.','Foto bertanda tersimpan.','Foto bertanda disimpan.'],
+'a.newPin2':['Repeat the new PIN','Ulangi PIN baru','Ulang PIN baharu'],'a.setPin':['Set PIN','Atur PIN','Tetapkan PIN'],'a.back':['Back to sign-in','Kembali ke masuk','Kembali ke log masuk'],'tab.dash':['Dashboard','Dasbor','Papan pemuka'],'db.print':['Print one page','Cetak satu halaman','Cetak satu halaman'],'db.note':['Open, overdue and aging are always as of today. The period filter applies to logged and closed counts, the contractor table and the charts.','Terbuka, terlambat, dan usia selalu per hari ini. Filter periode berlaku untuk jumlah dicatat/ditutup, tabel kontraktor dan grafik.','Terbuka, tertunggak dan umur sentiasa setakat hari ini. Penapis tempoh terpakai pada bilangan direkod/ditutup, jadual kontraktor dan carta.'],'db.p4':['4 weeks','4 minggu','4 minggu'],'db.p12':['12 weeks','12 minggu','12 minggu'],'db.pall':['All','Semua','Semua'],'db.over':['Overdue','Terlambat','Tertunggak'],'db.highNV':['High risk, not verified','Risiko tinggi, belum diverifikasi','Risiko tinggi, belum disahkan'],'db.await':['Waiting for verification','Menunggu verifikasi','Menunggu pengesahan'],'db.ontime':['On-time closure (4 wks)','Ditutup tepat waktu (4 mgg)','Ditutup tepat masa (4 mgg)'],'db.oldest':['oldest','terlama','terlama'],'db.days':['days','hari','hari'],'db.d':['d','h','h'],'db.grow':['Backlog is growing: more findings were logged than closed for two weeks in a row.','Tunggakan bertambah: temuan dicatat lebih banyak daripada ditutup dua minggu berturut-turut.','Tunggakan bertambah: dapatan direkod lebih banyak daripada ditutup dua minggu berturut-turut.'],'db.weekly':['Logged vs closed per week','Dicatat vs ditutup per minggu','Direkod vs ditutup seminggu'],'db.logged':['Logged','Dicatat','Direkod'],'db.closed':['Closed','Ditutup','Ditutup'],'db.weekHint':['Numbers show logged/closed; the date is the Monday of the week.','Angka: dicatat/ditutup; tanggal = hari Senin minggu itu.','Angka: direkod/ditutup; tarikh = Isnin minggu itu.'],'db.aging':['Age of open findings (days)','Usia temuan terbuka (hari)','Umur dapatan terbuka (hari)'],'db.agingHint':['15+ days is the real backlog. Tap a number to see the findings.','15+ hari adalah tunggakan sebenarnya. Ketuk angka untuk melihat temuan.','15+ hari ialah tunggakan sebenar. Ketik nombor untuk lihat dapatan.'],'db.byIc':['By contractor','Per kontraktor','Mengikut kontraktor'],'db.open':['Open','Terbuka','Terbuka'],'db.median':['Median to close','Median penutupan','Median penutupan'],'db.reopen':['Sent back','Dikembalikan','Dikembalikan'],'db.fair':['Percentages show n and stay grey under 5 findings. Dots use fixed targets, not a ranking. The contractor clock stops when they close.','Persentase menampilkan n dan abu-abu di bawah 5 temuan. Titik memakai target tetap, bukan peringkat. Waktu kontraktor berhenti saat mereka menutup.','Peratusan menunjukkan n dan kelabu bawah 5 dapatan. Titik guna sasaran tetap, bukan kedudukan. Jam kontraktor berhenti apabila mereka menutup.'],'db.mix':['Risk and category mix','Campuran risiko dan kategori','Campuran risiko dan kategori'],'db.other':['Other','Lainnya','Lain-lain'],'db.locs':['Top locations (open findings)','Lokasi teratas (temuan terbuka)','Lokasi teratas (dapatan terbuka)'],'db.heat':['Location by contractor (period)','Lokasi per kontraktor (periode)','Lokasi mengikut kontraktor (tempoh)'],'db.watch':['Overdue watch list','Daftar pantau terlambat','Senarai pantau tertunggak'],'db.hot':['Repeat hotspots (same category and place within 30 days)','Titik berulang (kategori dan tempat sama dalam 30 hari)','Titik berulang (kategori dan tempat sama dalam 30 hari)'],
+'pk.mark':['✏ Mark photo','✏ Tandai foto','✏ Tanda foto'],'pk.undo':['Undo','Urungkan','Buat asal'],'pk.clear':['Clear','Hapus','Kosongkan'],'pk.cancel':['Cancel','Batal','Batal'],'pk.done':['✓ Keep marking','✓ Simpan tanda','✓ Simpan tanda'],'pk.saved':['Marked photo saved.','Foto bertanda tersimpan.','Foto bertanda disimpan.'],
 'a.phone':['Phone view','Tampilan ponsel','Paparan telefon'],'a.logout':['Sign out','Keluar','Log keluar'],
 'l.search':['Search ref, location, text','Cari no. ref, lokasi, teks','Cari no. rujukan, lokasi, teks'],'l.allIc':['All companies','Semua perusahaan','Semua syarikat'],'l.allSt':['All statuses','Semua status','Semua status'],
 'l.grp0':['No grouping','Tanpa pengelompokan','Tanpa kumpulan'],'l.grpLoc':['Group: location','Kelompok: lokasi','Kumpulan: lokasi'],'l.grpIc':['Group: company','Kelompok: perusahaan','Kumpulan: syarikat'],'l.grpSt':['Group: status','Kelompok: status','Kumpulan: status'],'l.grpRisk':['Group: risk','Kelompok: risiko','Kumpulan: risiko'],'l.sNew':['Sort: newest','Urut: terbaru','Isih: terbaru'],'l.sOld':['Sort: oldest','Urut: terlama','Isih: terlama'],'l.sLoc':['Sort: location A–Z','Urut: lokasi A–Z','Isih: lokasi A–Z'],'l.sIc':['Sort: company','Urut: perusahaan','Isih: syarikat'],'l.sRisk':['Sort: risk','Urut: risiko','Isih: risiko'],'l.sDue':['Sort: close-by date','Urut: tenggat','Isih: tarikh akhir'],'l.more':['Show more','Tampilkan lagi','Papar lagi'],
@@ -528,7 +547,7 @@ function phoneView() {
   $('#phoneX').onclick = x; o.onclick = e => { if (e.target === o) x(); }; document.addEventListener('keydown', k);
 }
 function applyPerms() {
-  const need = {list: 'view', report: 'view', users: 'users'};
+  const need = {list: 'view', dash: 'dash', report: 'view', users: 'users'};
   $$('#tabs button[data-t]').forEach(b => b.hidden = !can(need[b.dataset.t]));
   $('#rpPrint').hidden = !can('pdf'); $('#rpCsv').hidden = !can('csv');
   $('#btnNewFinding').hidden = !can('log'); $('#btnPhone').hidden = !(ME.admin || can('users')) || window.self !== window.top;
@@ -549,7 +568,7 @@ async function enterAdmin() {
 
 /* ---------- findings list ---------- */
 let SHOWN = 100; const LS = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
-function applyList(j) { ROWS = j.rows; TODAY = j.today || TODAY; fillSelects(); renderList(); }
+function applyList(j) { ROWS = j.rows; TODAY = j.today || TODAY; fillSelects(); renderList(); DASH_DIRTY = true; if ($('#tab-dash') && $('#tab-dash').classList.contains('on')) { dashInit(); dashRender(); } }
 async function loadList(pre) { const j = pre ? await pre : await api(withToken({action: 'list'})); if (j instanceof Error) throw j; applyList(j); try { localStorage.setItem('wt_rows', JSON.stringify({rows: j.rows, today: j.today})); } catch (e) {} }
 function renderList() {
   const rows = ROWS, open = rows.filter(isOpen), late = rows.filter(isLate), wait = rows.filter(r => r.status === 'Closed by IC'), ver = rows.filter(r => r.status === 'Verified');
@@ -694,6 +713,86 @@ async function buildReport() {
   rows.forEach(r => { const box = $('#rf_' + CSS.escape(r.id) + ' .pair'); if (box) box.innerHTML = pairHTML(idsOf(r.beforePhotos).slice(0, 1).map(i => PHC[i]).filter(Boolean), idsOf(r.afterPhotos).slice(-1).map(i => PHC[i]).filter(Boolean)); });
   wirePeek('#reportOut'); $('#rpProg').textContent = t('rp.ready'); $('#rpPrint').disabled = !rows.length;
 }
+/* ---------- dashboard: every number is worked out here from the list already loaded (no extra request) ---------- */
+let DASH = {days: 84, ic: ''}, DASH_DIRTY = true;
+const JKT = iso => { const d = new Date(iso); return isNaN(d) ? '' : new Date(d.getTime() + 7 * 3600e3).toISOString().slice(0, 10); }; // Jakarta date, not the browser's zone
+const dAdd = (iso, n) => new Date(new Date(iso + 'T12:00:00Z').getTime() + n * 86400000).toISOString().slice(0, 10);
+const mondayOf = iso => dAdd(iso, -((new Date(iso + 'T12:00:00Z').getUTCDay() + 6) % 7));
+const med = a => { if (!a.length) return null; const s = a.slice().sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+const D_RISK = {High: 0, Medium: 1, Low: 2};
+function dashCompute() {
+  const today = TODAY, from = DASH.days ? dAdd(today, -DASH.days) : '0000-00-00', w4 = dAdd(today, -28);
+  const all = ROWS.filter(r => !DASH.ic || r.ic === DASH.ic).map(r => Object.assign({}, r, {c: JKT(r.createdAt), x: r.closedAt ? JKT(r.closedAt) : '', due: String(r.dueDate).slice(0, 10)}));
+  const per = all.filter(r => r.c >= from), open = all.filter(isOpen), late = open.filter(r => r.due < today).map(r => Object.assign({}, r, {late: daysBetween(r.due, today)}));
+  late.sort((a, b) => (D_RISK[a.risk] ?? 3) - (D_RISK[b.risk] ?? 3) || b.late - a.late);
+  const await_ = all.filter(r => r.status === 'Closed by IC').map(r => Object.assign({}, r, {age: r.x ? daysBetween(r.x, today) : 0})).sort((a, b) => b.age - a.age);
+  const highNV = all.filter(r => r.risk === 'High' && r.status !== 'Verified');
+  const closed4 = all.filter(r => r.x && r.x >= w4), onT = closed4.filter(r => r.x <= r.due).length;
+  const weeks = []; let m0 = mondayOf(today); for (let i = 11; i >= 0; i--) weeks.push({w: dAdd(m0, -7 * i), lg: 0, cl: 0});
+  all.forEach(r => { const a = weeks.find(w => r.c >= w.w && r.c < dAdd(w.w, 7)); if (a) a.lg++; if (r.x) { const b = weeks.find(w => r.x >= w.w && r.x < dAdd(w.w, 7)); if (b) b.cl++; } });
+  const growing = weeks.length > 1 && weeks[11].lg > weeks[11].cl && weeks[10].lg > weeks[10].cl;
+  const ics = Array.from(new Set(all.map(r => r.ic))).sort();
+  const cstat = ics.map(ic => { const a = all.filter(r => r.ic === ic), cl = a.filter(r => r.x), c4 = cl.filter(r => r.x >= w4), days = cl.filter(r => r.x >= r.c).map(r => daysBetween(r.c, r.x));
+    return {ic: ic, logged: a.filter(r => r.c >= from).length, open: a.filter(isOpen).length, over: late.filter(r => r.ic === ic).length, otN: c4.length, ot: c4.filter(r => r.x <= r.due).length, med: med(days), cl: cl.length, re: cl.filter(r => Number(r.reopenCount) > 0).length}; });
+  const bk = [[0, 3], [4, 7], [8, 14], [15, 9999]], aging = ics.map(ic => ({ic: ic, b: bk.map(([lo, hi]) => open.filter(r => r.ic === ic && daysBetween(r.c, today) >= lo && daysBetween(r.c, today) <= hi))}));
+  const cnt = (arr, f) => { const m = {}; arr.forEach(r => { const k = f(r) || '—'; m[k] = (m[k] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]); };
+  const locs = cnt(open, r => r.location).slice(0, 8).map(([l, n]) => ({l: l, n: n, r: ['High', 'Medium', 'Low'].map(k => open.filter(x => x.location === l && x.risk === k).length)}));
+  const locH = cnt(per, r => r.location).slice(0, 8).map(([l]) => l);
+  const rep = {}; all.forEach(r => { const k = r.category + '|' + r.location; (rep[k] = rep[k] || []).push(r.c); });
+  const hot = Object.entries(rep).map(([k, d]) => { d.sort(); let n = 1, best = 1; for (let i = 1; i < d.length; i++) { n = daysBetween(d[i - 1], d[i]) <= 30 ? n + 1 : 1; best = Math.max(best, n); } return {k: k, n: best}; }).filter(h => h.n >= 2).sort((a, b) => b.n - a.n).slice(0, 3);
+  return {all, per, open, late, await_, highNV, closed4, onT, weeks, growing, ics, cstat, aging, locs, locH, cats: cnt(per, r => catLabel(r.category)), risk: ['High', 'Medium', 'Low'].map(k => per.filter(r => r.risk === k).length), hot, from, today};
+}
+let DSET = {};
+function dashRender() {
+  const root = $('#dashOut'); if (!root) return; DASH_DIRTY = false;
+  if (!ROWS.length) { root.innerHTML = '<div class="hint">' + esc(t('rp.empty')) + '</div>'; return; }
+  const d = dashCompute(); DSET = {};
+  const reg = (title, rows) => { const k = 'k' + Object.keys(DSET).length; DSET[k] = {title: title, rows: rows}; return k; };
+  const btn = (k, inner, cls) => '<button type="button" class="dlink ' + (cls || '') + '" data-set="' + k + '">' + inner + '</button>';
+  const pct = (n, N) => N < 5 ? '<span class="gray">n=' + N + '</span>' : Math.round(100 * n / N) + '% <small>(' + n + '/' + N + ')</small>';
+  const dot = (v, g, a) => '<span class="tl ' + (v <= g ? 'g' : v <= a ? 'a' : 'r') + '"></span>';
+  const tile = (n, lab, k, sub) => '<div class="dk">' + (k && DSET[k].rows.length ? btn(k, '<b>' + n + '</b>') : '<b>' + n + '</b>') + '<span>' + esc(lab) + '</span>' + (sub ? '<small>' + sub + '</small>' : '') + '</div>';
+  const ot4 = d.closed4.length;
+  let h = '<div class="dkr">' + tile(d.late.length, t('db.over'), reg(t('db.over'), d.late)) + tile(d.highNV.length, t('db.highNV'), reg(t('db.highNV'), d.highNV)) +
+    tile(d.await_.length, t('db.await'), reg(t('db.await'), d.await_), d.await_.length ? esc(t('db.oldest')) + ' ' + d.await_[0].age + ' ' + esc(t('db.days')) : '') +
+    tile(ot4 < 5 ? 'n=' + ot4 : Math.round(100 * d.onT / ot4) + '%', t('db.ontime'), '', ot4 ? d.onT + '/' + ot4 : '') + '</div>';
+  if (d.growing) h += '<div class="dwarn">' + esc(t('db.grow')) + '</div>';
+  const mx = Math.max(1, ...d.weeks.map(w => Math.max(w.lg, w.cl)));
+  h += '<div class="dg"><div class="dc"><h3>' + esc(t('db.weekly')) + '</h3><div class="wk">' + d.weeks.map(w => '<div class="wc"><div class="wb"><i class="lg" style="height:' + Math.round(100 * w.lg / mx) + '%" title="' + w.lg + '"></i><i class="cl" style="height:' + Math.round(100 * w.cl / mx) + '%" title="' + w.cl + '"></i></div><span>' + w.lg + '/' + w.cl + '</span><small>' + w.w.slice(8) + '/' + w.w.slice(5, 7) + '</small></div>').join('') + '</div><div class="hint"><i class="sw lg"></i>' + esc(t('db.logged')) + ' <i class="sw cl"></i>' + esc(t('db.closed')) + ' · ' + esc(t('db.weekHint')) + '</div></div>';
+  h += '<div class="dc"><h3>' + esc(t('db.aging')) + '</h3><table class="dt"><tr><th></th>' + ['0–3', '4–7', '8–14', '15+'].map(x => '<th>' + x + '</th>').join('') + '</tr>' + d.aging.map(a => '<tr><td>' + esc(a.ic) + '</td>' + a.b.map((r, i) => '<td>' + (r.length ? btn(reg(a.ic + ' · ' + ['0–3', '4–7', '8–14', '15+'][i] + ' ' + t('db.days'), r), r.length, i === 3 ? 'warnc' : '') : '<span class="gray">0</span>') + '</td>').join('') + '</tr>').join('') + '</table><div class="hint">' + esc(t('db.agingHint')) + '</div></div></div>';
+  h += '<div class="dg"><div class="dc"><h3>' + esc(t('db.byIc')) + '</h3><div class="xs"><table class="dt"><tr><th></th><th>' + esc(t('db.logged')) + '</th><th>' + esc(t('db.open')) + '</th><th>' + esc(t('db.over')) + '</th><th>' + esc(t('db.ontime')) + '</th><th>' + esc(t('db.median')) + '</th><th>' + esc(t('db.reopen')) + '</th></tr>' +
+    d.cstat.map(c => '<tr><td><b>' + esc(c.ic) + '</b></td><td>' + c.logged + '</td><td>' + c.open + '</td><td>' + dot(c.over, 0, 2) + c.over + '</td><td>' + (c.otN < 5 ? pct(c.ot, c.otN) : dot(100 - Math.round(100 * c.ot / c.otN), 10, 30) + pct(c.ot, c.otN)) + '</td><td>' + (c.med == null ? '–' : c.med + ' ' + esc(t('db.d'))) + '</td><td>' + (c.cl < 5 ? pct(c.re, c.cl) : dot(Math.round(100 * c.re / c.cl), 10, 25) + pct(c.re, c.cl)) + '</td></tr>').join('') + '</table></div><div class="hint">' + esc(t('db.fair')) + '</div></div>';
+  const rs = d.risk, rt = Math.max(1, rs[0] + rs[1] + rs[2]);
+  h += '<div class="dc"><h3>' + esc(t('db.mix')) + '</h3><div class="stk">' + ['High', 'Medium', 'Low'].map((k, i) => rs[i] ? '<i class="' + k + '" style="width:' + (100 * rs[i] / rt) + '%">' + rs[i] + '</i>' : '').join('') + '</div><div class="hint">' + ['High', 'Medium', 'Low'].map((k, i) => '<span class="risk ' + k + '"></span>' + esc(t('r.' + k)) + ' ' + rs[i]).join(' &nbsp; ') + '</div>' +
+    '<div class="hb">' + (() => { const top = d.cats.slice(0, 6), oth = d.cats.slice(6).reduce((a, c) => a + c[1], 0), m = Math.max(1, ...top.map(c => c[1])); return top.concat(oth ? [[t('db.other'), oth]] : []).map(c => '<div><span>' + esc(c[0]) + '</span><div class="bb"><i style="width:' + (100 * c[1] / m) + '%"></i></div><b>' + c[1] + '</b></div>').join(''); })() + '</div></div></div>';
+  const lm = Math.max(1, ...d.locs.map(l => l.n));
+  h += '<div class="dg"><div class="dc"><h3>' + esc(t('db.locs')) + '</h3><div class="hb">' + (d.locs.length ? d.locs.map(l => '<div><span>' + btn(reg(l.l, d.open.filter(r => r.location === l.l)), esc(l.l)) + '</span><div class="bb seg" style="width:' + (100 * l.n / lm) + '%">' + ['High', 'Medium', 'Low'].map((k, i) => l.r[i] ? '<i class="' + k + '" style="flex:' + l.r[i] + '"></i>' : '').join('') + '</div><b>' + l.n + '</b></div>').join('') : '<span class="gray">–</span>') + '</div></div>';
+  const cm = {}; d.per.forEach(r => { const k = r.location + '|' + r.ic; cm[k] = (cm[k] || 0) + 1; }); const cmx = Math.max(1, ...Object.values(cm));
+  h += '<div class="dc"><h3>' + esc(t('db.heat')) + '</h3><div class="xs"><table class="dt heat"><tr><th></th>' + d.ics.map(i => '<th>' + esc(i.replace('PT. ', '')) + '</th>').join('') + '</tr>' + d.locH.map(l => '<tr><td>' + esc(l) + '</td>' + d.ics.map(i => { const n = cm[l + '|' + i] || 0; return '<td style="background:rgba(68,162,118,' + (n ? 0.12 + 0.6 * n / cmx : 0) + ')">' + (n || '') + '</td>'; }).join('') + '</tr>').join('') + '</table></div></div></div>';
+  const wl = (arr, withAge) => arr.slice(0, 10).map((r, i) => '<tr class="rowk' + (i >= 5 ? ' px' : '') + '" data-open="' + esc(r.id) + '"><td><b>' + esc(r.id) + '</b></td><td>' + esc(r.ic) + '</td><td>' + esc(r.location) + '</td><td><span class="risk ' + esc(r.risk) + '"></span></td><td>' + (withAge ? r.age : r.late) + ' ' + esc(t('db.d')) + '</td><td>' + (Number(r.reopenCount) > 0 ? '↺' + r.reopenCount : '') + '</td></tr>').join('');
+  h += '<div class="dg"><div class="dc"><h3>' + esc(t('db.watch')) + ' (' + d.late.length + ')</h3><table class="dt">' + (d.late.length ? wl(d.late, false) : '<tr><td class="gray">–</td></tr>') + '</table>' + (d.late.length > 10 ? btn(reg(t('db.watch'), d.late), esc(t('l.more')) + ' (' + (d.late.length - 10) + ')') : '') + '</div>' +
+    '<div class="dc"><h3>' + esc(t('db.await')) + ' (' + d.await_.length + ')</h3><table class="dt">' + (d.await_.length ? wl(d.await_, true) : '<tr><td class="gray">–</td></tr>') + '</table>' + (d.await_.length > 10 ? btn(reg(t('db.await'), d.await_), esc(t('l.more')) + ' (' + (d.await_.length - 10) + ')') : '') +
+    (d.hot.length ? '<h3 style="margin-top:12px">' + esc(t('db.hot')) + '</h3>' + d.hot.map(x => '<div class="hint">• ' + esc(x.k.replace('|', ' · ')) + ' — ' + x.n + '×</div>').join('') : '') + '</div></div>';
+  root.innerHTML = h;
+  $$('#dashOut [data-set]').forEach(b => b.onclick = () => dashSheet(DSET[b.dataset.set]));
+  $$('#dashOut [data-open]').forEach(b => b.onclick = () => openDetail(b.dataset.open));
+}
+function dashSheet(s) {
+  if (!s) return; let o = $('#dashSheet'); if (o) o.remove();
+  o = document.createElement('div'); o.id = 'dashSheet'; o.className = 'noprint';
+  o.innerHTML = '<div class="in"><div class="row" style="justify-content:space-between"><h3>' + esc(s.title) + ' (' + s.rows.length + ')</h3><button type="button" class="btn" id="dsX">✕</button></div>' + s.rows.slice(0, 60).map(r => '<div class="item ' + esc(r.risk) + '" data-id="' + esc(r.id) + '"><span class="id">' + esc(r.id) + '</span><div class="mid"><div><b>' + esc(r.ic) + '</b> · ' + esc(r.location) + ' · <span class="d">' + esc(r.description) + '</span></div></div><div class="rt">' + chip(r) + '</div></div>').join('') + '</div>';
+  document.body.appendChild(o); $('#dsX').onclick = () => o.remove(); o.onclick = e => { if (e.target === o) o.remove(); };
+  $$('#dashSheet .item').forEach(e => e.onclick = () => { o.remove(); openDetail(e.dataset.id); });
+}
+function dashInit() {
+  $('#dbPer').innerHTML = [[28, 'db.p4'], [84, 'db.p12'], [0, 'db.pall']].map(p => '<button type="button" data-d="' + p[0] + '" class="' + (DASH.days === p[0] ? 'on' : '') + '">' + esc(t(p[1])) + '</button>').join('');
+  $$('#dbPer button').forEach(b => b.onclick = () => { DASH.days = Number(b.dataset.d); dashInit(); dashRender(); });
+  const ics = Array.from(new Set(ROWS.map(r => r.ic))).sort(); $('#dbIc').hidden = ics.length < 2;
+  $('#dbIc').innerHTML = '<option value="">' + esc(t('l.allIc')) + '</option>' + ics.map(i => '<option' + (i === DASH.ic ? ' selected' : '') + '>' + esc(i) + '</option>').join('');
+  $('#dbIc').onchange = () => { DASH.ic = $('#dbIc').value; dashRender(); };
+  $('#dbPrint').onclick = () => { document.body.classList.add('printDash'); const off = () => { document.body.classList.remove('printDash'); window.removeEventListener('afterprint', off); }; window.addEventListener('afterprint', off); window.print(); };
+}
+
 function csvReport() {
   const rows = REPORT.length ? REPORT : ROWS, cols = ['id', 'createdAt', 'ic', 'location', 'category', 'risk', 'description', 'dueDate', 'status', 'closedBy', 'closedAt', 'closeNote', 'verifiedBy', 'verifiedAt', 'hseNote', 'reopenCount'];
   const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
@@ -705,16 +804,16 @@ function csvReport() {
 function renderDigest() { const dg = window.DG; if (dg) $('#dgInfo').textContent = (dg.digestOn ? t('dg.on') : t('dg.off')) + (dg.digestLast ? ' · ' + dg.digestLast : ''); }
 
 /* ---------- users and access: one compact table, a tick saves at once ---------- */
-const PERM_KEYS = ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'close', 'delete', 'users', 'ic', 'nNew', 'nDigest', 'nWeekly', 'nClose'];
+const PERM_KEYS = ['view', 'pdf', 'csv', 'dash', 'log', 'verify', 'resend', 'close', 'delete', 'users', 'ic', 'nNew', 'nDigest', 'nWeekly', 'nClose'];
 const NOTIFY_KEYS = ['ic', 'nNew', 'nDigest', 'nWeekly', 'nClose'];
-const PERM_DEFAULT = ['view', 'pdf', 'log', 'verify', 'resend']; // EcoOils person. No email copies by default (saves quota)
+const PERM_DEFAULT = ['view', 'pdf', 'dash', 'log', 'verify', 'resend']; // EcoOils person. No email copies by default (saves quota)
 // Position -> the boxes it ticks. Picking a position ticks these (and unticks the rest); you can still tick or untick anything after.
 const POSITIONS = ['hsseDeputy', 'hsseOfficer', 'trainee', 'mgmt', 'icMgr', 'icLead', 'icOfficer', 'icPM', 'icAdmin'];
 const PRESETS = {
-  hsseDeputy: ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'close'],
-  hsseOfficer: ['view', 'pdf', 'log', 'verify', 'resend', 'close'],
+  hsseDeputy: ['view', 'pdf', 'csv', 'dash', 'log', 'verify', 'resend', 'close'],
+  hsseOfficer: ['view', 'pdf', 'dash', 'log', 'verify', 'resend', 'close'],
   trainee: ['view', 'log'],
-  mgmt: ['view', 'pdf', 'nWeekly'],
+  mgmt: ['view', 'pdf', 'dash', 'nWeekly'],
   icMgr: ['view', 'pdf', 'close', 'ic'],
   icLead: ['view', 'close', 'ic'],
   icOfficer: ['view', 'close'],
@@ -810,6 +909,7 @@ function setTab(n) {
   if (n === 'none') { $$('.tab').forEach(s => s.classList.remove('on')); return; }
   $$('#tabs button[data-t]').forEach(x => x.classList.toggle('on', x.dataset.t === n)); $('#btnNewFinding').classList.toggle('on', n === 'log'); $$('.tab').forEach(s => s.classList.toggle('on', s.id === 'tab-' + n));
   document.body.classList.toggle('onUsers', n === 'users');
+  if (n === 'dash') { dashInit(); if (DASH_DIRTY) dashRender(); }
   try { localStorage.setItem('wt_tab', n); } catch (e) {}
 }
 function bind() {
