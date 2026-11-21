@@ -1,4 +1,4 @@
-const VERSION = '1.12.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.12.1'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
