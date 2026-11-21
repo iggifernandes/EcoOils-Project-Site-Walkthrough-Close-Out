@@ -115,8 +115,9 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 .pair .none{border:1px dashed #bbb;border-radius:8px;padding:30px 10px;text-align:center;color:var(--mut);font-size:13px}
 .kv{display:grid;grid-template-columns:130px 1fr;gap:3px 12px;font-size:14px;margin:8px 0}.kv dt{color:var(--mut)}.kv dd{margin:0;word-break:break-word}
 @media(max-width:520px){.kv{grid-template-columns:1fr}.kv dt{margin-top:6px}}
-#dlg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:60;overflow:auto;padding:14px}
-#dlg .in{background:#fff;border-radius:12px;max-width:860px;margin:0 auto;padding:16px}
+#dlg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:60;display:flex;align-items:center;justify-content:center;padding:10px}
+#dlg .in{background:#fff;border-radius:12px;width:567px;max-width:100%;height:567px;max-height:100%;overflow:auto;padding:14px;box-shadow:0 10px 40px rgba(0,0,0,.4)}
+#dlg .pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}#dlg .dth{width:150px;height:150px;margin:0}#dlg .kv{font-size:13px}
 #peek{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:90;display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:10px}
 #peek img{max-width:100%;max-height:100%;border-radius:6px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;background:#231f20;color:#fff;padding:10px 16px;border-radius:9px;z-index:99;max-width:92vw}
@@ -264,7 +265,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
 <script>
 const LOCS = ["ADMINISTRATION BUILDING", "BLOCK 6 B SOUTH EAST CORNER", "BLOCK 6B", "BLOCK 6B EAST GATE", "BOILER / CHIMNEY AREA", "CONTROL ROOM, MCC ROOM", "COOLING TOWER", "DDE TREATMENT PLANT (DTP)", "DIESEL TANK", "DIRTY COOLING TOWER", "DRY AND LIQUID CHEMICAL STORAGE", "ECOOILS WARE HOUSE", "EFFLUENT TREATMENT PLANT (ETP)", "ELECTRICAL SUBSTATION (PLN)", "EXTRACTION PLANT", "FA PLANT", "FIRE WATER PUMP HOUSE", "FIRE WATER TANK", "GSB OFFICE", "HEXANE AND DIESEL RECEIVING BAY", "HEXANE TANK", "KKS OFFICE", "LOADING/UNLOADING AREA (PUMP HOUSE)", "MCC BUILDING", "NORTH-WEST CORNER BLOCK 6A", "OFFICE VEHICLE PARKING AREA", "OIL POLISHING PLANT", "PBS OFFICE", "PIPE RACK", "PRE TREATMENT UNIT (PTU)", "RAW WATER PIT", "SCHEDULED & DOMESTIC WASTE SHED", "SECURITY BUILDING", "SECURITY POST", "SILO", "TANK FARM", "TRUCK PARKING AREA", "VAPOR ABSORPTION MACHINE (VAM) SHED", "WAREHOUSE", "WAREHOUSE BLOCK B", "WASTE WATER TREATMENT PLANT (WWTP)", "WATER TANK", "WATER TREATMENT PLANT (WTP) AND WATER TANKS", "WEIGHT BRIDGE", "WEN OFFICE", "WORKSHOP AREA"];
-const APP_VERSION = '1.12.2';
+const APP_VERSION = '1.12.3';
 const API_URL = 'https://script.google.com/macros/s/AKfycbydZ7RylbsTJqJdq_zZEXees36X6u5wT7U0z59Oh1caOwZltMX8fp4xOAFRUwzW9oDO/exec';
 const COMPANIES = ['PT. ECOOILS', 'PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS', 'PT. SOS'];
 const OTHER_CO = 'OTHER (TYPE YOUR COMPANY NAME)';
@@ -592,7 +593,7 @@ async function peekFull(id) {
 function wirePeek(root) { $$(root + ' img[data-src]').forEach(i => i.onclick = () => peek(i.src)); }
 async function openDetail(id) {
   const r = ROWS.find(x => x.id === id); if (!r) return; CUR = id;
-  const bids = idsOf(r.beforePhotos).slice(0, 3), aids = idsOf(r.afterPhotos).slice(-3);
+  const bids = idsOf(r.beforePhotos).slice(0, 1), aids = idsOf(r.afterPhotos).slice(-1);
   const dlg = $('#dlg'), inn = $('#dlgIn'); dlg.hidden = false;
   const head = '<div class="row" style="justify-content:space-between"><b style="letter-spacing:.08em">' + esc(r.id) + '</b><span>' + chip(r) + '</span></div>';
   const kv = [[t('f.ic'), r.ic], [t('f.loc'), r.location], [t('f.cat'), catLabel(r.category)], [t('f.risk'), '<span class="risk ' + esc(r.risk) + '"></span>' + esc(t('r.' + r.risk))], [t('d.logged'), fmtDate(String(r.createdAt).slice(0, 10))], [t('d.due'), fmtDate(r.dueDate)], [t('d.finding'), r.description]];
@@ -602,12 +603,13 @@ async function openDetail(id) {
   if (Number(r.reopenCount)) kv.push([t('d.sentBack'), r.reopenCount]);
   const own = r.ic === OTHER_CO ? '' : '';
   let acts = '';
-  if (r.status === 'Closed by IC') acts += '<div class="card"><div class="row"><button class="btn pri" id="xVerify">' + esc(t('x.verify')) + '</button></div><label class="f" style="margin-top:10px"><span>' + esc(t('x.backNote')) + '</span><textarea id="xNote" maxlength="1000"></textarea></label><div class="row" style="margin-top:6px"><label class="f"><span>' + esc(t('x.newDue')) + '</span><input type="date" id="xDue" value="' + esc(addDays(TODAY, DUE_DAYS[r.risk] || 3)) + '"></label><button class="btn danger" id="xBack" style="align-self:flex-end">' + esc(t('x.sendBack')) + '</button></div></div>';
+  const vbar = r.status === 'Closed by IC' && can('verify') ? '<button class="btn pri" id="xVerify" style="width:100%;padding:14px;font-size:17px;margin:10px 0">✓ ' + esc(t('x.verify')) + '</button>' : '';
+  if (r.status === 'Closed by IC' && can('verify')) acts += '<div class="card"><label class="f"><span>' + esc(t('x.backNote')) + '</span><textarea id="xNote" maxlength="1000"></textarea></label><div class="row" style="margin-top:6px"><label class="f"><span>' + esc(t('x.newDue')) + '</span><input type="date" id="xDue" value="' + esc(addDays(TODAY, DUE_DAYS[r.risk] || 3)) + '"></label><button class="btn danger" id="xBack" style="align-self:flex-end">' + esc(t('x.sendBack')) + '</button></div></div>';
   if (isOpen(r)) acts += '<div class="card"><div class="row"><button class="btn" id="xResend">' + esc(t('x.resend')) + '</button><button class="btn" id="xCopy">' + esc(t('x.copy')) + '</button><a class="btn" id="xWa" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">' + esc(t('x.wa')) + '</a></div></div>' +
     '<div class="card"><h2>' + esc(t('x.update')) + '</h2><div class="row"><select id="xRisk" style="width:auto">' + RISKS.map(k => '<option value="' + k + '"' + (k === r.risk ? ' selected' : '') + '>' + esc(t('r.' + k)) + '</option>').join('') + '</select><input type="date" id="xDue2" style="width:auto" value="' + esc(String(r.dueDate).slice(0, 10)) + '"><button class="btn" id="xUpd">' + esc(t('btn.save')) + '</button></div></div>' +
     '<div class="card"><h2>' + esc(t('x.onBehalf')) + '</h2><p class="hint">' + esc(t('x.onBehalfHelp')) + '</p><label class="f"><span>' + esc(t('x.byWho')) + '</span><input id="xBy" maxlength="120"></label><label class="f" style="margin-top:8px"><span>' + esc(t('ic.note')) + '</span><textarea id="xCn" maxlength="1000"></textarea></label><div class="hint" style="margin-top:8px">' + esc(t('x.afterPh')) + '</div><div id="pb_onb"></div><div class="row end" style="margin-top:10px"><button class="btn pri" id="xOnb">' + esc(t('x.saveClose')) + '</button></div></div>';
   { const m = acts.match(/<div class="card"><div class="row"><button class="btn" id="xResend">[\s\S]*?<\/a><\/div><\/div>/); const rc = m ? m[0] : ''; const rest = rc ? acts.replace(rc, '') : acts; const mo = rest.match(/<div class="card"><h2>[^<]*<\/h2><p class="hint">[^<]*<\/p><label class="f"><span>[^<]*<\/span><input id="xBy"[\s\S]*?id="xOnb">[^<]*<\/button><\/div><\/div>/); const onb = mo ? mo[0] : ''; const rest2 = onb ? rest.replace(onb, '') : rest; acts = (can('resend') ? rc : '') + (can('verify') ? rest2 : '') + ((can('verify') || can('close')) ? onb : ''); }
-  inn.innerHTML = '<div class="row" style="justify-content:flex-end"><button class="btn" id="xClose">' + esc(t('btn.close')) + '</button></div>' + head + '<dl class="kv">' + kv.map(p => '<dt>' + esc(p[0]) + '</dt><dd>' + (String(p[1]).startsWith('<span class="risk') ? p[1] : esc(p[1])) + '</dd>').join('') + '</dl><div class="pair" id="dPair"><div class="hint">…</div></div><div style="height:12px"></div>' + acts + (can('delete') ? '<div class="row end"><button class="btn danger" id="xDel">' + esc(t('btn.delete')) + '</button></div>' : '');
+  inn.innerHTML = '<div class="row" style="justify-content:flex-end"><button class="btn" id="xClose">' + esc(t('btn.close')) + '</button></div>' + head + '<div class="pair" id="dPair"><div class="hint">…</div></div>' + vbar + '<dl class="kv">' + kv.map(p => '<dt>' + esc(p[0]) + '</dt><dd>' + (String(p[1]).startsWith('<span class="risk') ? p[1] : esc(p[1])) + '</dd>').join('') + '</dl>' + '<div style="height:12px"></div>' + acts + (can('delete') ? '<div class="row end"><button class="btn danger" id="xDel">' + esc(t('btn.delete')) + '</button></div>' : '');
   $('#xClose').onclick = closeDetail;
   PB.onb = []; renderPB('onb');
   const wire = (sel, fn) => { const e = $(sel); if (e) e.onclick = fn; };
@@ -620,9 +622,12 @@ async function openDetail(id) {
   wire('#xOnb', async () => { if (!PB.onb.length) return toast(t('ic.needPhoto'), true); try { await api(withToken({action: 'adminClose', id: id, closedBy: $('#xBy').value, note: $('#xCn').value, after: PB.onb, afterThumb: THUMBOF[PB.onb[0]]}), 60000); toast(t('x.saved')); delete PHC['']; await refreshAfter(); } catch (e) { toast(e.message, true); } });
   wire('#xDel', async () => { if (!confirm(t('x.confirmDel'))) return; try { await api(withToken({action: 'delete', ids: [id]})); toast(t('x.deleted')); closeDetail(); await loadList(); } catch (e) { toast(e.message, true); } });
   const tids = bids.concat(aids); const pair0 = $('#dPair'); if (pair0 && tids.every(i => THC[i])) pair0.innerHTML = pairThumbs(bids, aids); // instant when the list already loaded them
-  await fetchThumbs(tids);
-  const pair = $('#dPair'); if (pair && CUR === id) { pair.innerHTML = pairThumbs(bids, aids); $$('#dPair [data-pid]').forEach(i => i.onclick = () => peekFull(i.dataset.pid)); }
+  const wirePair = () => { const pair = $('#dPair'); if (pair && CUR === id) { pair.innerHTML = pairThumbs(bids, aids); $$('#dPair [data-pid]').forEach(i => i.onclick = () => peekFull(i.dataset.pid)); } };
+  await fetchThumbs(tids); wirePair();
+  const miss = tids.filter(i => i && !THC[i]); // Drive gave no preview: use the photo itself, shrink it once, remember it
+  if (miss.length) { try { const j = await api(withToken({action: 'photos', ids: miss})); for (const k of miss) { const u = j.photos && j.photos[k]; if (!u) continue; const th = await shrink(u, 120); THC[k] = th; api(withToken({action: 'saveThumb', id: k, uri: th})).catch(() => {}); } persistThumbs(); wirePair(); } catch (e) {} }
 }
+function shrink(uri, w) { return new Promise(res => { const im = new Image(); im.onload = () => { const k = Math.min(1, w / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', .6)); }; im.onerror = () => res(uri); im.src = uri; }); }
 function closeDetail() { $('#dlg').hidden = true; CUR = null; }
 async function refreshAfter(keep) { const id = CUR; await loadList(); if (keep && id) openDetail(id); else closeDetail(); }
 

@@ -1,4 +1,4 @@
-const VERSION = '1.12.1'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.12.3'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -54,6 +54,7 @@ function doPost(e) {
       case 'list': return json_(list_(requirePerm_(req, 'view')));
       case 'photos': requirePerm_(req, 'view'); return json_(photos_(req));
       case 'thumbs': requirePerm_(req, 'view'); return json_(thumbs_(req));
+      case 'saveThumb': requirePerm_(req, 'view'); saveThumb_(s_(req.id, 80), String(req.uri || '')); return json_({ ok: true });
       case 'create': return json_(create_(req, requirePerm_(req, 'log')));
       case 'update': requirePerm_(req, 'verify'); return json_(update_(req));
       case 'verify': return json_(setStatus_(req, requirePerm_(req, 'verify')));
