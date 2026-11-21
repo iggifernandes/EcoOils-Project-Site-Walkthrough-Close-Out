@@ -206,7 +206,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
  <div class="logbar"><button class="btn pri" id="btnNewFinding"><span aria-hidden="true">+</span> <span data-i="tab.log"></span></button></div>
  <nav class="tabs" id="tabs" style="margin-top:0">
   <button data-t="list" class="on" data-i="tab.list"></button><button data-t="report" data-i="tab.report"></button><button data-t="users" data-i="tab.users"></button>
-  <span class="sp"></span><button id="btnLogout" data-i="a.logout"></button>
+  <span class="sp"></span><button id="btnPhone" data-i="a.phone" hidden></button><button id="btnLogout" data-i="a.logout"></button>
  </nav>
 
  <div style="height:14px"></div>
@@ -264,7 +264,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
 <script>
 const LOCS = ["ADMINISTRATION BUILDING", "BLOCK 6 B SOUTH EAST CORNER", "BLOCK 6B", "BLOCK 6B EAST GATE", "BOILER / CHIMNEY AREA", "CONTROL ROOM, MCC ROOM", "COOLING TOWER", "DDE TREATMENT PLANT (DTP)", "DIESEL TANK", "DIRTY COOLING TOWER", "DRY AND LIQUID CHEMICAL STORAGE", "ECOOILS WARE HOUSE", "EFFLUENT TREATMENT PLANT (ETP)", "ELECTRICAL SUBSTATION (PLN)", "EXTRACTION PLANT", "FA PLANT", "FIRE WATER PUMP HOUSE", "FIRE WATER TANK", "GSB OFFICE", "HEXANE AND DIESEL RECEIVING BAY", "HEXANE TANK", "KKS OFFICE", "LOADING/UNLOADING AREA (PUMP HOUSE)", "MCC BUILDING", "NORTH-WEST CORNER BLOCK 6A", "OFFICE VEHICLE PARKING AREA", "OIL POLISHING PLANT", "PBS OFFICE", "PIPE RACK", "PRE TREATMENT UNIT (PTU)", "RAW WATER PIT", "SCHEDULED & DOMESTIC WASTE SHED", "SECURITY BUILDING", "SECURITY POST", "SILO", "TANK FARM", "TRUCK PARKING AREA", "VAPOR ABSORPTION MACHINE (VAM) SHED", "WAREHOUSE", "WAREHOUSE BLOCK B", "WASTE WATER TREATMENT PLANT (WWTP)", "WATER TANK", "WATER TREATMENT PLANT (WTP) AND WATER TANKS", "WEIGHT BRIDGE", "WEN OFFICE", "WORKSHOP AREA"];
-const APP_VERSION = '1.12.1';
+const APP_VERSION = '1.12.2';
 const API_URL = 'https://script.google.com/macros/s/AKfycbydZ7RylbsTJqJdq_zZEXees36X6u5wT7U0z59Oh1caOwZltMX8fp4xOAFRUwzW9oDO/exec';
 const COMPANIES = ['PT. ECOOILS', 'PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS', 'PT. SOS'];
 const OTHER_CO = 'OTHER (TYPE YOUR COMPANY NAME)';
@@ -314,7 +314,7 @@ const D = {
 'a.login':['HSSE sign-in','Masuk HSSE','Log masuk HSSE'],'a.email':['Email','Email','Emel'],'a.pin':['PIN (6 digits)','PIN (6 digit)','PIN (6 digit)'],'a.remember':['Keep me signed in on this device for 60 days','Biarkan saya tetap masuk di perangkat ini selama 60 hari','Kekalkan saya log masuk pada peranti ini selama 60 hari'],'a.loginBtn':['Sign in','Masuk','Log masuk'],
 'a.forgot':['Forgot PIN / set PIN','Lupa PIN / atur PIN','Lupa PIN / tetapkan PIN'],'a.resetInfo':['We email a 6-digit code to your HSSE address. Enter it with a new 6-digit PIN.','Kami mengirim kode 6 digit ke email HSSE Anda. Masukkan kode itu dengan PIN baru 6 digit.','Kami menghantar kod 6 digit ke emel HSSE anda. Masukkan kod itu bersama PIN baharu 6 digit.'],
 'a.sendCode':['Email me a code','Kirim kode ke email saya','Hantar kod ke emel saya'],'a.code':['6-digit code from the email','Kode 6 digit dari email','Kod 6 digit daripada emel'],'a.newPin':['New PIN (6 digits)','PIN baru (6 digit)','PIN baharu (6 digit)'],
-'a.newPin2':['Repeat the new PIN','Ulangi PIN baru','Ulang PIN baharu'],'a.setPin':['Set PIN','Atur PIN','Tetapkan PIN'],'a.back':['Back to sign-in','Kembali ke masuk','Kembali ke log masuk'],'a.logout':['Sign out','Keluar','Log keluar'],
+'a.newPin2':['Repeat the new PIN','Ulangi PIN baru','Ulang PIN baharu'],'a.setPin':['Set PIN','Atur PIN','Tetapkan PIN'],'a.back':['Back to sign-in','Kembali ke masuk','Kembali ke log masuk'],'a.phone':['Phone view','Tampilan ponsel','Paparan telefon'],'a.logout':['Sign out','Keluar','Log keluar'],
 'l.search':['Search ref, location, text','Cari no. ref, lokasi, teks','Cari no. rujukan, lokasi, teks'],'l.allIc':['All companies','Semua perusahaan','Semua syarikat'],'l.allSt':['All statuses','Semua status','Semua status'],
 'l.grp0':['No grouping','Tanpa pengelompokan','Tanpa kumpulan'],'l.grpLoc':['Group: location','Kelompok: lokasi','Kumpulan: lokasi'],'l.grpIc':['Group: company','Kelompok: perusahaan','Kumpulan: syarikat'],'l.grpSt':['Group: status','Kelompok: status','Kumpulan: status'],'l.grpRisk':['Group: risk','Kelompok: risiko','Kumpulan: risiko'],'l.sNew':['Sort: newest','Urut: terbaru','Isih: terbaru'],'l.sOld':['Sort: oldest','Urut: terlama','Isih: terlama'],'l.sLoc':['Sort: location A–Z','Urut: lokasi A–Z','Isih: lokasi A–Z'],'l.sIc':['Sort: company','Urut: perusahaan','Isih: syarikat'],'l.sRisk':['Sort: risk','Urut: risiko','Isih: risiko'],'l.sDue':['Sort: close-by date','Urut: tenggat','Isih: tarikh akhir'],'l.more':['Show more','Tampilkan lagi','Papar lagi'],
 'l.none':['No findings match.','Tidak ada temuan yang cocok.','Tiada dapatan yang sepadan.'],
@@ -497,11 +497,19 @@ async function doLogin() {
 }
 let ME = {perms: [], admin: false};
 const can = p => ME.perms.indexOf(p) >= 0;
+function phoneView() {
+  if ($('#phoneOv')) return;
+  const o = document.createElement('div'); o.id = 'phoneOv'; o.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:12px';
+  const h = Math.min(780, innerHeight - 40);
+  o.innerHTML = '<div style="position:relative;width:390px;max-width:100%;height:' + h + 'px;background:#fff;border:10px solid #222;border-radius:30px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.5)"><iframe src="' + location.pathname + '?phone=1" style="width:100%;height:100%;border:0"></iframe></div><button id="phoneX" style="position:absolute;top:12px;right:16px;padding:8px 14px;border-radius:8px;border:0;background:#fff;font-size:15px;cursor:pointer">✕</button>';
+  document.body.appendChild(o); const x = () => { o.remove(); document.removeEventListener('keydown', k); }, k = e => { if (e.key === 'Escape') x(); };
+  $('#phoneX').onclick = x; o.onclick = e => { if (e.target === o) x(); }; document.addEventListener('keydown', k);
+}
 function applyPerms() {
   const need = {list: 'view', report: 'view', users: 'users'};
   $$('#tabs button[data-t]').forEach(b => b.hidden = !can(need[b.dataset.t]));
   $('#rpPrint').hidden = !can('pdf'); $('#rpCsv').hidden = !can('csv');
-  $('#btnNewFinding').hidden = !can('log');
+  $('#btnNewFinding').hidden = !can('log'); $('#btnPhone').hidden = !(ME.admin || can('users')) || window.self !== window.top;
 }
 function firstTab() { return can('view') ? 'list' : can('log') ? 'log' : can('users') ? 'users' : 'none'; }
 async function enterAdmin() {
@@ -789,7 +797,7 @@ function bind() {
   $('#btnSendCode').onclick = async () => { try { await api({action: 'requestReset', email: $('#l_email').value}); toast(t('m.codeSent')); } catch (e) { toast(e.message, true); } };
   $('#btnSetPin').onclick = async () => { const p = $('#r_pin').value; if (!/^\d{6}$/.test(p)) return toast(t('m.pin6'), true); if (p !== $('#r_pin2').value) return toast(t('m.pinMismatch'), true);
     try { await api({action: 'setPin', email: $('#l_email').value, code: $('#r_code').value, pin: p}); toast(t('m.pinSet')); $('#r_pin').value = $('#r_pin2').value = $('#r_code').value = ''; $('#btnBack').click(); } catch (e) { toast(e.message, true); } };
-  ['#fl_ic', '#fl_st', '#fl_grp', '#fl_sort'].forEach(s => $(s).onchange = () => { SHOWN = 100; renderList(); }); let qT; $('#fl_q').oninput = () => { clearTimeout(qT); qT = setTimeout(() => { SHOWN = 100; renderList(); }, 200); };
+  ['#fl_ic', '#fl_st', '#fl_grp', '#fl_sort'].forEach(s => $(s).onchange = () => { SHOWN = 100; renderList(); }); let qT; $('#btnPhone').onclick = phoneView; $('#fl_q').oninput = () => { clearTimeout(qT); qT = setTimeout(() => { SHOWN = 100; renderList(); }, 200); };
   $('#f_ic').onchange = () => $('#f_ic2').hidden = $('#f_ic').value !== OTHER_CO; $('#f_loc').onchange = () => $('#f_loc2').hidden = $('#f_loc').value !== '__other';
   $('#f_risk').onchange = syncDue; $('#btnLog').onclick = submitLog;
   $('#rpBuild').onclick = buildReport; $('#rpPrint').onclick = () => window.print(); $('#rpCsv').onclick = csvReport;
