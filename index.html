@@ -132,12 +132,14 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 .rep .fnd{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:12px;break-inside:avoid;page-break-inside:avoid}
 .rep .fh{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px}
 @media print{
-  @page{size:A4;margin:12mm}
+  @page{size:A4 landscape;margin:8mm}
   body{background:#fff}
-  header.eh,.titlebar,nav.tabs,.noprint,#toast,#dlg,.tab:not(#tab-report){display:none!important}
+  header.eh,.titlebar,nav.tabs,.noprint,#toast,#dlg,#btnNewFinding,.tab:not(#tab-report){display:none!important}
   main{padding:0;max-width:none}#tab-report{display:block}
-  .rep{border:0;padding:0;margin:0}.rep .pair .ph img.big{max-height:68mm;width:auto;max-width:100%}
-  .rep .fnd{border-color:#999}
+  .rep{border:0;padding:0;margin:0}.rep .pair .ph img.big{max-height:44mm;max-width:100%;width:auto}
+  .rep .rh{margin-bottom:4px}.rep .sum{margin-bottom:6px}
+  .rpg{display:grid;grid-template-columns:1fr 1fr;gap:5mm;break-after:page;page-break-after:always;align-items:stretch}.rpg:last-child{break-after:auto;page-break-after:auto}
+  .rep .fnd{border-color:#999;margin:0;padding:5px 7px;font-size:11px}.rep .fnd p{margin:3px 0!important;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.rep .fnd h3{font-size:10px;margin:2px 0}.rep .pair{gap:6px}
 }
 </style>
 </head>
@@ -265,7 +267,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
 <script>
 const LOCS = ["ADMINISTRATION BUILDING", "BLOCK 6 B SOUTH EAST CORNER", "BLOCK 6B", "BLOCK 6B EAST GATE", "BOILER / CHIMNEY AREA", "CONTROL ROOM, MCC ROOM", "COOLING TOWER", "DDE TREATMENT PLANT (DTP)", "DIESEL TANK", "DIRTY COOLING TOWER", "DRY AND LIQUID CHEMICAL STORAGE", "ECOOILS WARE HOUSE", "EFFLUENT TREATMENT PLANT (ETP)", "ELECTRICAL SUBSTATION (PLN)", "EXTRACTION PLANT", "FA PLANT", "FIRE WATER PUMP HOUSE", "FIRE WATER TANK", "GSB OFFICE", "HEXANE AND DIESEL RECEIVING BAY", "HEXANE TANK", "KKS OFFICE", "LOADING/UNLOADING AREA (PUMP HOUSE)", "MCC BUILDING", "NORTH-WEST CORNER BLOCK 6A", "OFFICE VEHICLE PARKING AREA", "OIL POLISHING PLANT", "PBS OFFICE", "PIPE RACK", "PRE TREATMENT UNIT (PTU)", "RAW WATER PIT", "SCHEDULED & DOMESTIC WASTE SHED", "SECURITY BUILDING", "SECURITY POST", "SILO", "TANK FARM", "TRUCK PARKING AREA", "VAPOR ABSORPTION MACHINE (VAM) SHED", "WAREHOUSE", "WAREHOUSE BLOCK B", "WASTE WATER TREATMENT PLANT (WWTP)", "WATER TANK", "WATER TREATMENT PLANT (WTP) AND WATER TANKS", "WEIGHT BRIDGE", "WEN OFFICE", "WORKSHOP AREA"];
-const APP_VERSION = '1.14.0';
+const APP_VERSION = '1.14.1';
 const API_URL = 'https://script.google.com/macros/s/AKfycbydZ7RylbsTJqJdq_zZEXees36X6u5wT7U0z59Oh1caOwZltMX8fp4xOAFRUwzW9oDO/exec';
 const COMPANIES = ['PT. ECOOILS', 'PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS', 'PT. SOS'];
 const OTHER_CO = 'OTHER (TYPE YOUR COMPANY NAME)';
@@ -672,6 +674,7 @@ async function submitLog() {
 
 /* ---------- report ---------- */
 let REPORT = [];
+function pages4(a) { let h = ''; for (let i = 0; i < a.length; i += 4) h += '<div class="rpg">' + a.slice(i, i + 4).join('') + '</div>'; return h; } // 4 findings (4 before/after pairs) per landscape page
 async function buildReport() {
   const ic = $('#rp_ic').value, st = $('#rp_st').value, from = $('#rp_from').value, to = $('#rp_to').value;
   let rows = ROWS.filter(r => (!ic || r.ic === ic) && (!from || String(r.createdAt).slice(0, 10) >= from) && (!to || String(r.createdAt).slice(0, 10) <= to));
@@ -683,12 +686,12 @@ async function buildReport() {
   const period = (from || to) ? (fmtDate(from) || '…') + ' – ' + (fmtDate(to) || '…') : t('rp.all');
   out.innerHTML = '<div class="rep"><div class="rh"><div><h2>' + esc(t('rp.head')) + '</h2><div class="hint">Sei Mangkei · ' + esc(t('rp.company')) + ': <b>' + esc(ic || t('l.allIc')) + '</b> · ' + esc(t('rp.period')) + ': ' + esc(period) + ' · ' + esc(t('rp.generated')) + ': ' + esc(fmtDate(todayISO())) + '</div></div><div class="brand" style="width:110px"><img src="wordmark.png" alt="EcoOils"><div class="proj" style="font-size:11px"><span>P</span><span>R</span><span>O</span><span>J</span><span>E</span><span>C</span><span>T</span></div></div></div>' +
     '<div class="sum"><div><b>' + rows.length + '</b>' + esc(t('rp.logged')) + '</div><div><b>' + closed.length + '</b>' + esc(t('rp.closedN')) + '</div><div><b>' + ver.length + '</b>' + esc(t('rp.verN')) + '</div><div><b>' + op.length + '</b>' + esc(t('rp.openN')) + '</div><div><b>' + late.length + '</b>' + esc(t('rp.overN')) + '</div><div><b>' + avg + '</b>' + esc(t('rp.avg')) + '</div></div>' +
-    (rows.length ? rows.map(r => '<div class="fnd" id="rf_' + esc(r.id) + '"><div class="fh"><div><b>' + esc(r.id) + '</b> · ' + esc(r.ic) + ' · ' + esc(r.location) + '</div><div>' + chip(r) + '</div></div><div class="hint"><span class="risk ' + esc(r.risk) + '"></span>' + esc(t('r.' + r.risk)) + ' · ' + esc(catLabel(r.category)) + ' · ' + esc(t('d.logged')) + ' ' + esc(fmtDate(String(r.createdAt).slice(0, 10))) + ' · ' + esc(t('d.due')) + ' ' + esc(fmtDate(r.dueDate)) + (r.closedAt ? ' · ' + esc(t('d.closed')) + ' ' + esc(fmtDate(String(r.closedAt).slice(0, 10))) + ' (' + esc(r.closedBy) + ')' : '') + '</div><p style="margin:6px 0">' + esc(r.description) + (r.closeNote ? '<br><i>' + esc(t('d.note')) + ': ' + esc(r.closeNote) + '</i>' : '') + '</p><div class="pair"><div class="hint">…</div></div></div>').join('') : '<div class="hint">' + esc(t('rp.empty')) + '</div>') + '</div>';
+    (rows.length ? pages4(rows.map(r => '<div class="fnd" id="rf_' + esc(r.id) + '"><div class="fh"><div><b>' + esc(r.id) + '</b> · ' + esc(r.ic) + ' · ' + esc(r.location) + '</div><div>' + chip(r) + '</div></div><div class="hint"><span class="risk ' + esc(r.risk) + '"></span>' + esc(t('r.' + r.risk)) + ' · ' + esc(catLabel(r.category)) + ' · ' + esc(t('d.logged')) + ' ' + esc(fmtDate(String(r.createdAt).slice(0, 10))) + ' · ' + esc(t('d.due')) + ' ' + esc(fmtDate(r.dueDate)) + (r.closedAt ? ' · ' + esc(t('d.closed')) + ' ' + esc(fmtDate(String(r.closedAt).slice(0, 10))) + ' (' + esc(r.closedBy) + ')' : '') + '</div><p style="margin:6px 0">' + esc(r.description) + (r.closeNote ? '<br><i>' + esc(t('d.note')) + ': ' + esc(r.closeNote) + '</i>' : '') + '</p><div class="pair"><div class="hint">…</div></div></div>')) : '<div class="hint">' + esc(t('rp.empty')) + '</div>') + '</div>';
   $('#rpPrint').disabled = true;
-  const ids = []; rows.forEach(r => { ids.push(...idsOf(r.beforePhotos).slice(0, 3), ...idsOf(r.afterPhotos).slice(-3)); });
+  const ids = []; rows.forEach(r => { ids.push(...idsOf(r.beforePhotos).slice(0, 1), ...idsOf(r.afterPhotos).slice(-1)); });
   const need = ids.filter(i => !(i in PHC)); let done = 0;
   for (let i = 0; i < need.length; i += 3) { await loadPhotos(need.slice(i, i + 3)); done = Math.min(need.length, i + 3); $('#rpProg').textContent = t('rp.loading', {a: done, b: need.length}); }
-  rows.forEach(r => { const box = $('#rf_' + CSS.escape(r.id) + ' .pair'); if (box) box.innerHTML = pairHTML(idsOf(r.beforePhotos).slice(0, 3).map(i => PHC[i]).filter(Boolean), idsOf(r.afterPhotos).slice(-3).map(i => PHC[i]).filter(Boolean)); });
+  rows.forEach(r => { const box = $('#rf_' + CSS.escape(r.id) + ' .pair'); if (box) box.innerHTML = pairHTML(idsOf(r.beforePhotos).slice(0, 1).map(i => PHC[i]).filter(Boolean), idsOf(r.afterPhotos).slice(-1).map(i => PHC[i]).filter(Boolean)); });
   wirePeek('#reportOut'); $('#rpProg').textContent = t('rp.ready'); $('#rpPrint').disabled = !rows.length;
 }
 function csvReport() {
