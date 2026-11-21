@@ -1,4 +1,4 @@
-const VERSION = '1.11.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.12.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -81,13 +81,24 @@ function withLock_(fn) {
 }
 
 // Every read of a whole sheet goes through this. After any write, call CacheService.getScriptCache().remove(key).
+// Cache in 30,000-character pieces (one cache value is limited to 100 KB). Before, anything over 90 KB was NOT cached, so a long findings list was re-read from the sheet on every tap.
 function cached_(key, seconds, loader) {
-  const cache = CacheService.getScriptCache();
-  const hit = cache.get(key);
-  if (hit) return JSON.parse(hit);
-  const value = loader();
-  const text = JSON.stringify(value);
-  if (text.length < 90000) cache.put(key, text, seconds); // cache values are limited to 100 KB
+  const cache = CacheService.getScriptCache(), meta = cache.get(key);
+  if (meta) {
+    const n = Number(meta), keys = [];
+    for (let i = 0; i < n; i++) keys.push(key + '_' + i);
+    const got = n > 0 ? cache.getAll(keys) : {};
+    let ok = n > 0, text = '';
+    keys.forEach(function (k) { if (got[k] == null) ok = false; else text += got[k]; });
+    if (ok) return JSON.parse(text);
+  }
+  const value = loader(), text = JSON.stringify(value), parts = Math.ceil(text.length / 30000);
+  if (parts <= 30) {
+    const m = {};
+    for (let i = 0; i < parts; i++) m[key + '_' + i] = text.slice(i * 30000, (i + 1) * 30000);
+    m[key] = String(parts);
+    try { cache.putAll(m, seconds); } catch (e) {}
+  }
   return value;
 }
 
@@ -104,7 +115,11 @@ function json_(obj) {
 /* ---------- sheet helpers ---------- */
 function prop_(k) { return PropertiesService.getScriptProperties().getProperty(k); }
 function s_(v, max) { return String(v == null ? '' : v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').trim().slice(0, max || 2000); }
-function clearCache_() { CacheService.getScriptCache().removeAll(['findings', 'contacts', 'users']); }
+function clearCache_() {
+  const keys = [];
+  ['findings', 'contacts', 'users'].forEach(function (k) { keys.push(k); for (let i = 0; i < 30; i++) keys.push(k + '_' + i); });
+  CacheService.getScriptCache().removeAll(keys);
+}
 
 function tab_(name, cols) {
   const ss = SpreadsheetApp.openById(prop_('SHEET_ID'));
@@ -168,7 +183,7 @@ function savePhotos_(arr, prefix) {
     const m = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+\/=]+)$/.exec(String(uri || ''));
     if (!m) throw new Error('Invalid photo');
     const bytes = Utilities.base64Decode(m[2]);
-    if (bytes.length > 3 * 1024 * 1024) throw new Error('Photo too large');
+    if (bytes.length > 1.5 * 1024 * 1024) throw new Error('Photo too large'); // the app sends about 100-150 KB (1024 px)
     const blob = Utilities.newBlob(bytes, m[1], prefix + '-' + (i + 1) + '.' + m[1].split('/')[1]);
     ids.push(folder.createFile(blob).getId());
   });
@@ -192,19 +207,33 @@ function photos_(r) {
   return { ok: true, photos: out };
 }
 
-/* Small list thumbnails (Drive's own ~200px preview, cached 6h). '' = Drive has not made the preview yet: the page retries later. */
+/* Small thumbnails. The app makes a ~120 px thumbnail when the photo is taken and the server keeps it in the Thumbs tab (instant, no Drive call).
+   Older photos have none: those fall back to Drive's own preview once and are then kept in the Thumbs tab too. '' = not available yet. */
+const T_NAME = 'Thumbs', T_COLS = ['id', 'uri'];
+function saveThumb_(id, uri) {
+  uri = String(uri || '');
+  if (!id || !/^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(uri) || uri.length > 20000) return;
+  try { appendRows_(tab_(T_NAME, T_COLS), [[id, uri]]); CacheService.getScriptCache().put('th_' + id, uri, 21600); } catch (e) { console.error('saveThumb ' + e); }
+}
 function thumbs_(r) {
   const out = {}, cache = CacheService.getScriptCache(), fid = prop_('FOLDER_ID');
-  (r.ids || []).slice(0, 10).forEach(function (raw) {
-    const id = s_(raw, 80); out[id] = '';
+  const want = (r.ids || []).slice(0, 10).map(function (x) { return s_(x, 80); });
+  let sh = null, rowOf = null;
+  want.forEach(function (id) {
+    out[id] = '';
     try {
       const hit = cache.get('th_' + id); if (hit) { out[id] = hit; return; }
+      if (rowOf === null) {
+        rowOf = {}; sh = SpreadsheetApp.openById(prop_('SHEET_ID')).getSheetByName(T_NAME);
+        if (sh && sh.getLastRow() >= 2) sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues().forEach(function (v, i) { rowOf[String(v[0])] = i + 2; });
+      }
+      if (rowOf[id]) { const uri = String(sh.getRange(rowOf[id], 2).getValue() || ''); if (uri) { out[id] = uri; cache.put('th_' + id, uri, 21600); return; } }
       const f = DriveApp.getFileById(id), it = f.getParents(); let ok = false;
       while (it.hasNext()) if (it.next().getId() === fid) ok = true;
       if (!ok) return;
       const th = f.getThumbnail(); if (!th) return;
-      const uri = 'data:' + th.getContentType() + ';base64,' + Utilities.base64Encode(th.getBytes());
-      if (uri.length < 90000) { out[id] = uri; cache.put('th_' + id, uri, 21600); }
+      const uri2 = 'data:' + th.getContentType() + ';base64,' + Utilities.base64Encode(th.getBytes());
+      if (uri2.length < 90000) { out[id] = uri2; cache.put('th_' + id, uri2, 21600); if (/^data:image\/jpeg/.test(uri2)) saveThumb_(id, uri2); }
     } catch (e) { out[id] = ''; }
   });
   return { ok: true, thumbs: out };
@@ -397,7 +426,7 @@ function create_(r, email) {
   const due = isoDate_(f.dueDate);
   const row = withLock_(function () {
     const id = nextId_(), now = new Date().toISOString();
-    const ids = savePhotos_(r.before, id + '-before');
+    const ids = savePhotos_(r.before, id + '-before'); saveThumb_(ids[0], r.beforeThumb);
     const o = {
       id: id, createdAt: now, ic: s_(f.ic, 60).toUpperCase(), location: s_(f.location, 120), category: s_(f.category, 60), risk: s_(f.risk),
       description: s_(f.description, 1500), dueDate: due, status: 'Open', beforePhotos: ids.join(','), afterPhotos: '', closeNote: '', closedBy: '',
@@ -469,7 +498,7 @@ function adminClose_(r, email) {
     const o = readRow_(sh, row), now = new Date().toISOString();
     const sc = scopeOf_(email); if (sc && String(o.ic).toUpperCase().trim() !== sc) throw new Error('This finding belongs to another company.');
     const ver = userInfo_(email).perms.indexOf('verify') >= 0;
-    const ids = savePhotos_(r.after, o.id + '-after-' + (idsOf_(o.afterPhotos).length + 1));
+    const ids = savePhotos_(r.after, o.id + '-after-' + (idsOf_(o.afterPhotos).length + 1)); saveThumb_(ids[0], r.afterThumb);
     trash_(idsOf_(o.afterPhotos)); o.afterPhotos = ids.join(','); // one after photo only: a new one replaces the old
     o.closeNote = note; o.closedBy = name + (ver ? ' (via HSSE)' : ' (via app)'); o.closedAt = now; o.updatedAt = now;
     if (ver) { o.status = 'Verified'; o.verifiedBy = email; o.verifiedAt = now; } // a verifier closing on the spot = closed and verified
@@ -522,7 +551,7 @@ function icClose_(r) {
     if (row < 0) throw new Error('This finding was removed.');
     o = readRow_(sh, row);
     if (OPEN_STATUS.indexOf(o.status) < 0) throw new Error('This finding is already closed.');
-    const ids = savePhotos_(r.after, id + '-after-' + (idsOf_(o.afterPhotos).length + 1));
+    const ids = savePhotos_(r.after, id + '-after-' + (idsOf_(o.afterPhotos).length + 1)); saveThumb_(ids[0], r.afterThumb);
     const now = new Date().toISOString();
     trash_(idsOf_(o.afterPhotos)); o.afterPhotos = ids.join(','); // one after photo only: a new one replaces the old
     o.closeNote = note; o.closedBy = name; o.closedAt = now; o.status = 'Closed by IC'; o.updatedAt = now;

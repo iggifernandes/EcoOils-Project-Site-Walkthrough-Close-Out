@@ -96,7 +96,8 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 .kpi.red b{color:var(--red)}.kpi.grn b{color:var(--gdark)}
 .fl{display:grid;grid-template-columns:1fr 1fr 2fr;gap:8px;margin-bottom:12px}@media(max-width:620px){.fl{grid-template-columns:1fr}}
 .item{background:#fff;border:1px solid var(--line);border-left:5px solid var(--line);border-radius:8px;padding:4px 10px 4px 8px;margin-bottom:4px;cursor:pointer;display:grid;grid-template-columns:auto auto 1fr auto;gap:8px;align-items:center}
-.item .tps{display:flex;gap:3px}.tp{width:38px;height:38px;border-radius:5px;background:#eceeed center/cover no-repeat;border:1px solid var(--line);display:block;flex:none}.tp.none{background:transparent;border-style:dashed;opacity:.5}.tp.aft{border-color:var(--green)}
+.item .tps{display:flex;gap:3px}.tp{width:38px;height:38px;border-radius:5px;background:#eceeed center/cover no-repeat;border:1px solid var(--line);display:block;flex:none}.dth{display:inline-block;width:96px;height:96px;border-radius:8px;background:#eceeed center/cover no-repeat;border:1px solid var(--line);cursor:zoom-in;margin-right:6px}
+.tp.none{background:transparent;border-style:dashed;opacity:.5}.tp.aft{border-color:var(--green)}
 .item .rt{text-align:right;white-space:nowrap;font-size:12px;color:var(--mut)}
 @media(max-width:620px){.item .rt .due{display:none}.item .id{font-size:12px}}
 .item:hover{border-color:var(--gdark)}
@@ -263,7 +264,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
 <script>
 const LOCS = ["ADMINISTRATION BUILDING", "BLOCK 6 B SOUTH EAST CORNER", "BLOCK 6B", "BLOCK 6B EAST GATE", "BOILER / CHIMNEY AREA", "CONTROL ROOM, MCC ROOM", "COOLING TOWER", "DDE TREATMENT PLANT (DTP)", "DIESEL TANK", "DIRTY COOLING TOWER", "DRY AND LIQUID CHEMICAL STORAGE", "ECOOILS WARE HOUSE", "EFFLUENT TREATMENT PLANT (ETP)", "ELECTRICAL SUBSTATION (PLN)", "EXTRACTION PLANT", "FA PLANT", "FIRE WATER PUMP HOUSE", "FIRE WATER TANK", "GSB OFFICE", "HEXANE AND DIESEL RECEIVING BAY", "HEXANE TANK", "KKS OFFICE", "LOADING/UNLOADING AREA (PUMP HOUSE)", "MCC BUILDING", "NORTH-WEST CORNER BLOCK 6A", "OFFICE VEHICLE PARKING AREA", "OIL POLISHING PLANT", "PBS OFFICE", "PIPE RACK", "PRE TREATMENT UNIT (PTU)", "RAW WATER PIT", "SCHEDULED & DOMESTIC WASTE SHED", "SECURITY BUILDING", "SECURITY POST", "SILO", "TANK FARM", "TRUCK PARKING AREA", "VAPOR ABSORPTION MACHINE (VAM) SHED", "WAREHOUSE", "WAREHOUSE BLOCK B", "WASTE WATER TREATMENT PLANT (WWTP)", "WATER TANK", "WATER TREATMENT PLANT (WTP) AND WATER TANKS", "WEIGHT BRIDGE", "WEN OFFICE", "WORKSHOP AREA"];
-const APP_VERSION = '1.11.0';
+const APP_VERSION = '1.12.0';
 const API_URL = 'https://script.google.com/macros/s/AKfycbydZ7RylbsTJqJdq_zZEXees36X6u5wT7U0z59Oh1caOwZltMX8fp4xOAFRUwzW9oDO/exec';
 const COMPANIES = ['PT. ECOOILS', 'PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS', 'PT. SOS'];
 const OTHER_CO = 'OTHER (TYPE YOUR COMPANY NAME)';
@@ -332,7 +333,7 @@ const D = {
 'v.photo':['Add at least one photo.','Tambahkan minimal satu foto.','Tambah sekurang-kurangnya satu foto.'],
 'd.finding':['Finding','Temuan','Dapatan'],'d.ref':['Ref','No. ref','No. rujukan'],'d.logged':['Logged','Dicatat','Dicatat'],'d.due':['Close by','Tutup sebelum','Tutup sebelum'],'d.closed':['Closed','Ditutup','Ditutup'],'d.closedBy':['Closed by','Ditutup oleh','Ditutup oleh'],
 'd.note':['Close-out note','Catatan penutupan','Nota penutupan'],'d.verified':['Verified','Diverifikasi','Disahkan'],'d.hse':['HSSE note','Catatan HSSE','Nota HSSE'],'d.sentBack':['Times sent back','Kali dikembalikan','Kali dikembalikan'],
-'ph.before':['Before','Sebelum','Sebelum'],'ph.after':['After','Sesudah','Selepas'],'ph.none':['No photo yet','Belum ada foto','Belum ada foto'],
+'ph.before':['Before','Sebelum','Sebelum'],'ph.after':['After','Sesudah','Selepas'],'ph.full':['Tap to enlarge','Ketuk untuk memperbesar','Ketik untuk membesarkan'],'ph.none':['No photo yet','Belum ada foto','Belum ada foto'],
 'x.verify':['Verify close-out','Verifikasi penutupan','Sahkan penutupan'],'x.sendBack':['Send back','Kembalikan','Kembalikan'],'x.backNote':['What is still missing? (required)','Apa yang masih kurang? (wajib)','Apa yang masih kurang? (wajib)'],
 'x.newDue':['New close-by date','Tanggal tutup baru','Tarikh tutup baharu'],'x.resend':['Email again','Kirim email lagi','Hantar emel lagi'],'x.copy':['Copy close-out link','Salin tautan penutupan','Salin pautan penutupan'],
 'x.wa':['Share on WhatsApp','Bagikan lewat WhatsApp','Kongsi melalui WhatsApp'],'x.onBehalf':['Close on behalf of the company','Tutup atas nama perusahaan','Tutup bagi pihak syarikat'],
@@ -423,7 +424,7 @@ function readImg(file, max, q) {
       const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(im, 0, 0, w, h); res(c.toDataURL('image/jpeg', q)); }; im.onerror = rej; im.src = fr.result; };
     fr.onerror = rej; fr.readAsDataURL(file); });
 }
-const PB = {log: [], ic: [], onb: []};
+const PB = {log: [], ic: [], onb: []}, THUMBOF = {}; // THUMBOF: full photo -> its ~120 px thumbnail, sent with the photo
 function renderPB(kind) {
   const root = $('#pb_' + kind), items = PB[kind]; if (!root) return;
   root.innerHTML = '';
@@ -453,7 +454,7 @@ function wireDrop(el, kind) {
 }
 async function addFiles(kind, files) {
   for (const f of [...files]) { if (PB[kind].length >= 1) break; if (!/^image\//.test(f.type)) continue;
-    try { PB[kind].push(await readImg(f, 1280, .78)); } catch (e) { toast('Photo error', true); } }
+    try { const full = await readImg(f, 1024, .7); THUMBOF[full] = await readImg(f, 120, .6); PB[kind].push(full); } catch (e) { toast('Photo error', true); } }
   renderPB(kind);
 }
 
@@ -482,7 +483,7 @@ const chip = r => { const s = isLate(r) ? 'Overdue' : r.status; return '<span cl
 const idsOf = s => String(s || '').split(',').map(x => x.trim()).filter(Boolean);
 
 /* ---------- login ---------- */
-function logoutUI() { TOKEN = ''; try { sessionStorage.removeItem('wt_tok'); } catch (e) {} if (!IC) show('login'); }
+function logoutUI() { TOKEN = ''; try { sessionStorage.removeItem('wt_tok'); localStorage.removeItem('wt_rows'); localStorage.removeItem('wt_thc'); } catch (e) {} if (!IC) show('login'); }
 function show(v) { $('#vIC').hidden = v !== 'ic'; $('#vLogin').hidden = v !== 'login'; $('#vAdm').hidden = v !== 'adm'; }
 async function doLogin() {
   const pin = $('#l_pin').value;
@@ -502,17 +503,20 @@ function applyPerms() {
 function firstTab() { return can('view') ? 'list' : can('log') ? 'log' : can('users') ? 'users' : 'none'; }
 async function enterAdmin() {
   show('adm');
+  const listP = api(withToken({action: 'list'})).catch(e => e); // start the list at the same time as the permission check
+  try { const c = JSON.parse(localStorage.getItem('wt_rows') || 'null'); if (c && c.rows) { applyList(c); } } catch (e) {} // show the last list at once, then refresh
   try { const m = await api(withToken({action: 'me'})); ME = {perms: m.perms || [], admin: !!m.admin}; } catch (e) { if (e.message === t('e.session')) throw e; ME = e.message === 'Unknown action' ? {perms: ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'delete'], admin: true} : {perms: [], admin: false}; } // an older backend only had owners
   applyPerms();
   let want = 'list'; try { want = localStorage.getItem('wt_tab') || 'list'; } catch (e) {}
   const need = {list: 'view', report: 'view', users: 'users', log: 'log'};
   setTab(need[want] && can(need[want]) ? want : firstTab());
-  const jobs = []; if (can('view')) jobs.push(loadList()); if (can('users')) jobs.push(loadUsers());
+  const jobs = []; if (can('view')) jobs.push(loadList(listP)); if (can('users')) jobs.push(loadUsers());
   await Promise.all(jobs);
 }
 
 /* ---------- findings list ---------- */
-async function loadList() { const j = await api(withToken({action: 'list'})); ROWS = j.rows; TODAY = j.today || TODAY; fillSelects(); renderList(); }
+function applyList(j) { ROWS = j.rows; TODAY = j.today || TODAY; fillSelects(); renderList(); }
+async function loadList(pre) { const j = pre ? await pre : await api(withToken({action: 'list'})); if (j instanceof Error) throw j; applyList(j); try { localStorage.setItem('wt_rows', JSON.stringify({rows: j.rows, today: j.today})); } catch (e) {} }
 function renderList() {
   const rows = ROWS, open = rows.filter(isOpen), late = rows.filter(isLate), wait = rows.filter(r => r.status === 'Closed by IC'), ver = rows.filter(r => r.status === 'Verified');
   const closed = rows.filter(r => r.closedAt), avg = closed.length ? (closed.reduce((a, r) => a + Math.max(0, daysBetween(String(r.createdAt).slice(0, 10), String(r.closedAt).slice(0, 10))), 0) / closed.length) : null;
@@ -529,16 +533,22 @@ function renderList() {
 }
 
 /* ---------- list thumbnails: small, loaded only for rows on screen ---------- */
-const THC = {}; let thQ = new Set(), thT = null, thObs = null;
+const THC = (() => { try { return JSON.parse(localStorage.getItem('wt_thc') || '{}'); } catch (e) { return {}; } })(); let thSave = null; let thQ = new Set(), thT = null, thObs = null;
 function paintThumbs() { $$('#items [data-th]').forEach(s => { const u = THC[s.dataset.th]; if (u) s.style.backgroundImage = 'url(' + u + ')'; }); }
 function watchThumbs() {
   if (thObs) thObs.disconnect();
   thObs = new IntersectionObserver(es => { es.forEach(e => { if (!e.isIntersecting) return; thObs.unobserve(e.target); e.target.querySelectorAll('[data-th]').forEach(s => { if (!THC[s.dataset.th]) thQ.add(s.dataset.th); }); }); if (thQ.size && !thT) thT = setTimeout(flushThumbs, 150); }, {rootMargin: '200px'});
   $$('#items .item').forEach(e => thObs.observe(e));
 }
+function persistThumbs() { clearTimeout(thSave); thSave = setTimeout(() => { try { const k = Object.keys(THC); if (k.length > 300) k.slice(0, k.length - 300).forEach(x => delete THC[x]); localStorage.setItem('wt_thc', JSON.stringify(THC)); } catch (e) { try { localStorage.removeItem('wt_thc'); } catch (e2) {} } }, 800); }
+async function fetchThumbs(ids) {
+  const need = ids.filter(i => i && !THC[i]);
+  for (let i = 0; i < need.length; i += 8) { try { const j = await api(withToken({action: 'thumbs', ids: need.slice(i, i + 8)})); Object.keys(j.thumbs).forEach(k => { if (j.thumbs[k]) THC[k] = j.thumbs[k]; }); } catch (e) {} }
+  persistThumbs();
+}
 async function flushThumbs() {
   thT = null; const ids = [...thQ]; thQ = new Set();
-  for (let i = 0; i < ids.length; i += 8) { try { const j = await api(withToken({action: 'thumbs', ids: ids.slice(i, i + 8)})); Object.keys(j.thumbs).forEach(k => { if (j.thumbs[k]) THC[k] = j.thumbs[k]; }); paintThumbs(); } catch (e) {} }
+  for (let i = 0; i < ids.length; i += 8) { try { const j = await api(withToken({action: 'thumbs', ids: ids.slice(i, i + 8)})); Object.keys(j.thumbs).forEach(k => { if (j.thumbs[k]) THC[k] = j.thumbs[k]; }); paintThumbs(); persistThumbs(); } catch (e) {} }
 }
 
 /* ---------- finding detail ---------- */
@@ -549,6 +559,15 @@ async function loadPhotos(ids) {
 function pairHTML(before, after) {
   const col = (label, arr) => '<div><h3>' + esc(label) + '</h3>' + (arr.length ? '<div class="ph">' + arr.map((s, i) => '<img class="' + (i === 0 ? 'big' : 'sm') + '" data-src="1" alt="" src="' + s + '">').join('') + '</div>' : '<div class="none">' + esc(t('ph.none')) + '</div>') + '</div>';
   return col(t('ph.before'), before) + col(t('ph.after'), after);
+}
+function pairThumbs(before, after) {
+  const col = (label, ids) => '<div><h3>' + esc(label) + '</h3>' + (ids.length ? '<div class="ph">' + ids.map(i => '<span class="dth" data-pid="' + esc(i) + '" title="' + esc(t('ph.full')) + '"' + (THC[i] ? ' style="background-image:url(' + THC[i] + ')"' : '') + '></span>').join('') + '</div>' : '<div class="none">' + esc(t('ph.none')) + '</div>') + '</div>';
+  return col(t('ph.before'), before) + col(t('ph.after'), after);
+}
+// Thumbnail first, then the full photo only when asked for (one small request).
+async function peekFull(id) {
+  peek(THC[id] || 'data:image/gif;base64,R0lGODlhAQABAAAAACw=');
+  try { const j = await api(withToken({action: 'photos', ids: [id]})); const u = j.photos && j.photos[id]; if (u && !$('#peek').hidden) $('#peek img').src = u; } catch (e) {}
 }
 function wirePeek(root) { $$(root + ' img[data-src]').forEach(i => i.onclick = () => peek(i.src)); }
 async function openDetail(id) {
@@ -578,10 +597,11 @@ async function openDetail(id) {
   wire('#xCopy', async () => { try { await navigator.clipboard.writeText(r.link); toast(t('x.copied')); } catch (e) { toast(r.link); } });
   const wa = $('#xWa'); if (wa) wa.href = 'https://wa.me/?text=' + encodeURIComponent('[' + r.id + '] ' + r.risk + ' - ' + r.location + ' - ' + t('d.due') + ' ' + fmtDate(r.dueDate) + '\n' + r.description + '\n' + r.link);
   wire('#xUpd', async () => { try { await api(withToken({action: 'update', id: id, fields: {risk: $('#xRisk').value, dueDate: $('#xDue2').value}})); toast(t('x.saved')); await refreshAfter(true); } catch (e) { toast(e.message, true); } });
-  wire('#xOnb', async () => { if (!PB.onb.length) return toast(t('ic.needPhoto'), true); try { await api(withToken({action: 'adminClose', id: id, closedBy: $('#xBy').value, note: $('#xCn').value, after: PB.onb}), 60000); toast(t('x.saved')); delete PHC['']; await refreshAfter(); } catch (e) { toast(e.message, true); } });
+  wire('#xOnb', async () => { if (!PB.onb.length) return toast(t('ic.needPhoto'), true); try { await api(withToken({action: 'adminClose', id: id, closedBy: $('#xBy').value, note: $('#xCn').value, after: PB.onb, afterThumb: THUMBOF[PB.onb[0]]}), 60000); toast(t('x.saved')); delete PHC['']; await refreshAfter(); } catch (e) { toast(e.message, true); } });
   wire('#xDel', async () => { if (!confirm(t('x.confirmDel'))) return; try { await api(withToken({action: 'delete', ids: [id]})); toast(t('x.deleted')); closeDetail(); await loadList(); } catch (e) { toast(e.message, true); } });
-  await loadPhotos(bids.concat(aids));
-  const pair = $('#dPair'); if (pair && CUR === id) { pair.innerHTML = pairHTML(bids.map(i => PHC[i]).filter(Boolean), aids.map(i => PHC[i]).filter(Boolean)); wirePeek('#dPair'); }
+  const tids = bids.concat(aids); const pair0 = $('#dPair'); if (pair0 && tids.every(i => THC[i])) pair0.innerHTML = pairThumbs(bids, aids); // instant when the list already loaded them
+  await fetchThumbs(tids);
+  const pair = $('#dPair'); if (pair && CUR === id) { pair.innerHTML = pairThumbs(bids, aids); $$('#dPair [data-pid]').forEach(i => i.onclick = () => peekFull(i.dataset.pid)); }
 }
 function closeDetail() { $('#dlg').hidden = true; CUR = null; }
 async function refreshAfter(keep) { const id = CUR; await loadList(); if (keep && id) openDetail(id); else closeDetail(); }
@@ -596,7 +616,7 @@ async function submitLog() {
   if (!PB.log.length) return toast(t('v.photo'), true);
   const b = $('#btnLog'); b.disabled = true; toast(t('m.sending'));
   try {
-    const j = await api(withToken({action: 'create', fields, before: PB.log}), 90000);
+    const j = await api(withToken({action: 'create', fields, before: PB.log, beforeThumb: THUMBOF[PB.log[0]]}), 90000);
     PB.log = []; renderPB('log'); $('#f_desc').value = ''; $('#f_loc').value = ''; $('#f_loc2').hidden = true; $('#f_cat').value = '';
     const msg = j.mail.sent ? t('log.mailSent', {n: j.mail.sent}) : (j.mail.quota ? t('log.quota') : t('log.noMail'));
     const dn = $('#logDone'); dn.hidden = false;
@@ -733,7 +753,7 @@ async function sendIC() {
   if (name.length < 2) return toast(t('ic.needName'), true);
   if (!PB.ic.length) return toast(t('ic.needPhoto'), true);
   const b = $('#icSend'); b.disabled = true; toast(t('m.sending'));
-  try { await api({action: 'icClose', c: IC.c, closedBy: name, note: $('#ic_note').value, after: PB.ic}, 90000); IC.done = true; IC.f.status = 'Closed by IC'; IC.after = PB.ic.slice(); PB.ic = []; renderIC(); window.scrollTo(0, 0); }
+  try { await api({action: 'icClose', c: IC.c, closedBy: name, note: $('#ic_note').value, after: PB.ic, afterThumb: THUMBOF[PB.ic[0]]}, 90000); IC.done = true; IC.f.status = 'Closed by IC'; IC.after = PB.ic.slice(); PB.ic = []; renderIC(); window.scrollTo(0, 0); }
   catch (e) { toast(e.message, true); b.disabled = false; }
 }
 
