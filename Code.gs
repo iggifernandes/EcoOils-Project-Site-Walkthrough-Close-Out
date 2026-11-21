@@ -1,4 +1,4 @@
-const VERSION = '1.8.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.9.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -16,11 +16,13 @@ const U_NAME = 'Users';
 const U_COLS = ['id', 'name', 'perms', 'active', 'updatedAt', 'company']; // id = the person's email (lowercase)
 // What a ticked box allows. Owners (ADMIN_EMAILS) always have everything.
 // view=read, pdf=print/PDF report, csv=CSV export, log=log findings, verify=verify/send back/close/edit, resend=resend email,
+// close = upload the AFTER photo and close a finding from the app (status Closed by IC, still needs verifying; Verify alone is not needed).
 // delete=delete findings, users=manage users (also runs the daily digest by hand).
 // ic = this person is the contractor's contact: they are emailed the findings of their company (set the Company in the Users tab).
 // Email copies (not app access): nNew = a copy of every new finding sent to the contractor, nDigest = a copy of the daily summary, nWeekly = the weekly summary (one email, Monday by default, Script Property WEEKLY_DAY),
 // nClose = the "closed by IC, please check" email and the High-risk reminder. Owners (ADMIN_EMAILS) always get all three.
-const PERMS = ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'delete', 'users', 'ic', 'nNew', 'nDigest', 'nWeekly', 'nClose'];
+const IC_COMPANIES = ['PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS']; // a person whose Company is one of these only ever sees that company's findings
+const PERMS = ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'close', 'delete', 'users', 'ic', 'nNew', 'nDigest', 'nWeekly', 'nClose'];
 const DATE_COLS = ['dueDate'];
 const RISKS = ['High', 'Medium', 'Low'];
 const OPEN_STATUS = ['Open', 'Reopened'];
@@ -47,12 +49,12 @@ function doPost(e) {
       case 'icView': return json_(icView_(req));
       case 'icClose': return json_(icClose_(req));
       case 'me': return json_(me_(req));
-      case 'list': requirePerm_(req, 'view'); return json_(list_());
+      case 'list': return json_(list_(requirePerm_(req, 'view')));
       case 'photos': requirePerm_(req, 'view'); return json_(photos_(req));
       case 'create': return json_(create_(req, requirePerm_(req, 'log')));
       case 'update': requirePerm_(req, 'verify'); return json_(update_(req));
       case 'verify': return json_(setStatus_(req, requirePerm_(req, 'verify')));
-      case 'adminClose': return json_(adminClose_(req, requirePerm_(req, 'verify')));
+      case 'adminClose': return json_(adminClose_(req, requirePerm_(req, ['verify', 'close'])));
       case 'delete': requirePerm_(req, 'delete'); return json_(delete_(req));
       case 'resend': requirePerm_(req, 'resend'); return json_(resend_(req));
       case 'weeklyNow': requirePerm_(req, 'users'); return json_(weekly_({ force: true }));
@@ -205,7 +207,7 @@ function userInfo_(email) {
   const u = users_().filter(function (x) { return String(x.id).toLowerCase() === email && String(x.active) !== 'false' && String(x.active) !== 'FALSE'; })[0];
   if (!u) return null;
   const p = String(u.perms || '').split(',').map(function (x) { return x.trim(); }).filter(function (x) { return PERMS.indexOf(x) >= 0; });
-  return { email: email, admin: false, perms: p, name: u.name || '' };
+  return { email: email, admin: false, perms: p, name: u.name || '', company: String(u.company || '').toUpperCase().trim() };
 }
 function me_(r) { const i = userInfo_(requirePerm_(r, '')); if (!i) throw new Error('SESSION'); return { ok: true, email: i.email, admin: i.admin, perms: i.perms, name: i.name }; }
 
@@ -355,8 +357,11 @@ function parseLink_(v) {
 }
 
 /* ---------- admin: findings ---------- */
-function list_() {
-  const rows = findings_().map(function (o) { const c = {}; Object.keys(o).forEach(function (k) { c[k] = o[k]; }); c.link = closeLink_(o.id); return c; });
+function scopeOf_(email) { const i = userInfo_(email); return i && !i.admin && IC_COMPANIES.indexOf(i.company) >= 0 ? i.company : ''; }
+
+function list_(email) {
+  const sc = scopeOf_(email);
+  const rows = findings_().filter(function (o) { return !sc || String(o.ic).toUpperCase().trim() === sc; }).map(function (o) { const c = {}; Object.keys(o).forEach(function (k) { c[k] = o[k]; }); c.link = closeLink_(o.id); return c; });
   return { ok: true, rows: rows, today: todayIso_() };
 }
 
@@ -440,13 +445,17 @@ function adminClose_(r, email) {
     const sh = tab_(F_NAME, F_COLS), row = findRow_(sh, r.id);
     if (row < 0) throw new Error('Finding not found');
     const o = readRow_(sh, row), now = new Date().toISOString();
+    const sc = scopeOf_(email); if (sc && String(o.ic).toUpperCase().trim() !== sc) throw new Error('This finding belongs to another company.');
+    const ver = userInfo_(email).perms.indexOf('verify') >= 0;
     const ids = savePhotos_(r.after, o.id + '-after-' + (idsOf_(o.afterPhotos).length + 1));
     o.afterPhotos = idsOf_(o.afterPhotos).concat(ids).join(',');
-    o.closeNote = note; o.closedBy = name + ' (via HSSE)'; o.closedAt = now;
-    o.status = 'Verified'; o.verifiedBy = email; o.verifiedAt = now; o.updatedAt = now;
+    o.closeNote = note; o.closedBy = name + (ver ? ' (via HSSE)' : ' (via app)'); o.closedAt = now; o.updatedAt = now;
+    if (ver) { o.status = 'Verified'; o.verifiedBy = email; o.verifiedAt = now; } // a verifier closing on the spot = closed and verified
+    else o.status = 'Closed by IC'; // close only: waits for verification (auto-verify rules apply)
     writeRow_(sh, row, o, F_COLS);
     clearCache_();
-    return { ok: true };
+    if (!ver) { try { notifyClosed_(o); } catch (e) { console.error('notifyClosed ' + e); } }
+    return { ok: true, verified: ver };
   });
 }
 
