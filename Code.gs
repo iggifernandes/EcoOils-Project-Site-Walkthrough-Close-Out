@@ -1,4 +1,4 @@
-const VERSION = '1.12.3'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.13.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -54,6 +54,7 @@ function doPost(e) {
       case 'list': return json_(list_(requirePerm_(req, 'view')));
       case 'photos': requirePerm_(req, 'view'); return json_(photos_(req));
       case 'thumbs': requirePerm_(req, 'view'); return json_(thumbs_(req));
+      case 'markPhoto': return json_(markPhoto_(req, requirePerm_(req, 'log')));
       case 'saveThumb': requirePerm_(req, 'view'); saveThumb_(s_(req.id, 80), String(req.uri || '')); return json_({ ok: true });
       case 'create': return json_(create_(req, requirePerm_(req, 'log')));
       case 'update': requirePerm_(req, 'verify'); return json_(update_(req));
@@ -489,6 +490,25 @@ function setStatus_(r, email) {
 }
 
 // HSSE closes a finding on behalf of the IC (for example the IC sent the after photo by WhatsApp). It is verified straight away.
+/* Free-hand marking: the marked copy replaces the photo (one before / one after stays true). */
+function markPhoto_(r, email) {
+  return withLock_(function () {
+    const sh = tab_(F_NAME, F_COLS), row = findRow_(sh, r.id);
+    if (row < 0) throw new Error('Finding not found');
+    const o = readRow_(sh, row), sc = scopeOf_(email);
+    if (sc && String(o.ic).toUpperCase().trim() !== sc) throw new Error('This finding belongs to another company.');
+    const pid = s_(r.photoId, 80), bef = idsOf_(o.beforePhotos), aft = idsOf_(o.afterPhotos);
+    const inB = bef.indexOf(pid) >= 0, inA = aft.indexOf(pid) >= 0;
+    if (!inB && !inA) throw new Error('Photo not found on this finding');
+    const ids = savePhotos_([r.photo], o.id + '-' + (inB ? 'before' : 'after') + '-marked'); saveThumb_(ids[0], r.thumb);
+    trash_([pid]);
+    if (inB) o.beforePhotos = ids.join(','); else o.afterPhotos = ids.join(',');
+    o.updatedAt = new Date().toISOString();
+    writeRow_(sh, row, o, F_COLS); clearCache_();
+    return { ok: true };
+  });
+}
+
 function adminClose_(r, email) {
   const name = s_(r.closedBy, 120), note = s_(r.note, 1000);
   if (name.length < 2) throw new Error('Write who closed it');

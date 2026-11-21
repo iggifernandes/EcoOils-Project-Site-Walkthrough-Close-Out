@@ -119,7 +119,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 #dlg .in{background:#fff;border-radius:12px;width:567px;max-width:100%;height:567px;max-height:100%;overflow:auto;padding:14px;box-shadow:0 10px 40px rgba(0,0,0,.4)}
 #dlg .pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}#dlg .dth{width:150px;height:150px;margin:0}#dlg .kv{font-size:13px}
 #peek{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:90;display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:10px}
-#peek img{max-width:100%;max-height:100%;border-radius:6px}
+#peek img{max-width:100%;max-height:100%;border-radius:6px}#pkC{position:absolute;touch-action:none;cursor:crosshair;border-radius:6px}#pkBar{position:absolute;left:0;right:0;bottom:14px;display:flex;justify-content:center;gap:8px;pointer-events:none}#pkBar>*,#pkBar button{pointer-events:auto}#pkTools{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}#pkRed{color:#e11d1d}#pkYel{color:#f5c400}#pkBar .btn{padding:9px 14px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;background:#231f20;color:#fff;padding:10px 16px;border-radius:9px;z-index:99;max-width:92vw}
 .toast.err{background:var(--red)}
 .ct{display:flex;gap:8px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px;background:#fff}
@@ -260,12 +260,12 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 </main>
 
 <div id="dlg" hidden><div class="in" id="dlgIn"></div></div>
-<div id="peek" hidden><img alt=""></div>
+<div id="peek" hidden><img alt=""><canvas id="pkC" hidden></canvas><div id="pkBar"><button type="button" class="btn" id="pkMark" data-i="pk.mark" hidden></button><span id="pkTools" hidden><button type="button" class="btn" id="pkRed">●</button><button type="button" class="btn" id="pkYel">●</button><button type="button" class="btn" id="pkUndo" data-i="pk.undo"></button><button type="button" class="btn" id="pkClr" data-i="pk.clear"></button><button type="button" class="btn" id="pkCancel" data-i="pk.cancel"></button><button type="button" class="btn pri" id="pkDone" data-i="pk.done"></button></span></div></div>
 <div id="toast" class="toast" hidden></div>
 
 <script>
 const LOCS = ["ADMINISTRATION BUILDING", "BLOCK 6 B SOUTH EAST CORNER", "BLOCK 6B", "BLOCK 6B EAST GATE", "BOILER / CHIMNEY AREA", "CONTROL ROOM, MCC ROOM", "COOLING TOWER", "DDE TREATMENT PLANT (DTP)", "DIESEL TANK", "DIRTY COOLING TOWER", "DRY AND LIQUID CHEMICAL STORAGE", "ECOOILS WARE HOUSE", "EFFLUENT TREATMENT PLANT (ETP)", "ELECTRICAL SUBSTATION (PLN)", "EXTRACTION PLANT", "FA PLANT", "FIRE WATER PUMP HOUSE", "FIRE WATER TANK", "GSB OFFICE", "HEXANE AND DIESEL RECEIVING BAY", "HEXANE TANK", "KKS OFFICE", "LOADING/UNLOADING AREA (PUMP HOUSE)", "MCC BUILDING", "NORTH-WEST CORNER BLOCK 6A", "OFFICE VEHICLE PARKING AREA", "OIL POLISHING PLANT", "PBS OFFICE", "PIPE RACK", "PRE TREATMENT UNIT (PTU)", "RAW WATER PIT", "SCHEDULED & DOMESTIC WASTE SHED", "SECURITY BUILDING", "SECURITY POST", "SILO", "TANK FARM", "TRUCK PARKING AREA", "VAPOR ABSORPTION MACHINE (VAM) SHED", "WAREHOUSE", "WAREHOUSE BLOCK B", "WASTE WATER TREATMENT PLANT (WWTP)", "WATER TANK", "WATER TREATMENT PLANT (WTP) AND WATER TANKS", "WEIGHT BRIDGE", "WEN OFFICE", "WORKSHOP AREA"];
-const APP_VERSION = '1.12.3';
+const APP_VERSION = '1.13.0';
 const API_URL = 'https://script.google.com/macros/s/AKfycbydZ7RylbsTJqJdq_zZEXees36X6u5wT7U0z59Oh1caOwZltMX8fp4xOAFRUwzW9oDO/exec';
 const COMPANIES = ['PT. ECOOILS', 'PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS', 'PT. SOS'];
 const OTHER_CO = 'OTHER (TYPE YOUR COMPANY NAME)';
@@ -315,7 +315,8 @@ const D = {
 'a.login':['HSSE sign-in','Masuk HSSE','Log masuk HSSE'],'a.email':['Email','Email','Emel'],'a.pin':['PIN (6 digits)','PIN (6 digit)','PIN (6 digit)'],'a.remember':['Keep me signed in on this device for 60 days','Biarkan saya tetap masuk di perangkat ini selama 60 hari','Kekalkan saya log masuk pada peranti ini selama 60 hari'],'a.loginBtn':['Sign in','Masuk','Log masuk'],
 'a.forgot':['Forgot PIN / set PIN','Lupa PIN / atur PIN','Lupa PIN / tetapkan PIN'],'a.resetInfo':['We email a 6-digit code to your HSSE address. Enter it with a new 6-digit PIN.','Kami mengirim kode 6 digit ke email HSSE Anda. Masukkan kode itu dengan PIN baru 6 digit.','Kami menghantar kod 6 digit ke emel HSSE anda. Masukkan kod itu bersama PIN baharu 6 digit.'],
 'a.sendCode':['Email me a code','Kirim kode ke email saya','Hantar kod ke emel saya'],'a.code':['6-digit code from the email','Kode 6 digit dari email','Kod 6 digit daripada emel'],'a.newPin':['New PIN (6 digits)','PIN baru (6 digit)','PIN baharu (6 digit)'],
-'a.newPin2':['Repeat the new PIN','Ulangi PIN baru','Ulang PIN baharu'],'a.setPin':['Set PIN','Atur PIN','Tetapkan PIN'],'a.back':['Back to sign-in','Kembali ke masuk','Kembali ke log masuk'],'a.phone':['Phone view','Tampilan ponsel','Paparan telefon'],'a.logout':['Sign out','Keluar','Log keluar'],
+'a.newPin2':['Repeat the new PIN','Ulangi PIN baru','Ulang PIN baharu'],'a.setPin':['Set PIN','Atur PIN','Tetapkan PIN'],'a.back':['Back to sign-in','Kembali ke masuk','Kembali ke log masuk'],'pk.mark':['✏ Mark photo','✏ Tandai foto','✏ Tanda foto'],'pk.undo':['Undo','Urungkan','Buat asal'],'pk.clear':['Clear','Hapus','Kosongkan'],'pk.cancel':['Cancel','Batal','Batal'],'pk.done':['✓ Keep marking','✓ Simpan tanda','✓ Simpan tanda'],'pk.saved':['Marked photo saved.','Foto bertanda tersimpan.','Foto bertanda disimpan.'],
+'a.phone':['Phone view','Tampilan ponsel','Paparan telefon'],'a.logout':['Sign out','Keluar','Log keluar'],
 'l.search':['Search ref, location, text','Cari no. ref, lokasi, teks','Cari no. rujukan, lokasi, teks'],'l.allIc':['All companies','Semua perusahaan','Semua syarikat'],'l.allSt':['All statuses','Semua status','Semua status'],
 'l.grp0':['No grouping','Tanpa pengelompokan','Tanpa kumpulan'],'l.grpLoc':['Group: location','Kelompok: lokasi','Kumpulan: lokasi'],'l.grpIc':['Group: company','Kelompok: perusahaan','Kumpulan: syarikat'],'l.grpSt':['Group: status','Kelompok: status','Kumpulan: status'],'l.grpRisk':['Group: risk','Kelompok: risiko','Kumpulan: risiko'],'l.sNew':['Sort: newest','Urut: terbaru','Isih: terbaru'],'l.sOld':['Sort: oldest','Urut: terlama','Isih: terlama'],'l.sLoc':['Sort: location A–Z','Urut: lokasi A–Z','Isih: lokasi A–Z'],'l.sIc':['Sort: company','Urut: perusahaan','Isih: syarikat'],'l.sRisk':['Sort: risk','Urut: risiko','Isih: risiko'],'l.sDue':['Sort: close-by date','Urut: tenggat','Isih: tarikh akhir'],'l.more':['Show more','Tampilkan lagi','Papar lagi'],
 'l.none':['No findings match.','Tidak ada temuan yang cocok.','Tiada dapatan yang sepadan.'],
@@ -417,9 +418,27 @@ async function resume() {
 }
 
 /* ---------- photos: peek overlay, drag and drop, + button ---------- */
-function peek(src) { $('#peek img').src = src; $('#peek').hidden = false; }
-$('#peek').addEventListener('click', () => $('#peek').hidden = true);
-document.addEventListener('keydown', e => { if (e.key === 'Escape') $('#peek').hidden = true; });
+let PKOPT = null, PKON = false, PKS = [], PKCOL = '#e11d1d';
+function peek(src, opt) { PKOPT = opt || null; markOff(); $('#peek img').src = src; $('#peek').hidden = false; $('#pkMark').hidden = !PKOPT; }
+function peekEnable(opt) { PKOPT = opt; $('#pkMark').hidden = !opt; }
+function peekClose() { markOff(); $('#peek').hidden = true; }
+$('#peek').addEventListener('click', e => { if (PKON || e.target.closest('#pkBar')) return; peekClose(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (PKON) markOff(); else peekClose(); } });
+/* free-hand marking: draw on the photo with a finger or mouse, then keep the marked copy */
+function markOn() { const im = $('#peek img'), c = $('#pkC'), r = im.getBoundingClientRect(); if (!im.naturalWidth) return; PKON = true; PKS = [];
+  c.hidden = false; c.style.left = r.left + 'px'; c.style.top = r.top + 'px'; c.style.width = r.width + 'px'; c.style.height = r.height + 'px'; c.width = im.naturalWidth; c.height = im.naturalHeight;
+  $('#pkMark').hidden = true; $('#pkTools').hidden = false; markDraw(); }
+function markOff() { PKON = false; PKS = []; const c = $('#pkC'); if (c) c.hidden = true; const t2 = $('#pkTools'); if (t2) t2.hidden = true; const m = $('#pkMark'); if (m) m.hidden = !PKOPT || $('#peek').hidden; }
+function markDraw() { const c = $('#pkC'), g = c.getContext('2d'); g.clearRect(0, 0, c.width, c.height); g.lineCap = g.lineJoin = 'round'; g.lineWidth = Math.max(4, c.width / 120);
+  PKS.forEach(s2 => { g.strokeStyle = s2.col; g.beginPath(); s2.p.forEach((q, i) => i ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1])); if (s2.p.length === 1) g.lineTo(s2.p[0][0] + .1, s2.p[0][1]); g.stroke(); }); }
+(() => { const c = $('#pkC'); let down = false; const pt = e => { const r = c.getBoundingClientRect(); return [(e.clientX - r.left) * c.width / r.width, (e.clientY - r.top) * c.height / r.height]; };
+  c.addEventListener('pointerdown', e => { down = true; c.setPointerCapture(e.pointerId); PKS.push({col: PKCOL, p: [pt(e)]}); markDraw(); e.preventDefault(); });
+  c.addEventListener('pointermove', e => { if (!down) return; PKS[PKS.length - 1].p.push(pt(e)); markDraw(); e.preventDefault(); });
+  ['pointerup', 'pointercancel'].forEach(n => c.addEventListener(n, () => { down = false; }));
+  $('#pkMark').onclick = markOn; $('#pkRed').onclick = () => { PKCOL = '#e11d1d'; }; $('#pkYel').onclick = () => { PKCOL = '#f5c400'; };
+  $('#pkUndo').onclick = () => { PKS.pop(); markDraw(); }; $('#pkClr').onclick = () => { PKS = []; markDraw(); }; $('#pkCancel').onclick = markOff;
+  $('#pkDone').onclick = async () => { if (!PKS.length) return markOff(); const im = $('#peek img'), o = document.createElement('canvas'); o.width = im.naturalWidth; o.height = im.naturalHeight; const g = o.getContext('2d'); g.drawImage(im, 0, 0); g.drawImage(c, 0, 0);
+    const full = o.toDataURL('image/jpeg', .72), th = await shrink(full, 120), cb = PKOPT && PKOPT.onSave; markOff(); if (cb) { try { await cb(full, th); } catch (e) { toast(e.message, true); } } }; })();
 function readImg(file, max, q) {
   return new Promise((res, rej) => { const fr = new FileReader();
     fr.onload = () => { const im = new Image(); im.onload = () => { const s = Math.min(1, max / Math.max(im.width, im.height)), w = Math.round(im.width * s), h = Math.round(im.height * s);
@@ -433,7 +452,7 @@ function renderPB(kind) {
   if (items.length) {
     const th = document.createElement('div'); th.className = 'thumbs';
     items.forEach((src, i) => { const d = document.createElement('div'); d.className = 'th'; d.innerHTML = '<img alt=""><button type="button" aria-label="remove">×</button>';
-      d.querySelector('img').src = src; d.querySelector('img').onclick = () => peek(src);
+      d.querySelector('img').src = src; d.querySelector('img').onclick = () => peek(src, {onSave: (full, th) => { THUMBOF[full] = th; items[i] = full; renderPB(kind); peekClose(); }});
       d.querySelector('button').onclick = e => { e.stopPropagation(); items.splice(i, 1); renderPB(kind); }; th.appendChild(d); });
     root.appendChild(th);
   }
@@ -588,7 +607,7 @@ function pairThumbs(before, after) {
 // Thumbnail first, then the full photo only when asked for (one small request).
 async function peekFull(id) {
   peek(THC[id] || 'data:image/gif;base64,R0lGODlhAQABAAAAACw=');
-  try { const j = await api(withToken({action: 'photos', ids: [id]})); const u = j.photos && j.photos[id]; if (u && !$('#peek').hidden) $('#peek img').src = u; } catch (e) {}
+  try { const j = await api(withToken({action: 'photos', ids: [id]})); const u = j.photos && j.photos[id]; if (u && !$('#peek').hidden) { $('#peek img').src = u; if (can('log') && CUR) { const fid = CUR; peekEnable({onSave: async (full, th) => { await api(withToken({action: 'markPhoto', id: fid, photoId: id, photo: full, thumb: th}), 60000); toast(t('pk.saved')); peekClose(); await refreshAfter(true); }}); } } } catch (e) {}
 }
 function wirePeek(root) { $$(root + ' img[data-src]').forEach(i => i.onclick = () => peek(i.src)); }
 async function openDetail(id) {
