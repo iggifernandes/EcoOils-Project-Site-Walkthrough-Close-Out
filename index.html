@@ -95,7 +95,10 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 .kpi b{display:block;font:300 28px/1.1 Jost,sans-serif;letter-spacing:.04em}.kpi span{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
 .kpi.red b{color:var(--red)}.kpi.grn b{color:var(--gdark)}
 .fl{display:grid;grid-template-columns:1fr 1fr 2fr;gap:8px;margin-bottom:12px}@media(max-width:620px){.fl{grid-template-columns:1fr}}
-.item{background:#fff;border:1px solid var(--line);border-left:5px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:4px 12px;align-items:center}
+.item{background:#fff;border:1px solid var(--line);border-left:5px solid var(--line);border-radius:8px;padding:4px 10px 4px 8px;margin-bottom:4px;cursor:pointer;display:grid;grid-template-columns:auto auto 1fr auto;gap:8px;align-items:center}
+.item .tps{display:flex;gap:3px}.tp{width:38px;height:38px;border-radius:5px;background:#eceeed center/cover no-repeat;border:1px solid var(--line);display:block;flex:none}.tp.none{background:transparent;border-style:dashed;opacity:.5}.tp.aft{border-color:var(--green)}
+.item .rt{text-align:right;white-space:nowrap;font-size:12px;color:var(--mut)}
+@media(max-width:620px){.item .rt .due{display:none}.item .id{font-size:12px}}
 .item:hover{border-color:var(--gdark)}
 .item.High{border-left-color:var(--red)}.item.Medium{border-left-color:var(--yellow)}.item.Low{border-left-color:var(--green)}
 .item .id{font-weight:600;letter-spacing:.06em}.item .mid{min-width:0}.item .mid div{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -260,7 +263,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
 <script>
 const LOCS = ["ADMINISTRATION BUILDING", "BLOCK 6 B SOUTH EAST CORNER", "BLOCK 6B", "BLOCK 6B EAST GATE", "BOILER / CHIMNEY AREA", "CONTROL ROOM, MCC ROOM", "COOLING TOWER", "DDE TREATMENT PLANT (DTP)", "DIESEL TANK", "DIRTY COOLING TOWER", "DRY AND LIQUID CHEMICAL STORAGE", "ECOOILS WARE HOUSE", "EFFLUENT TREATMENT PLANT (ETP)", "ELECTRICAL SUBSTATION (PLN)", "EXTRACTION PLANT", "FA PLANT", "FIRE WATER PUMP HOUSE", "FIRE WATER TANK", "GSB OFFICE", "HEXANE AND DIESEL RECEIVING BAY", "HEXANE TANK", "KKS OFFICE", "LOADING/UNLOADING AREA (PUMP HOUSE)", "MCC BUILDING", "NORTH-WEST CORNER BLOCK 6A", "OFFICE VEHICLE PARKING AREA", "OIL POLISHING PLANT", "PBS OFFICE", "PIPE RACK", "PRE TREATMENT UNIT (PTU)", "RAW WATER PIT", "SCHEDULED & DOMESTIC WASTE SHED", "SECURITY BUILDING", "SECURITY POST", "SILO", "TANK FARM", "TRUCK PARKING AREA", "VAPOR ABSORPTION MACHINE (VAM) SHED", "WAREHOUSE", "WAREHOUSE BLOCK B", "WASTE WATER TREATMENT PLANT (WWTP)", "WATER TANK", "WATER TREATMENT PLANT (WTP) AND WATER TANKS", "WEIGHT BRIDGE", "WEN OFFICE", "WORKSHOP AREA"];
-const APP_VERSION = '1.9.1';
+const APP_VERSION = '1.10.0';
 const API_URL = 'https://script.google.com/macros/s/AKfycbydZ7RylbsTJqJdq_zZEXees36X6u5wT7U0z59Oh1caOwZltMX8fp4xOAFRUwzW9oDO/exec';
 const COMPANIES = ['PT. ECOOILS', 'PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS', 'PT. SOS'];
 const OTHER_CO = 'OTHER (TYPE YOUR COMPANY NAME)';
@@ -518,8 +521,23 @@ function renderList() {
   const ic = $('#fl_ic').value, st = $('#fl_st').value, q = $('#fl_q').value.trim().toLowerCase();
   let f = rows.filter(r => (!ic || r.ic === ic) && (!st || (st === 'Overdue' ? isLate(r) : st === 'Open' ? isOpen(r) : r.status === st)) && (!q || [r.id, r.location, r.description, r.ic, r.category].join(' ').toLowerCase().includes(q)));
   f.sort((a, b) => (isLate(b) - isLate(a)) || String(b.createdAt).localeCompare(String(a.createdAt)));
-  $('#items').innerHTML = f.length ? f.map(r => '<div class="item ' + esc(r.risk) + '" data-id="' + esc(r.id) + '"><span class="id">' + esc(r.id) + '</span><div class="mid"><div><b>' + esc(r.ic) + '</b> · ' + esc(r.location) + '</div><div class="d">' + esc(catLabel(r.category)) + ' · ' + esc(r.description) + '</div></div><div style="text-align:right">' + chip(r) + '<div class="d">' + esc(t('d.due')) + ' ' + esc(fmtDate(r.dueDate)) + '</div></div></div>').join('') : '<div class="hint">' + esc(t('l.none')) + '</div>';
+  $('#items').innerHTML = f.length ? f.map(r => { const b = idsOf(r.beforePhotos)[0], a = idsOf(r.afterPhotos).slice(-1)[0];
+    return '<div class="item ' + esc(r.risk) + '" data-id="' + esc(r.id) + '"><span class="tps">' + (b ? '<span class="tp" data-th="' + esc(b) + '"></span>' : '<span class="tp none"></span>') + (a ? '<span class="tp aft" data-th="' + esc(a) + '"></span>' : '<span class="tp none"></span>') + '</span><span class="id">' + esc(r.id) + '</span><div class="mid"><div><b>' + esc(r.ic) + '</b> · ' + esc(r.location) + ' · ' + esc(catLabel(r.category)) + ' · <span class="d">' + esc(r.description) + '</span></div></div><div class="rt">' + chip(r) + ' <span class="due">' + esc(fmtDate(r.dueDate)) + '</span></div></div>'; }).join('') : '<div class="hint">' + esc(t('l.none')) + '</div>';
+  paintThumbs(); watchThumbs();
   $$('#items .item').forEach(e => e.onclick = () => openDetail(e.dataset.id));
+}
+
+/* ---------- list thumbnails: small, loaded only for rows on screen ---------- */
+const THC = {}; let thQ = new Set(), thT = null, thObs = null;
+function paintThumbs() { $$('#items [data-th]').forEach(s => { const u = THC[s.dataset.th]; if (u) s.style.backgroundImage = 'url(' + u + ')'; }); }
+function watchThumbs() {
+  if (thObs) thObs.disconnect();
+  thObs = new IntersectionObserver(es => { es.forEach(e => { if (!e.isIntersecting) return; thObs.unobserve(e.target); e.target.querySelectorAll('[data-th]').forEach(s => { if (!THC[s.dataset.th]) thQ.add(s.dataset.th); }); }); if (thQ.size && !thT) thT = setTimeout(flushThumbs, 150); }, {rootMargin: '200px'});
+  $$('#items .item').forEach(e => thObs.observe(e));
+}
+async function flushThumbs() {
+  thT = null; const ids = [...thQ]; thQ = new Set();
+  for (let i = 0; i < ids.length; i += 8) { try { const j = await api(withToken({action: 'thumbs', ids: ids.slice(i, i + 8)})); Object.keys(j.thumbs).forEach(k => { if (j.thumbs[k]) THC[k] = j.thumbs[k]; }); paintThumbs(); } catch (e) {} }
 }
 
 /* ---------- finding detail ---------- */

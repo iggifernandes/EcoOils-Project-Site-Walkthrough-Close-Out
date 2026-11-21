@@ -1,4 +1,4 @@
-const VERSION = '1.9.1'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.10.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -51,6 +51,7 @@ function doPost(e) {
       case 'me': return json_(me_(req));
       case 'list': return json_(list_(requirePerm_(req, 'view')));
       case 'photos': requirePerm_(req, 'view'); return json_(photos_(req));
+      case 'thumbs': requirePerm_(req, 'view'); return json_(thumbs_(req));
       case 'create': return json_(create_(req, requirePerm_(req, 'log')));
       case 'update': requirePerm_(req, 'verify'); return json_(update_(req));
       case 'verify': return json_(setStatus_(req, requirePerm_(req, 'verify')));
@@ -187,6 +188,24 @@ function photos_(r) {
   const out = {};
   (r.ids || []).slice(0, 6).forEach(function (id) { try { out[id] = photoUri_(s_(id, 80)); } catch (e) { out[id] = ''; } });
   return { ok: true, photos: out };
+}
+
+/* Small list thumbnails (Drive's own ~200px preview, cached 6h). '' = Drive has not made the preview yet: the page retries later. */
+function thumbs_(r) {
+  const out = {}, cache = CacheService.getScriptCache(), fid = prop_('FOLDER_ID');
+  (r.ids || []).slice(0, 10).forEach(function (raw) {
+    const id = s_(raw, 80); out[id] = '';
+    try {
+      const hit = cache.get('th_' + id); if (hit) { out[id] = hit; return; }
+      const f = DriveApp.getFileById(id), it = f.getParents(); let ok = false;
+      while (it.hasNext()) if (it.next().getId() === fid) ok = true;
+      if (!ok) return;
+      const th = f.getThumbnail(); if (!th) return;
+      const uri = 'data:' + th.getContentType() + ';base64,' + Utilities.base64Encode(th.getBytes());
+      if (uri.length < 90000) { out[id] = uri; cache.put('th_' + id, uri, 21600); }
+    } catch (e) { out[id] = ''; }
+  });
+  return { ok: true, thumbs: out };
 }
 
 function trash_(ids) { ids.forEach(function (f) { try { DriveApp.getFileById(f).setTrashed(true); } catch (e) {} }); }
