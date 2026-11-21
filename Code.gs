@@ -1,4 +1,4 @@
-const VERSION = '1.13.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.14.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -258,7 +258,7 @@ function userInfo_(email) {
   if (isAdminEmail_(email)) return { email: email, admin: true, perms: PERMS.slice(), name: '' };
   const u = users_().filter(function (x) { return String(x.id).toLowerCase() === email && String(x.active) !== 'false' && String(x.active) !== 'FALSE'; })[0];
   if (!u) return null;
-  const p = String(u.perms || '').split(',').map(function (x) { return x.trim(); }).filter(function (x) { return PERMS.indexOf(x) >= 0; });
+  const p = String(u.perms || '').split(',').map(function (x) { return x.trim(); }).filter(function (x) { return PERMS.indexOf(x) >= 0 && x !== 'users'; }); // 'users' (sees every email address) is owners only
   return { email: email, admin: false, perms: p, name: u.name || '', company: String(u.company || '').toUpperCase().trim() };
 }
 function me_(r) { const i = userInfo_(requirePerm_(r, '')); if (!i) throw new Error('SESSION'); return { ok: true, email: i.email, admin: i.admin, perms: i.perms, name: i.name }; }
@@ -412,9 +412,18 @@ function parseLink_(v) {
 /* ---------- admin: findings ---------- */
 function scopeOf_(email) { const i = userInfo_(email); return i && !i.admin && IC_COMPANIES.indexOf(i.company) >= 0 ? i.company : ''; }
 
+/* Email addresses are private to the owners. Everyone else sees a name (or "HSSE"), never an address. */
+function looksEmail_(v) { return /\S+@\S+\.\S+/.test(String(v || '')); }
+function nameFor_(v) {
+  const e = String(v || '').toLowerCase().trim();
+  const u = users_().filter(function (x) { return String(x.id).toLowerCase() === e; })[0];
+  return (u && u.name) ? u.name : 'HSSE';
+}
+function maskEmails_(o) { ['loggedBy', 'verifiedBy', 'closedBy'].forEach(function (k) { if (looksEmail_(o[k])) o[k] = nameFor_(o[k]); }); return o; }
+
 function list_(email) {
-  const sc = scopeOf_(email);
-  const rows = findings_().filter(function (o) { return !sc || String(o.ic).toUpperCase().trim() === sc; }).map(function (o) { const c = {}; Object.keys(o).forEach(function (k) { c[k] = o[k]; }); c.link = closeLink_(o.id); return c; });
+  const sc = scopeOf_(email), owner = isAdminEmail_(email);
+  const rows = findings_().filter(function (o) { return !sc || String(o.ic).toUpperCase().trim() === sc; }).map(function (o) { const c = {}; Object.keys(o).forEach(function (k) { c[k] = o[k]; }); if (!owner) maskEmails_(c); c.link = closeLink_(o.id); return c; });
   return { ok: true, rows: rows, today: todayIso_() };
 }
 
@@ -558,7 +567,7 @@ function icView_(r) {
   return {
     ok: true, today: todayIso_(), before: before, after: after,
     f: { id: o.id, ic: o.ic, location: o.location, category: o.category, risk: o.risk, description: o.description, dueDate: o.dueDate,
-      status: o.status, closeNote: o.closeNote, closedBy: o.closedBy, hseNote: o.hseNote, reopenCount: o.reopenCount, createdAt: o.createdAt }
+      status: o.status, closeNote: o.closeNote, closedBy: looksEmail_(o.closedBy) ? nameFor_(o.closedBy) : o.closedBy, hseNote: o.hseNote, reopenCount: o.reopenCount, createdAt: o.createdAt }
   };
 }
 
@@ -630,6 +639,15 @@ function recipients_(ic) {
 /* ---------- email ---------- */
 const SIG = '\n\nThank you / Terima kasih,\nHSSE - EcoOils Project, Sei Mangkei';
 function send_(opt) {
+  // One separate email per address, so nobody sees anyone else's address (not the contractor's colleagues, not HSSE).
+  const all = String(opt.to || '').split(',').concat(String(opt.cc || '').split(',')).map(function (x) { return x.trim().toLowerCase(); }).filter(Boolean);
+  const uniq = all.filter(function (x, i) { return all.indexOf(x) === i; });
+  if (uniq.length <= 1) return sendOne_(opt);
+  let okAny = false;
+  uniq.forEach(function (addr) { const o = {}; Object.keys(opt).forEach(function (k) { o[k] = opt[k]; }); o.to = addr; delete o.cc; if (sendOne_(o)) okAny = true; });
+  return okAny;
+}
+function sendOne_(opt) {
   const m = { to: opt.to, subject: opt.subject, body: opt.body, name: 'EcoOils Project HSSE' };
   if (opt.cc) m.cc = opt.cc;
   if (opt.attachments && opt.attachments.length) m.attachments = opt.attachments;
