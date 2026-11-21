@@ -1,4 +1,4 @@
-const VERSION = '1.10.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.11.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -13,7 +13,9 @@ const F_COLS = ['id', 'createdAt', 'ic', 'location', 'category', 'risk', 'descri
 const C_NAME = 'Contacts'; // OLD tab: only read once, to move its people into the Users tab (migrateContacts_). Not used any more.
 const C_COLS = ['id', 'ic', 'name', 'email', 'role', 'updatedAt'];
 const U_NAME = 'Users';
-const U_COLS = ['id', 'name', 'perms', 'active', 'updatedAt', 'company']; // id = the person's email (lowercase)
+const U_COLS = ['id', 'name', 'perms', 'active', 'updatedAt', 'company', 'position'];
+// Position = a label that pre-ticks the access boxes in the Users tab (the presets live in index.html, PRESETS). The ticks stay the real source of access.
+const POSITIONS = ['hsseDeputy', 'hsseOfficer', 'trainee', 'mgmt', 'icMgr', 'icLead', 'icOfficer', 'icPM', 'icAdmin']; // id = the person's email (lowercase)
 // What a ticked box allows. Owners (ADMIN_EMAILS) always have everything.
 // view=read, pdf=print/PDF report, csv=CSV export, log=log findings, verify=verify/send back/close/edit, resend=resend email,
 // close = upload the AFTER photo and close a finding from the app (status Closed by IC, still needs verifying; Verify alone is not needed).
@@ -322,7 +324,7 @@ function usersList_() {
   try { if (migrateContacts_()) clearCache_(); } catch (e) { Logger.log('migrateContacts ' + e); }
   const d = digestInfo_();
   return { ok: true, perms: PERMS, owners: adminEmails_(), digestOn: d.digestOn, digestDays: d.digestDays, digestLast: d.digestLast, users: users_().map(function (u) {
-    return { email: String(u.id), name: u.name, company: String(u.company || ''), perms: String(u.perms || '').split(',').filter(Boolean), active: String(u.active) !== 'false' && String(u.active) !== 'FALSE' };
+    return { email: String(u.id), name: u.name, company: String(u.company || ''), position: String(u.position || ''), perms: String(u.perms || '').split(',').filter(Boolean), active: String(u.active) !== 'false' && String(u.active) !== 'FALSE' };
   }) };
 }
 
@@ -335,12 +337,13 @@ function userSave_(r, caller) {
   if (perms.indexOf('users') >= 0 && !me.admin) throw new Error('Only an owner can give the Users access.');
   const company = s_(u.company, 60).toUpperCase();
   if (perms.indexOf('ic') >= 0 && !company) throw new Error('Pick the company first: contractor emails go to the company the person belongs to.');
+  const position = POSITIONS.indexOf(u.position) >= 0 ? u.position : '';
   const active = u.active === false ? 'false' : 'true';
   return withLock_(function () {
     const sh = tab_(U_NAME, U_COLS), row = findRow_(sh, email), isNew = row < 0;
     const old = isNew ? null : sh.getRange(row, 1, 1, U_COLS.length).getValues()[0];
     if (!isNew && !me.admin && String(old[2]).split(',').indexOf('users') >= 0) perms = perms.concat(['users']).filter(function (x, i, a) { return a.indexOf(x) === i; }); // a non-owner cannot strip the Users access
-    const o = { id: email, name: name, company: company, perms: perms.join(','), active: active, updatedAt: new Date().toISOString() };
+    const o = { id: email, name: name, company: company, position: position, perms: perms.join(','), active: active, updatedAt: new Date().toISOString() };
     if (isNew) appendRows_(sh, [U_COLS.map(function (k) { return o[k]; })]); else writeRow_(sh, row, o, U_COLS);
     clearCache_();
     if (active === 'false') revokeDevices_(email, '');

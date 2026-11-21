@@ -38,14 +38,14 @@ nav.tabs .sp{flex:1}
 .perms small{display:block;color:var(--mut)}
 .ur{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);flex-wrap:wrap}.ur:first-child{border-top:0}
 .ur .tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.ur .tags span{background:var(--okbg);color:var(--ok);border-radius:10px;padding:1px 9px;font-size:12px}.ur.off{opacity:.55}
-.uadd{display:grid;grid-template-columns:1fr 1.4fr 1fr auto;align-items:start;gap:6px}.uadd .btn{min-height:36px}.uadd input,.uadd select{min-height:36px;padding:4px 8px}
+.uadd{display:grid;grid-template-columns:1fr 1.3fr 1.1fr 1fr auto;align-items:start;gap:6px}.uadd .btn{min-height:36px}.uadd input,.uadd select{min-height:36px;padding:4px 8px}
 .ubar{padding:8px 10px;margin-bottom:6px}.udg{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}.udg .btn.sm{min-height:28px;padding:2px 10px;font-size:12px}
 .uhelp{margin-left:auto}.uhelp summary{cursor:pointer;color:var(--mut);font-size:12px;list-style:none;border:1px solid var(--line);border-radius:50%;width:20px;height:20px;text-align:center;line-height:18px}.uhelp[open]{flex-basis:100%}.uhelp p{margin:4px 0}
 .onUsers .titlebar{display:none}.onUsers .logbar{margin-top:6px}.onUsers .logbar .btn{min-height:34px;padding:0 16px;font-size:14px}.onUsers nav.tabs{margin-top:4px}.onUsers nav.tabs button{min-height:38px;padding:6px 14px}
 .ustatic .utw{max-height:calc(100dvh - 235px);min-height:240px;overflow:auto}
 @media(max-width:620px){.uadd{grid-template-columns:1fr}}
 .utw{padding:0;overflow-x:auto;margin-top:0}
-.ut select{font-size:12px;padding:3px 4px;min-height:28px;max-width:130px}
+.ut select{font-size:12px;padding:3px 4px;min-height:28px;max-width:200px}.ut select[data-pos]{min-width:190px}.ut select[data-co]{min-width:104px}
 table.ut{border-collapse:collapse;width:100%;font-size:13px}
 .ut th,.ut td{padding:3px 5px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
 .ut th{font-weight:600;font-size:11px;color:var(--mut);letter-spacing:.03em;position:sticky;top:0;background:#fff}
@@ -248,7 +248,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
  <section id="tab-users" class="tab ustatic">
   <div class="card ubar">
-   <div class="uadd"><input id="u_name" maxlength="120" data-ph="ct.name"><input id="u_email" type="email" maxlength="120" data-ph="a.email"><div><select id="u_co" aria-label="Company"></select><input id="u_co2" maxlength="60" style="margin-top:6px;text-transform:uppercase" data-ph="ph.otherCo" hidden></div><button class="btn pri" id="uAdd" data-i="us.add"></button></div>
+   <div class="uadd"><input id="u_name" maxlength="120" data-ph="ct.name"><input id="u_email" type="email" maxlength="120" data-ph="a.email"><select id="u_pos" aria-label="Position"></select><div><select id="u_co" aria-label="Company"></select><input id="u_co2" maxlength="60" style="margin-top:6px;text-transform:uppercase" data-ph="ph.otherCo" hidden></div><button class="btn pri" id="uAdd" data-i="us.add"></button></div>
    <div class="udg"><span id="dgInfo" class="hint"></span><button class="btn sm" id="dgNow" data-i="dg.now"></button><button class="btn sm" id="wkNow" data-i="dg.weekly"></button><details class="uhelp"><summary>?</summary><p class="hint" data-i="us.help"></p><p class="hint" data-i="us.preset"></p><p class="hint" data-i="dg.help"></p></details></div>
   </div>
   <div class="card utw"><div id="uList"></div></div>
@@ -263,7 +263,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
 <script>
 const LOCS = ["ADMINISTRATION BUILDING", "BLOCK 6 B SOUTH EAST CORNER", "BLOCK 6B", "BLOCK 6B EAST GATE", "BOILER / CHIMNEY AREA", "CONTROL ROOM, MCC ROOM", "COOLING TOWER", "DDE TREATMENT PLANT (DTP)", "DIESEL TANK", "DIRTY COOLING TOWER", "DRY AND LIQUID CHEMICAL STORAGE", "ECOOILS WARE HOUSE", "EFFLUENT TREATMENT PLANT (ETP)", "ELECTRICAL SUBSTATION (PLN)", "EXTRACTION PLANT", "FA PLANT", "FIRE WATER PUMP HOUSE", "FIRE WATER TANK", "GSB OFFICE", "HEXANE AND DIESEL RECEIVING BAY", "HEXANE TANK", "KKS OFFICE", "LOADING/UNLOADING AREA (PUMP HOUSE)", "MCC BUILDING", "NORTH-WEST CORNER BLOCK 6A", "OFFICE VEHICLE PARKING AREA", "OIL POLISHING PLANT", "PBS OFFICE", "PIPE RACK", "PRE TREATMENT UNIT (PTU)", "RAW WATER PIT", "SCHEDULED & DOMESTIC WASTE SHED", "SECURITY BUILDING", "SECURITY POST", "SILO", "TANK FARM", "TRUCK PARKING AREA", "VAPOR ABSORPTION MACHINE (VAM) SHED", "WAREHOUSE", "WAREHOUSE BLOCK B", "WASTE WATER TREATMENT PLANT (WWTP)", "WATER TANK", "WATER TREATMENT PLANT (WTP) AND WATER TANKS", "WEIGHT BRIDGE", "WEN OFFICE", "WORKSHOP AREA"];
-const APP_VERSION = '1.10.0';
+const APP_VERSION = '1.11.0';
 const API_URL = 'https://script.google.com/macros/s/AKfycbydZ7RylbsTJqJdq_zZEXees36X6u5wT7U0z59Oh1caOwZltMX8fp4xOAFRUwzW9oDO/exec';
 const COMPANIES = ['PT. ECOOILS', 'PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS', 'PT. SOS'];
 const OTHER_CO = 'OTHER (TYPE YOUR COMPANY NAME)';
@@ -294,7 +294,8 @@ const D = {
 'us.ownerMail':['gets every email','menerima semua email','menerima semua e-mel'],
 'pc.company':['Company','Perusahaan','Syarikat'],'pc.ic':['Contractor findings','Temuan kontraktor','Dapatan kontraktor'],'us.needCo':['Pick the company first.','Pilih perusahaan dulu.','Pilih syarikat dahulu.'],'us.otherQ':['Company name:','Nama perusahaan:','Nama syarikat:'],'us.grpMail2':['Gets email','Menerima email','Menerima e-mel'],
 'pc.nWeekly':['Weekly summary','Ringkasan mingguan','Ringkasan mingguan'],'dg.weekly':['Send weekly summary now','Kirim ringkasan mingguan sekarang','Hantar ringkasan mingguan sekarang'],'dg.weeklySent':['Weekly summary sent to {n} person(s)','Ringkasan mingguan terkirim ke {n} orang','Ringkasan mingguan dihantar kepada {n} orang'],'dg.weeklyNone':['Nobody is ticked for the weekly summary.','Belum ada yang dicentang untuk ringkasan mingguan.','Tiada yang ditanda untuk ringkasan mingguan.'],
-'pc.close':['Close (after photo)','Tutup (foto sesudah)','Tutup (foto selepas)'],
+'pc.close':['Close (after photo)','Tutup (foto sesudah)','Tutup (foto selepas)'],'pc.position':['Position','Jabatan','Jawatan'],'us.needCoPos':['Pick the company first: this position gets the contractor emails for its company.','Pilih perusahaan dulu: jabatan ini menerima email kontraktor untuk perusahaannya.','Pilih syarikat dahulu: jawatan ini menerima e-mel kontraktor untuk syarikatnya.'],'us.posSet':['Access set from the position. Tick or untick to adjust.','Akses diatur dari jabatan. Centang atau hapus untuk menyesuaikan.','Akses ditetapkan daripada jawatan. Tanda atau nyahtanda untuk melaraskan.'],
+'pos.hsseDeputy':['HSSE Deputy (EcoOils)','Wakil HSSE (EcoOils)','Timbalan HSSE (EcoOils)'],'pos.hsseOfficer':['HSSE Officer (EcoOils)','Petugas HSSE (EcoOils)','Pegawai HSSE (EcoOils)'],'pos.trainee':['HSSE Secondee / Trainee (EcoOils)','Secondee / Trainee HSSE (EcoOils)','Secondee / Pelatih HSSE (EcoOils)'],'pos.mgmt':['Management (view only)','Manajemen (hanya lihat)','Pengurusan (lihat sahaja)'],'pos.icMgr':['IC HSSE Manager','Manajer HSSE IC','Pengurus HSSE IC'],'pos.icLead':['IC Site Lead','Site Lead IC','Site Lead IC'],'pos.icOfficer':['IC HSSE Officer','Petugas HSSE IC','Pegawai HSSE IC'],'pos.icPM':['IC Project Manager','Manajer Proyek IC','Pengurus Projek IC'],'pos.icAdmin':['IC Admin / office (on file only)','Admin / kantor IC (hanya arsip)','Admin / pejabat IC (arkib sahaja)'],
 'pc.nNew':['New finding','Temuan baru','Dapatan baharu'],'pc.nDigest':['Daily summary','Ringkasan harian','Ringkasan harian'],'pc.nClose':['Closed by IC','Ditutup IC','Ditutup IC'],
 'pc.view':['Read','Baca','Baca'],'pc.pdf':['PDF','PDF','PDF'],'pc.csv':['CSV','CSV','CSV'],'pc.log':['Log','Catat','Log'],'pc.verify':['Verify','Verifikasi','Sahkan'],'pc.resend':['Resend','Kirim ulang','Hantar semula'],'pc.contactsView':['Contacts','Kontak','Kenalan'],'pc.contacts':['Edit contacts','Ubah kontak','Ubah kenalan'],'pc.delete':['Delete','Hapus','Padam'],'pc.users':['Users','Pengguna','Pengguna'],'pc.active':['On','Aktif','Aktif'],
 'us.can':['This person can:','Orang ini boleh:','Orang ini boleh:'],
@@ -460,7 +461,7 @@ async function addFiles(kind, files) {
 function setSel(sel, opts, keep) { const e = $(sel), cur = keep === undefined ? e.value : keep; e.innerHTML = opts.map(o => '<option value="' + esc(o[0]) + '">' + esc(o[1]) + '</option>').join(''); if ([...e.options].some(o => o.value === cur)) e.value = cur; }
 function fillSelects() {
   const coOpts = [['', '—'], ...COMPANIES.map(c => [c, c]), [OTHER_CO, OTHER_CO]];
-  setSel('#f_ic', coOpts); setSel('#u_co', coOpts);
+  setSel('#f_ic', coOpts); setSel('#u_co', coOpts); { const up = $('#u_pos'); if (up) { const v = up.value; up.innerHTML = posOptions(v, t('pc.position')); up.value = v; } }
   setSel('#f_loc', [['', '—'], ...LOCS.map(x => [x, x]), ['__other', '…']]);
   setSel('#f_cat', [['', '—'], ...CATS.map(c => [c[0], c[LI()]])]);
   setSel('#f_risk', RISKS.map(r => [r, t('r.' + r)]), $('#f_risk').value || 'Medium');
@@ -640,6 +641,20 @@ function renderDigest() { const dg = window.DG; if (dg) $('#dgInfo').textContent
 const PERM_KEYS = ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'close', 'delete', 'users', 'ic', 'nNew', 'nDigest', 'nWeekly', 'nClose'];
 const NOTIFY_KEYS = ['ic', 'nNew', 'nDigest', 'nWeekly', 'nClose'];
 const PERM_DEFAULT = ['view', 'pdf', 'log', 'verify', 'resend']; // EcoOils person. No email copies by default (saves quota)
+// Position -> the boxes it ticks. Picking a position ticks these (and unticks the rest); you can still tick or untick anything after.
+const POSITIONS = ['hsseDeputy', 'hsseOfficer', 'trainee', 'mgmt', 'icMgr', 'icLead', 'icOfficer', 'icPM', 'icAdmin'];
+const PRESETS = {
+  hsseDeputy: ['view', 'pdf', 'csv', 'log', 'verify', 'resend', 'close'],
+  hsseOfficer: ['view', 'pdf', 'log', 'verify', 'resend', 'close'],
+  trainee: ['view', 'log'],
+  mgmt: ['view', 'pdf', 'nWeekly'],
+  icMgr: ['view', 'pdf', 'close', 'ic'],
+  icLead: ['view', 'close', 'ic'],
+  icOfficer: ['view', 'close'],
+  icPM: ['view'],
+  icAdmin: []
+};
+function posOptions(cur, blank) { return '<option value=""' + (cur ? '' : ' selected') + '>' + esc(blank || '—') + '</option>' + POSITIONS.map(k => '<option value="' + k + '"' + (k === cur ? ' selected' : '') + '>' + esc(t('pos.' + k)) + '</option>').join(''); }
 const IC_COMPANIES = ['PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS']; // contractor person: starts with Contractor findings only
 let USERS = [], OWNERS = [];
 async function loadUsers() { const j = await api(withToken({action: 'usersList'})); USERS = j.users; OWNERS = j.owners; window.DG = j; renderUsers(); renderDigest(); }
@@ -647,16 +662,25 @@ function coOptions(cur) { const l = COMPANIES.slice(); if (cur && !l.includes(cu
 function renderUsers() {
   const cols = PERM_KEYS.filter(p => p !== 'users' || ME.admin);
   const nA = cols.filter(p => !NOTIFY_KEYS.includes(p)).length;
-  const head = '<tr class="grp"><th colspan="2"></th><th colspan="' + nA + '">' + esc(t('us.grpAccess')) + '</th><th colspan="5" class="nb">' + esc(t('us.grpMail')) + '</th><th colspan="2"></th></tr><tr><th></th><th>' + esc(t('pc.company')) + '</th>' + cols.map(p => '<th' + (p === 'ic' ? ' class="nb"' : '') + '>' + esc(t('pc.' + p)) + '</th>').join('') + '<th>' + esc(t('pc.active')) + '</th><th></th></tr>';
-  const owners = OWNERS.map(e => '<tr><td>' + esc(e) + '<small class="own">' + esc(t('us.owner')) + ' · ' + esc(t('us.ownerMail')) + '</small></td><td colspan="' + (cols.length + 3) + '"></td></tr>').join('');
-  const rows = USERS.map(u => '<tr class="' + (u.active ? '' : 'off') + '" data-u="' + esc(u.email) + '"><td title="' + esc(u.email) + '">' + esc(u.name) + '<small>' + esc(u.email) + '</small></td><td><select data-co>' + coOptions(u.company) + '</select></td>' +
+  const head = '<tr class="grp"><th colspan="3"></th><th colspan="' + nA + '">' + esc(t('us.grpAccess')) + '</th><th colspan="5" class="nb">' + esc(t('us.grpMail')) + '</th><th colspan="2"></th></tr><tr><th></th><th>' + esc(t('pc.position')) + '</th><th>' + esc(t('pc.company')) + '</th>' + cols.map(p => '<th' + (p === 'ic' ? ' class="nb"' : '') + '>' + esc(t('pc.' + p)) + '</th>').join('') + '<th>' + esc(t('pc.active')) + '</th><th></th></tr>';
+  const owners = OWNERS.map(e => '<tr><td>' + esc(e) + '<small class="own">' + esc(t('us.owner')) + ' · ' + esc(t('us.ownerMail')) + '</small></td><td colspan="' + (cols.length + 4) + '"></td></tr>').join('');
+  const rows = USERS.map(u => '<tr class="' + (u.active ? '' : 'off') + '" data-u="' + esc(u.email) + '"><td title="' + esc(u.email) + '">' + esc(u.name) + '<small>' + esc(u.email) + '</small></td><td><select data-pos>' + posOptions(u.position) + '</select></td><td><select data-co>' + coOptions(u.company) + '</select></td>' +
     cols.map(p => '<td' + (p === 'ic' ? ' class="nb"' : '') + '><input type="checkbox" data-p="' + p + '"' + (u.perms.includes(p) ? ' checked' : '') + '></td>').join('') +
     '<td><input type="checkbox" data-p="_active"' + (u.active ? ' checked' : '') + '></td><td><button class="x" data-ud="' + esc(u.email) + '" title="' + esc(t('btn.delete')) + '">×</button></td></tr>').join('');
-  $('#uList').innerHTML = '<table class="ut">' + head + owners + (rows || '<tr><td colspan="' + (cols.length + 4) + '" class="hint" style="text-align:left;padding:10px">' + esc(t('us.none')) + '</td></tr>') + '</table>';
+  $('#uList').innerHTML = '<table class="ut">' + head + owners + (rows || '<tr><td colspan="' + (cols.length + 5) + '" class="hint" style="text-align:left;padding:10px">' + esc(t('us.none')) + '</td></tr>') + '</table>';
   $$('#uList tr[data-u] select[data-co]').forEach(s => s.onchange = () => {
     const tr = s.closest('tr'), u = USERS.find(x => x.email === tr.dataset.u); let v = s.value;
     if (v === '__other') { v = (prompt(t('us.otherQ')) || '').trim().toUpperCase(); if (!v) { s.value = u.company || ''; return; } s.innerHTML = coOptions(v); }
     saveUserRow(tr.dataset.u, tr, v);
+  });
+  $$('#uList tr[data-u] select[data-pos]').forEach(s => s.onchange = () => {
+    const tr = s.closest('tr'), u = USERS.find(x => x.email === tr.dataset.u), pre = PRESETS[s.value];
+    if (pre) {
+      const co = tr.querySelector('select[data-co]').value;
+      if (pre.includes('ic') && (!co || co === '__other')) { s.value = u.position || ''; return toast(t('us.needCoPos'), true); }
+      PERM_KEYS.forEach(p => { if (p === 'users') return; const e = tr.querySelector('input[data-p="' + p + '"]'); if (e) e.checked = pre.includes(p); });
+    }
+    saveUserRow(tr.dataset.u, tr).then(() => { if (pre) toast(t('us.posSet')); });
   });
   $$('#uList tr[data-u] input').forEach(i => i.onchange = () => {
     const tr = i.closest('tr');
@@ -673,16 +697,17 @@ async function saveUserRow(email, tr, company) {
   const u = USERS.find(x => x.email === email); if (!u) return;
   if (company === undefined) company = tr.querySelector('select[data-co]').value === '__other' ? u.company : tr.querySelector('select[data-co]').value;
   const perms = PERM_KEYS.filter(p => { const e = tr.querySelector('input[data-p="' + p + '"]'); return e ? e.checked : u.perms.includes(p); });
-  const active = tr.querySelector('input[data-p=_active]').checked;
-  try { await api(withToken({action: 'userSave', user: {name: u.name, email, company, perms, active}})); u.perms = perms; u.active = active; u.company = company; tr.classList.toggle('off', !active); toast(t('x.saved')); }
+  const active = tr.querySelector('input[data-p=_active]').checked, position = tr.querySelector('select[data-pos]').value;
+  try { await api(withToken({action: 'userSave', user: {name: u.name, email, company, position, perms, active}})); u.perms = perms; u.active = active; u.company = company; u.position = position; tr.classList.toggle('off', !active); toast(t('x.saved')); }
   catch (e) { toast(e.message, true); await loadUsers(); }
 }
 async function addUser() {
   const co = $('#u_co').value === OTHER_CO ? $('#u_co2').value.trim().toUpperCase() : $('#u_co').value;
-  const user = {name: $('#u_name').value.trim(), email: $('#u_email').value.trim(), company: co, active: true, perms: IC_COMPANIES.includes(co) ? ['ic'] : PERM_DEFAULT.slice()};
+  const pos = $('#u_pos').value, pre = PRESETS[pos];
+  const user = {name: $('#u_name').value.trim(), email: $('#u_email').value.trim(), company: co, position: pos, active: true, perms: pre ? pre.slice() : (IC_COMPANIES.includes(co) ? ['ic'] : PERM_DEFAULT.slice())};
   if (!user.name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(user.email)) return toast(t('ct.bad'), true);
   if (!co) return toast(t('us.needCo'), true);
-  try { const j = await api(withToken({action: 'userSave', user})); $('#u_name').value = ''; $('#u_email').value = ''; $('#u_co').value = ''; $('#u_co2').hidden = true; toast(j.mailed ? t('us.invited') : t('x.saved')); await loadUsers(); } catch (e) { toast(e.message, true); }
+  try { const j = await api(withToken({action: 'userSave', user})); $('#u_name').value = ''; $('#u_email').value = ''; $('#u_co').value = ''; $('#u_pos').value = ''; $('#u_co2').hidden = true; toast(j.mailed ? t('us.invited') : t('x.saved')); await loadUsers(); } catch (e) { toast(e.message, true); }
 }
 
 /* ---------- IC close-out page ---------- */
