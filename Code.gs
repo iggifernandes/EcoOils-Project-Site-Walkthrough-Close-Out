@@ -1,4 +1,4 @@
-const VERSION = '1.9.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.9.1'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -161,7 +161,7 @@ function daysBetween_(a, b) { return Math.round((new Date(b + 'T12:00:00Z') - ne
 /* ---------- photos (Drive) ---------- */
 function savePhotos_(arr, prefix) {
   const folder = DriveApp.getFolderById(prop_('FOLDER_ID')), ids = [];
-  (arr || []).slice(0, 3).forEach(function (uri, i) {
+  (arr || []).slice(0, 1).forEach(function (uri, i) { // ONE photo only: 1 before and 1 after
     const m = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+\/=]+)$/.exec(String(uri || ''));
     if (!m) throw new Error('Invalid photo');
     const bytes = Utilities.base64Decode(m[2]);
@@ -448,7 +448,7 @@ function adminClose_(r, email) {
     const sc = scopeOf_(email); if (sc && String(o.ic).toUpperCase().trim() !== sc) throw new Error('This finding belongs to another company.');
     const ver = userInfo_(email).perms.indexOf('verify') >= 0;
     const ids = savePhotos_(r.after, o.id + '-after-' + (idsOf_(o.afterPhotos).length + 1));
-    o.afterPhotos = idsOf_(o.afterPhotos).concat(ids).join(',');
+    trash_(idsOf_(o.afterPhotos)); o.afterPhotos = ids.join(','); // one after photo only: a new one replaces the old
     o.closeNote = note; o.closedBy = name + (ver ? ' (via HSSE)' : ' (via app)'); o.closedAt = now; o.updatedAt = now;
     if (ver) { o.status = 'Verified'; o.verifiedBy = email; o.verifiedAt = now; } // a verifier closing on the spot = closed and verified
     else o.status = 'Closed by IC'; // close only: waits for verification (auto-verify rules apply)
@@ -502,7 +502,7 @@ function icClose_(r) {
     if (OPEN_STATUS.indexOf(o.status) < 0) throw new Error('This finding is already closed.');
     const ids = savePhotos_(r.after, id + '-after-' + (idsOf_(o.afterPhotos).length + 1));
     const now = new Date().toISOString();
-    o.afterPhotos = idsOf_(o.afterPhotos).concat(ids).join(',');
+    trash_(idsOf_(o.afterPhotos)); o.afterPhotos = ids.join(','); // one after photo only: a new one replaces the old
     o.closeNote = note; o.closedBy = name; o.closedAt = now; o.status = 'Closed by IC'; o.updatedAt = now;
     writeRow_(sh, row, o, F_COLS);
     clearCache_();
