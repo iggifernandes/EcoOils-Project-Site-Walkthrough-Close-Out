@@ -140,7 +140,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 .tl{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:var(--mut)}.tl.g{background:var(--green)}.tl.a{background:var(--yellow)}.tl.r{background:var(--red)}
 .wk{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;align-items:end}.wc{text-align:center;font-size:11px;color:var(--mut)}.wc span{display:block}.wb{height:110px;display:flex;align-items:flex-end;justify-content:center;gap:2px}.wb i{width:42%;display:block;min-height:1px}.wb .lg,.sw.lg{background:#9a9a9a}.wb .cl,.sw.cl{background:var(--green)}.sw{display:inline-block;width:10px;height:10px;margin:0 4px 0 8px}
 .stk{display:flex;height:24px;border-radius:6px;overflow:hidden;margin-bottom:6px}.stk i{display:flex;align-items:center;justify-content:center;font-style:normal;font-size:12px;color:#fff}.stk .High,.bb.seg .High{background:var(--red)}.stk .Medium,.bb.seg .Medium{background:var(--yellow);color:#231f20}.stk .Low,.bb.seg .Low{background:var(--green)}
-.hb>div{display:grid;grid-template-columns:34% 1fr 28px;gap:8px;align-items:center;font-size:13px;margin:5px 0}.hb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hb b{text-align:right;font-weight:500}.bb{height:12px;background:var(--bg);border-radius:3px;overflow:hidden}.bb i{display:block;height:100%;background:var(--green)}.bb.seg{display:flex;background:none}
+.hb>div{display:grid;grid-template-columns:34% 1fr 28px;gap:8px;align-items:center;font-size:13px;margin:5px 0}.hb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hb b{text-align:right;font-weight:500}.hb>div.sc{grid-template-columns:34% 1fr 28px 64px}.scq{color:var(--gdark);font-size:12px;white-space:nowrap}.bb{height:12px;background:var(--bg);border-radius:3px;overflow:hidden}.bb i{display:block;height:100%;background:var(--green)}.bb.seg{display:flex;background:none}
 #dashSheet{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:70;display:flex;align-items:flex-end;justify-content:center}#dashSheet .in{background:#fff;width:min(720px,100%);max-height:80vh;overflow:auto;border-radius:14px 14px 0 0;padding:14px}
 @media(max-width:620px){.dkr{grid-template-columns:1fr 1fr}.dg{grid-template-columns:1fr}}
 #pngBox{position:fixed;left:-20000px;top:0;width:1600px;padding:24px;background:#fff;font:400 15px/1.4 Jost,system-ui,Arial,sans-serif;color:#231f20}#pngBox h1{font-weight:300;letter-spacing:.14em;text-transform:uppercase;font-size:22px;margin:0 0 4px;color:#6e6b6c}
@@ -256,6 +256,10 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
  <section id="tab-dash" class="tab">
   <div class="card noprint"><div class="row" style="justify-content:space-between;align-items:center;gap:8px"><div class="seg" id="dbPer"></div><select id="dbIc"></select><button type="button" class="btn yel" id="dbPng" data-i="db.png" hidden></button></div><div class="hint" data-i="db.note"></div></div>
+  <div class="card noprint" id="scCard" hidden><h2 data-i="sc.title"></h2><div class="hint" data-i="sc.hint"></div>
+   <label class="f"><span data-i="sc.loc"></span><select id="scLoc"></select></label>
+   <label class="f"><span data-i="sc.note"></span><input id="scNote" maxlength="120" data-ph="sc.notePh"></label>
+   <div class="row" style="gap:8px"><button type="button" class="btn pri" id="scDl" data-i="sc.dl"></button><button type="button" class="btn yel" id="scShare" data-i="sc.share"></button></div></div>
   <div id="dashOut"></div>
  </section>
  <section id="tab-report" class="tab">
@@ -288,7 +292,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
 <script>
 const LOCS = ["ADMINISTRATION BUILDING", "BLOCK 6 B SOUTH EAST CORNER", "BLOCK 6B", "BLOCK 6B EAST GATE", "BOILER / CHIMNEY AREA", "CONTROL ROOM, MCC ROOM", "COOLING TOWER", "DDE TREATMENT PLANT (DTP)", "DIESEL TANK", "DIRTY COOLING TOWER", "DRY AND LIQUID CHEMICAL STORAGE", "ECOOILS WARE HOUSE", "EFFLUENT TREATMENT PLANT (ETP)", "ELECTRICAL SUBSTATION (PLN)", "EXTRACTION PLANT", "FA PLANT", "FIRE WATER PUMP HOUSE", "FIRE WATER TANK", "GSB OFFICE", "HEXANE AND DIESEL RECEIVING BAY", "HEXANE TANK", "KKS OFFICE", "LOADING/UNLOADING AREA (PUMP HOUSE)", "MCC BUILDING", "NORTH-WEST CORNER BLOCK 6A", "OFFICE VEHICLE PARKING AREA", "OIL POLISHING PLANT", "PBS OFFICE", "PIPE RACK", "PRE TREATMENT UNIT (PTU)", "RAW WATER PIT", "SCHEDULED & DOMESTIC WASTE SHED", "SECURITY BUILDING", "SECURITY POST", "SILO", "TANK FARM", "TRUCK PARKING AREA", "VAPOR ABSORPTION MACHINE (VAM) SHED", "WAREHOUSE", "WAREHOUSE BLOCK B", "WASTE WATER TREATMENT PLANT (WWTP)", "WATER TANK", "WATER TREATMENT PLANT (WTP) AND WATER TANKS", "WEIGHT BRIDGE", "WEN OFFICE", "WORKSHOP AREA"];
-const APP_VERSION = '1.15.1';
+const APP_VERSION = '1.16.0';
 const API_URL = 'https://script.google.com/macros/s/AKfycbydZ7RylbsTJqJdq_zZEXees36X6u5wT7U0z59Oh1caOwZltMX8fp4xOAFRUwzW9oDO/exec';
 const COMPANIES = ['PT. ECOOILS', 'PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS', 'PT. SOS'];
 const OTHER_CO = 'OTHER (TYPE YOUR COMPANY NAME)';
@@ -339,6 +343,7 @@ const D = {
 'a.forgot':['Forgot PIN / set PIN','Lupa PIN / atur PIN','Lupa PIN / tetapkan PIN'],'a.resetInfo':['We email a 6-digit code to your HSSE address. Enter it with a new 6-digit PIN.','Kami mengirim kode 6 digit ke email HSSE Anda. Masukkan kode itu dengan PIN baru 6 digit.','Kami menghantar kod 6 digit ke emel HSSE anda. Masukkan kod itu bersama PIN baharu 6 digit.'],
 'a.sendCode':['Email me a code','Kirim kode ke email saya','Hantar kod ke emel saya'],'a.code':['6-digit code from the email','Kode 6 digit dari email','Kod 6 digit daripada emel'],'a.newPin':['New PIN (6 digits)','PIN baru (6 digit)','PIN baharu (6 digit)'],
 'a.newPin2':['Repeat the new PIN','Ulangi PIN baru','Ulang PIN baharu'],'a.setPin':['Set PIN','Atur PIN','Tetapkan PIN'],'a.back':['Back to sign-in','Kembali ke masuk','Kembali ke log masuk'],'tab.dash':['Dashboard','Dasbor','Papan pemuka'],'db.png':['Download one-page PNG','Unduh PNG satu halaman','Muat turun PNG satu halaman'],'db.note':['Open, overdue and aging are always as of today. The period filter applies to logged and closed counts, the contractor table and the charts.','Terbuka, terlambat, dan usia selalu per hari ini. Filter periode berlaku untuk jumlah dicatat/ditutup, tabel kontraktor dan grafik.','Terbuka, tertunggak dan umur sentiasa setakat hari ini. Penapis tempoh terpakai pada bilangan direkod/ditutup, jadual kontraktor dan carta.'],'db.p4':['4 weeks','4 minggu','4 minggu'],'db.p12':['12 weeks','12 minggu','12 minggu'],'db.pall':['All','Semua','Semua'],'db.over':['Overdue','Terlambat','Tertunggak'],'db.highNV':['High risk, not verified','Risiko tinggi, belum diverifikasi','Risiko tinggi, belum disahkan'],'db.await':['Waiting for verification','Menunggu verifikasi','Menunggu pengesahan'],'db.ontime':['On-time closure (4 wks)','Ditutup tepat waktu (4 mgg)','Ditutup tepat masa (4 mgg)'],'db.oldest':['oldest','terlama','terlama'],'db.days':['days','hari','hari'],'db.d':['d','h','h'],'db.grow':['Backlog is growing: more findings were logged than closed for two weeks in a row.','Tunggakan bertambah: temuan dicatat lebih banyak daripada ditutup dua minggu berturut-turut.','Tunggakan bertambah: dapatan direkod lebih banyak daripada ditutup dua minggu berturut-turut.'],'db.weekly':['Logged vs closed per week','Dicatat vs ditutup per minggu','Direkod vs ditutup seminggu'],'db.logged':['Logged','Dicatat','Direkod'],'db.closed':['Closed','Ditutup','Ditutup'],'db.weekHint':['Numbers show logged/closed; the date is the Monday of the week.','Angka: dicatat/ditutup; tanggal = hari Senin minggu itu.','Angka: direkod/ditutup; tarikh = Isnin minggu itu.'],'db.aging':['Age of open findings (days)','Usia temuan terbuka (hari)','Umur dapatan terbuka (hari)'],'db.agingHint':['15+ days is the real backlog. Tap a number to see the findings.','15+ hari adalah tunggakan sebenarnya. Ketuk angka untuk melihat temuan.','15+ hari ialah tunggakan sebenar. Ketik nombor untuk lihat dapatan.'],'db.byIc':['By contractor','Per kontraktor','Mengikut kontraktor'],'db.open':['Open','Terbuka','Terbuka'],'db.median':['Median to close','Median penutupan','Median penutupan'],'db.reopen':['Sent back','Dikembalikan','Dikembalikan'],'db.fair':['Percentages show n and stay grey under 5 findings. Dots use fixed targets, not a ranking. The contractor clock stops when they close.','Persentase menampilkan n dan abu-abu di bawah 5 temuan. Titik memakai target tetap, bukan peringkat. Waktu kontraktor berhenti saat mereka menutup.','Peratusan menunjukkan n dan kelabu bawah 5 dapatan. Titik guna sasaran tetap, bukan kedudukan. Jam kontraktor berhenti apabila mereka menutup.'],'db.mix':['Risk and category mix','Campuran risiko dan kategori','Campuran risiko dan kategori'],'db.other':['Other','Lainnya','Lain-lain'],'db.locs':['Top locations (open findings)','Lokasi teratas (temuan terbuka)','Lokasi teratas (dapatan terbuka)'],'db.heat':['Location by contractor (period)','Lokasi per kontraktor (periode)','Lokasi mengikut kontraktor (tempoh)'],'db.watch':['Overdue watch list','Daftar pantau terlambat','Senarai pantau tertunggak'],'db.hot':['Repeat hotspots (same category and place within 30 days)','Titik berulang (kategori dan tempat sama dalam 30 hari)','Titik berulang (kategori dan tempat sama dalam 30 hari)'],
+'sc.title':['Location scorecard (owner only)','Kartu skor lokasi (khusus pemilik)','Kad skor lokasi (pemilik sahaja)'],'sc.hint':['All open observations of one location as phone-size pictures, 6 per picture, with the before photo. Share goes straight to WhatsApp or any app on a phone.','Semua temuan terbuka satu lokasi sebagai gambar ukuran ponsel, 6 per gambar, dengan foto sebelum. Bagikan langsung ke WhatsApp atau aplikasi lain di ponsel.','Semua dapatan terbuka satu lokasi sebagai gambar saiz telefon, 6 setiap gambar, dengan foto sebelum. Kongsi terus ke WhatsApp atau aplikasi lain di telefon.'],'sc.loc':['Location (open observations)','Lokasi (temuan terbuka)','Lokasi (dapatan terbuka)'],'sc.note':['Optional line on the picture','Baris opsional pada gambar','Baris pilihan pada gambar'],'sc.notePh':['e.g. Actions not closed','mis. Tindakan belum ditutup','cth. Tindakan belum ditutup'],'sc.dl':['Download PNG','Unduh PNG','Muat turun PNG'],'sc.share':['Share','Bagikan','Kongsi'],'sc.none':['No open observations in this location.','Tidak ada temuan terbuka di lokasi ini.','Tiada dapatan terbuka di lokasi ini.'],'sc.making':['Preparing pictures…','Menyiapkan gambar…','Menyediakan gambar…'],'sc.done':['Ready:','Siap:','Siap:'],
 'pk.mark':['✏ Mark photo','✏ Tandai foto','✏ Tanda foto'],'pk.undo':['Undo','Urungkan','Buat asal'],'pk.clear':['Clear','Hapus','Kosongkan'],'pk.cancel':['Cancel','Batal','Batal'],'pk.done':['✓ Keep marking','✓ Simpan tanda','✓ Simpan tanda'],'pk.saved':['Marked photo saved.','Foto bertanda tersimpan.','Foto bertanda disimpan.'],
 'a.phone':['Phone view','Tampilan ponsel','Paparan telefon'],'a.logout':['Sign out','Keluar','Log keluar'],
 'l.search':['Search ref, location, text','Cari no. ref, lokasi, teks','Cari no. rujukan, lokasi, teks'],'l.allIc':['All companies','Semua perusahaan','Semua syarikat'],'l.allSt':['All statuses','Semua status','Semua status'],
@@ -769,7 +774,7 @@ function dashRender() {
   h += '<div class="dc"><h3>' + esc(t('db.mix')) + '</h3><div class="stk">' + ['High', 'Medium', 'Low'].map((k, i) => rs[i] ? '<i class="' + k + '" style="width:' + (100 * rs[i] / rt) + '%">' + rs[i] + '</i>' : '').join('') + '</div><div class="hint">' + ['High', 'Medium', 'Low'].map((k, i) => '<span class="risk ' + k + '"></span>' + esc(t('r.' + k)) + ' ' + rs[i]).join(' &nbsp; ') + '</div>' +
     '<div class="hb">' + (() => { const top = d.cats.slice(0, 6), oth = d.cats.slice(6).reduce((a, c) => a + c[1], 0), m = Math.max(1, ...top.map(c => c[1])); return top.concat(oth ? [[t('db.other'), oth]] : []).map(c => '<div><span>' + esc(c[0]) + '</span><div class="bb"><i style="width:' + (100 * c[1] / m) + '%"></i></div><b>' + c[1] + '</b></div>').join(''); })() + '</div></div></div>';
   const lm = Math.max(1, ...d.locs.map(l => l.n));
-  h += '<div class="dg"><div class="dc"><h3>' + esc(t('db.locs')) + '</h3><div class="hb">' + (d.locs.length ? d.locs.map(l => '<div><span>' + btn(reg(l.l, d.open.filter(r => r.location === l.l)), esc(l.l)) + '</span><div class="bb seg" style="width:' + (100 * l.n / lm) + '%">' + ['High', 'Medium', 'Low'].map((k, i) => l.r[i] ? '<i class="' + k + '" style="flex:' + l.r[i] + '"></i>' : '').join('') + '</div><b>' + l.n + '</b></div>').join('') : '<span class="gray">–</span>') + '</div></div>';
+  h += '<div class="dg"><div class="dc"><h3>' + esc(t('db.locs')) + '</h3><div class="hb">' + (d.locs.length ? d.locs.map(l => '<div' + (ME.admin ? ' class="sc"' : '') + '><span>' + btn(reg(l.l, d.open.filter(r => r.location === l.l)), esc(l.l)) + '</span><div class="bb seg" style="width:' + (100 * l.n / lm) + '%">' + ['High', 'Medium', 'Low'].map((k, i) => l.r[i] ? '<i class="' + k + '" style="flex:' + l.r[i] + '"></i>' : '').join('') + '</div><b>' + l.n + '</b>' + (ME.admin ? '<button type="button" class="dlink scq" data-sc="' + esc(l.l) + '">⬇ PNG</button>' : '') + '</div>').join('') : '<span class="gray">–</span>') + '</div></div>';
   const cm = {}; d.per.forEach(r => { const k = r.location + '|' + r.ic; cm[k] = (cm[k] || 0) + 1; }); const cmx = Math.max(1, ...Object.values(cm));
   h += '<div class="dc"><h3>' + esc(t('db.heat')) + '</h3><div class="xs"><table class="dt heat"><tr><th></th>' + d.ics.map(i => '<th>' + esc(i.replace('PT. ', '')) + '</th>').join('') + '</tr>' + d.locH.map(l => '<tr><td>' + esc(l) + '</td>' + d.ics.map(i => { const n = cm[l + '|' + i] || 0; return '<td style="background:rgba(68,162,118,' + (n ? 0.12 + 0.6 * n / cmx : 0) + ')">' + (n || '') + '</td>'; }).join('') + '</tr>').join('') + '</table></div></div></div>';
   const wl = (arr, withAge) => arr.slice(0, 10).map((r, i) => '<tr class="rowk' + (i >= 5 ? ' px' : '') + '" data-open="' + esc(r.id) + '"><td><b>' + esc(r.id) + '</b></td><td>' + esc(r.ic) + '</td><td>' + esc(r.location) + '</td><td><span class="risk ' + esc(r.risk) + '"></span></td><td>' + (withAge ? r.age : r.late) + ' ' + esc(t('db.d')) + '</td><td>' + (Number(r.reopenCount) > 0 ? '↺' + r.reopenCount : '') + '</td></tr>').join('');
@@ -778,6 +783,7 @@ function dashRender() {
     (d.hot.length ? '<h3 style="margin-top:12px">' + esc(t('db.hot')) + '</h3>' + d.hot.map(x => '<div class="hint">• ' + esc(x.k.replace('|', ' · ')) + ' — ' + x.n + '×</div>').join('') : '') + '</div></div>';
   root.innerHTML = h;
   $$('#dashOut [data-set]').forEach(b => b.onclick = () => dashSheet(DSET[b.dataset.set]));
+  $$('#dashOut [data-sc]').forEach(b => b.onclick = () => scRun(b.dataset.sc, !!(navigator.canShare && navigator.share)));
   $$('#dashOut [data-open]').forEach(b => b.onclick = () => openDetail(b.dataset.open));
 }
 /* owner-only one-page PNG: the dashboard is drawn into a picture in the browser (no library, no upload) */
@@ -798,6 +804,62 @@ async function dashPng() {
     const blob = await new Promise(ok => c.toBlob(ok, 'image/png')); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Walkthrough-dashboard-' + TODAY + '.png'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   } catch (e) { toast(e.message || 'PNG failed', true); } finally { box.remove(); }
 }
+/* ---------- owner-only location scorecard: every open observation of one location as phone-size PNGs (6 per picture) ---------- */
+const SC_PER = 6;
+function scOpen(loc) { return ROWS.filter(r => isOpen(r) && (r.location || '—') === loc).map(r => Object.assign({}, r, {age: daysBetween(JKT(r.createdAt), TODAY), late: Math.max(0, daysBetween(String(r.dueDate).slice(0, 10), TODAY))})).sort((a, b) => (D_RISK[a.risk] ?? 3) - (D_RISK[b.risk] ?? 3) || b.late - a.late || b.age - a.age); }
+function scFill() {
+  const m = {}; ROWS.filter(isOpen).forEach(r => { const k = r.location || '—'; m[k] = (m[k] || 0) + 1; });
+  const cur = $('#scLoc').value, l = Object.entries(m).sort((a, b) => b[1] - a[1]);
+  $('#scLoc').innerHTML = l.map(([k, n]) => '<option value="' + esc(k) + '"' + (k === cur ? ' selected' : '') + '>' + esc(k) + ' (' + n + ')</option>').join('') || '<option value="">–</option>';
+}
+const scWrap = (g, text, w, max) => { const out = []; let line = ''; String(text || '').replace(/\s+/g, ' ').split(' ').forEach(wd => { const t2 = line ? line + ' ' + wd : wd; if (g.measureText(t2).width > w && line) { out.push(line); line = wd; } else line = t2; }); if (line) out.push(line); if (out.length > max) { out.length = max; out[max - 1] = out[max - 1].replace(/\s*\S*$/, '') + '…'; } return out; };
+const scImg = u => new Promise(ok => { if (!u) return ok(null); const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = u; });
+async function scBuild(loc, note) {
+  const all = scOpen(loc); if (!all.length) throw new Error(t('sc.none'));
+  const pages = Math.ceil(all.length / SC_PER), W = 1080, M = 36, CH = 300, F = 'Jost, Arial, sans-serif', blobs = [];
+  const high = all.filter(r => r.risk === 'High').length, over = all.filter(r => r.late > 0).length, oldest = Math.max(...all.map(r => r.age));
+  const byIc = {}; all.forEach(r => { byIc[r.ic] = (byIc[r.ic] || 0) + 1; });
+  const ph = {}; // before photos, one request per picture
+  for (let p = 0; p < pages; p++) {
+    const part = all.slice(p * SC_PER, (p + 1) * SC_PER), ids = part.map(r => idsOf(r.beforePhotos)[0]).filter(Boolean);
+    if (ids.length) { try { const j = await api(withToken({action: 'photos', ids: ids})); Object.assign(ph, j.photos || {}); } catch (e) {} }
+    const hdr = 330 + (note ? 80 : 0), H = hdr + part.length * CH + 70, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+    g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); g.textBaseline = 'alphabetic';
+    g.fillStyle = '#025b40'; g.fillRect(0, 0, W, 14);
+    g.fillStyle = '#6e6b6c'; g.font = '300 26px ' + F; g.fillText('OPEN OBSERVATIONS  ·  SEI MANGKEI', M, 62);
+    g.fillStyle = '#231f20'; g.font = '500 62px ' + F; g.fillText(String(loc).toUpperCase(), M, 134);
+    g.fillStyle = '#6e6b6c'; g.font = '400 26px ' + F; g.fillText('As of ' + TODAY + (pages > 1 ? '   ·   Picture ' + (p + 1) + ' of ' + pages : ''), M, 172);
+    const bx = [[all.length, 'OPEN', '#231f20'], [high, 'HIGH RISK', '#dd1d21'], [over, 'OVERDUE', '#dd1d21'], [oldest, 'OLDEST (DAYS)', '#231f20']], bw = (W - 2 * M - 3 * 14) / 4;
+    bx.forEach((b, i) => { const x = M + i * (bw + 14); g.fillStyle = '#f6f6f5'; g.fillRect(x, 192, bw, 92); g.fillStyle = b[2]; g.font = '500 44px ' + F; g.fillText(String(b[0]), x + 16, 242); g.fillStyle = '#6e6b6c'; g.font = '400 18px ' + F; g.fillText(b[1], x + 16, 270); });
+    let y = 300;
+    if (note) { g.fillStyle = '#fff4d6'; g.fillRect(M, y, W - 2 * M, 52); g.fillStyle = '#231f20'; g.font = '500 26px ' + F; g.fillText(scWrap(g, note, W - 2 * M - 24, 1)[0], M + 12, y + 35); y += 64; }
+    g.fillStyle = '#6e6b6c'; g.font = '400 22px ' + F; g.fillText(Object.entries(byIc).map(([k, n]) => k.replace('PT. ', '') + ' ' + n).join('   ·   '), M, hdr - 16); y = hdr;
+    for (let i = 0; i < part.length; i++) {
+      const r = part[i], top = y + i * CH, id1 = idsOf(r.beforePhotos)[0], im = await scImg(ph[id1]);
+      g.fillStyle = '#dcdcdc'; g.fillRect(M, top, W - 2 * M, 2);
+      const pw = 360, phh = 270, px = M, py = top + 14;
+      if (im) { const k = Math.max(pw / im.width, phh / im.height), sw = pw / k, sh = phh / k; g.drawImage(im, (im.width - sw) / 2, (im.height - sh) / 2, sw, sh, px, py, pw, phh); } else { g.fillStyle = '#eee'; g.fillRect(px, py, pw, phh); g.fillStyle = '#999'; g.font = '400 22px ' + F; g.fillText('No photo', px + 130, py + 140); }
+      const tx = px + pw + 22, tw = W - M - tx; g.fillStyle = r.risk === 'High' ? '#dd1d21' : r.risk === 'Medium' ? '#fbce07' : '#44a276'; g.fillRect(tx, py, 12, 34); 
+      g.fillStyle = '#231f20'; g.font = '500 30px ' + F; g.fillText(r.id + '  ·  ' + String(r.ic).replace('PT. ', ''), tx + 24, py + 28);
+      g.fillStyle = '#6e6b6c'; g.font = '400 22px ' + F; g.fillText(r.risk + ' risk  ·  ' + catLabel(r.category), tx, py + 68);
+      g.fillStyle = '#231f20'; g.font = '400 25px ' + F; scWrap(g, r.description, tw, 4).forEach((ln, k) => g.fillText(ln, tx, py + 108 + k * 32));
+      g.font = '500 23px ' + F; g.fillStyle = r.late > 0 ? '#dd1d21' : '#231f20'; g.fillText('Open ' + r.age + ' d  ·  Due ' + String(r.dueDate).slice(0, 10) + (r.late > 0 ? '  ·  ' + r.late + ' d overdue' : ''), tx, py + phh - 4);
+    }
+    g.fillStyle = '#6e6b6c'; g.font = '400 20px ' + F; g.fillText('Site Walkthrough Close-Out  ·  open actions as of ' + TODAY, M, H - 24);
+    blobs.push(await new Promise(ok => c.toBlob(ok, 'image/png')));
+  }
+  return {blobs: blobs, name: 'Open-observations-' + String(loc).replace(/[^\w]+/g, '-') + '-' + TODAY};
+}
+async function scRun(loc, share) {
+  if (!ME.admin) return; const b1 = $('#scDl'), b2 = $('#scShare'); [b1, b2].forEach(b => b && (b.disabled = true)); toast(t('sc.making'));
+  try {
+    const o = await scBuild(loc || $('#scLoc').value, ($('#scNote').value || '').trim()), files = o.blobs.map((b, i) => new File([b], o.name + (o.blobs.length > 1 ? '-' + (i + 1) + 'of' + o.blobs.length : '') + '.png', {type: 'image/png'}));
+    if (share && navigator.canShare && navigator.canShare({files: files})) { await navigator.share({files: files, title: loc || $('#scLoc').value}); }
+    else files.forEach((f, i) => setTimeout(() => { const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }, i * 400));
+    toast(t('sc.done') + ' ' + files.length);
+  } catch (e) { if (e && e.name !== 'AbortError') toast(e.message || 'Failed', true); } finally { [b1, b2].forEach(b => b && (b.disabled = false)); }
+}
+function scInit() { const on = !!ME.admin; $('#scCard').hidden = !on; if (!on) return; scFill(); $('#scDl').onclick = () => scRun('', false); $('#scShare').onclick = () => scRun('', true); $('#scShare').hidden = !(navigator.canShare && navigator.share); }
 function dashSheet(s) {
   if (!s) return; let o = $('#dashSheet'); if (o) o.remove();
   o = document.createElement('div'); o.id = 'dashSheet'; o.className = 'noprint';
@@ -811,7 +873,7 @@ function dashInit() {
   const ics = Array.from(new Set(ROWS.map(r => r.ic))).sort(); $('#dbIc').hidden = ics.length < 2;
   $('#dbIc').innerHTML = '<option value="">' + esc(t('l.allIc')) + '</option>' + ics.map(i => '<option' + (i === DASH.ic ? ' selected' : '') + '>' + esc(i) + '</option>').join('');
   $('#dbIc').onchange = () => { DASH.ic = $('#dbIc').value; dashRender(); };
-  $('#dbPng').hidden = !ME.admin; $('#dbPng').onclick = dashPng; // owners only
+  scInit(); $('#dbPng').hidden = !ME.admin; $('#dbPng').onclick = dashPng; // owners only
 }
 
 function csvReport() {
