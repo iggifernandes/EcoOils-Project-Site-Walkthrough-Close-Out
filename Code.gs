@@ -1,4 +1,4 @@
-const VERSION = '1.17.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.18.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -9,7 +9,7 @@ const APP_URL = 'https://iggifernandes.github.io/EcoOils-Project-Site-Walkthroug
 const F_NAME = 'Findings';
 const F_COLS = ['id', 'createdAt', 'ic', 'location', 'category', 'risk', 'description', 'dueDate', 'status',
   'beforePhotos', 'afterPhotos', 'closeNote', 'closedBy', 'closedAt', 'verifiedBy', 'verifiedAt', 'hseNote',
-  'reopenCount', 'loggedBy', 'updatedAt'];
+  'reopenCount', 'loggedBy', 'updatedAt', 'prevIc', 'reassignedBy', 'reassignedAt', 'reassignCount', 'reassignLog'];
 const C_NAME = 'Contacts'; // OLD tab: only read once, to move its people into the Users tab (migrateContacts_). Not used any more.
 const C_COLS = ['id', 'ic', 'name', 'email', 'role', 'updatedAt'];
 const U_NAME = 'Users';
@@ -49,6 +49,8 @@ function doPost(e) {
       case 'resume': return json_(resume_(req));
       case 'logout': CacheService.getScriptCache().remove('sess_' + req.token); if (req.device) revokeDevices_('', s_(req.device, 100)); return json_({ ok: true });
       case 'icView': return json_(icView_(req));
+      case 'icReassign': return json_(reassign_(req, ''));
+      case 'reassign': return json_(reassign_(req, requirePerm_(req, 'view')));
       case 'icClose': return json_(icClose_(req));
       case 'me': return json_(me_(req));
       case 'list': return json_(list_(requirePerm_(req, 'view')));
@@ -574,8 +576,49 @@ function icView_(r) {
   return {
     ok: true, today: todayIso_(), before: before, after: after,
     f: { id: o.id, ic: o.ic, location: o.location, category: o.category, risk: o.risk, description: o.description, dueDate: o.dueDate,
-      status: o.status, closeNote: o.closeNote, closedBy: looksEmail_(o.closedBy) ? nameFor_(o.closedBy) : o.closedBy, hseNote: o.hseNote, reopenCount: o.reopenCount, createdAt: o.createdAt }
+      status: o.status, prevIc: o.prevIc, reassignedBy: o.reassignedBy, reassignedAt: o.reassignedAt, reassignCount: o.reassignCount, closeNote: o.closeNote, closedBy: looksEmail_(o.closedBy) ? nameFor_(o.closedBy) : o.closedBy, hseNote: o.hseNote, reopenCount: o.reopenCount, createdAt: o.createdAt }
   };
+}
+
+/* Wrong contractor? The contractor moves it straight to the right company: no approval needed, always visible, then HSSE decides if it bounces.
+   Rules: only while open; due date and age are untouched; every move is logged; a contractor can pass it on, and the next company can send it
+   back once; after that (reassignCount 2) only HSSE (Verify permission) can move it. */
+const REASSIGN_REASONS = ['Wrong contractor / not our scope', 'Another contractor owns this area', 'Another contractor caused it', 'Other'];
+function reassign_(r, email) {
+  const link = !email, newIc = String(s_(r.to, 40)).toUpperCase().trim(), reason = s_(r.reason, 160);
+  if (IC_COMPANIES.indexOf(newIc) < 0) throw new Error('Choose the contractor to move it to');
+  if (reason.length < 2) throw new Error('Choose a reason');
+  const id = link ? parseLink_(r.c) : s_(r.id, 20); let o, who;
+  withLock_(function () {
+    const sh = tab_(F_NAME, F_COLS), row = findRow_(sh, id);
+    if (row < 0) throw new Error('This finding was removed.');
+    o = readRow_(sh, row);
+    if (OPEN_STATUS.indexOf(o.status) < 0) throw new Error('Only open findings can be moved.');
+    const oldIc = String(o.ic).toUpperCase().trim(); if (oldIc === newIc) throw new Error('It already belongs to ' + newIc);
+    let hse = false;
+    if (link) who = s_(r.by, 120); else {
+      const i = userInfo_(email), sc = scopeOf_(email); hse = i.perms.indexOf('verify') >= 0;
+      if (sc && sc !== oldIc) throw new Error('This finding belongs to another company.');
+      if (!sc && !hse) throw new Error('Not allowed');
+      who = dispName_(email);
+    }
+    if (who.length < 2) throw new Error('Write your name');
+    if (!hse && Number(o.reassignCount || 0) >= 2) throw new Error('This was already passed back once. HSSE will decide.');
+    const now = new Date().toISOString(), cnt = Number(o.reassignCount || 0) + 1;
+    o.prevIc = o.ic; o.ic = newIc; o.reassignedBy = who + ' (' + String(o.prevIc).replace('PT. ', '') + ')'; o.reassignedAt = now; o.reassignCount = cnt;
+    o.reassignLog = (o.reassignLog ? o.reassignLog + '\n' : '') + now.slice(0, 10) + ' · ' + o.prevIc + ' → ' + newIc + ' · ' + who + ' · ' + reason;
+    o.updatedAt = now; writeRow_(sh, row, o, F_COLS); clearCache_();
+  });
+  let mail = { sent: 0 };
+  try {
+    const rc = recipients_(o.ic), lk = closeLink_(o.id), by = o.reassignedBy;
+    if (rc.to.length) {
+      const body = 'Dear ' + rc.names.join(', ') + ',\n\n' + by + ' has moved this finding to ' + o.ic + ' (reason: ' + reason + ').\n\nRef: ' + o.id + '\nRisk: ' + o.risk + '\nLocation: ' + o.location + '\nFinding: ' + o.description + '\nDue: ' + fmtD_(o.dueDate) + ' (the due date did not change)\n\nIf it is not yours either, open the link and send it back once, then HSSE decides.\n' + lk;
+      const ok = send_({ to: rc.to.join(','), cc: copies_('nNew').join(','), subject: '[Walkthrough ' + o.id + '] REASSIGNED to ' + o.ic + ' by ' + by + ' - ' + o.location, body: body + SIG });
+      mail = { sent: ok ? rc.to.length : 0 };
+    }
+  } catch (e) { console.error('reassign mail ' + e); }
+  return { ok: true, ic: o.ic, mail: mail };
 }
 
 function icClose_(r) {
