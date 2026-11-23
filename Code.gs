@@ -1,4 +1,4 @@
-const VERSION = '1.15.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.17.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -261,7 +261,7 @@ function userInfo_(email) {
   const p = String(u.perms || '').split(',').map(function (x) { return x.trim(); }).filter(function (x) { return PERMS.indexOf(x) >= 0 && x !== 'users'; }); // 'users' (sees every email address) is owners only
   return { email: email, admin: false, perms: p, name: u.name || '', company: String(u.company || '').toUpperCase().trim() };
 }
-function me_(r) { const i = userInfo_(requirePerm_(r, '')); if (!i) throw new Error('SESSION'); return { ok: true, email: i.email, admin: i.admin, perms: i.perms, name: i.name }; }
+function me_(r) { const i = userInfo_(requirePerm_(r, '')); if (!i) throw new Error('SESSION'); return { ok: true, email: i.email, admin: i.admin, perms: i.perms, name: i.name || dispName_(i.email) }; }
 
 function requestReset_(r) {
   const email = s_(r.email, 120).toLowerCase(), cache = CacheService.getScriptCache();
@@ -419,11 +419,18 @@ function nameFor_(v) {
   const u = users_().filter(function (x) { return String(x.id).toLowerCase() === e; })[0];
   return (u && u.name) ? u.name : 'HSSE';
 }
+/* Display name for a login email: Users-sheet name, else (owners only, who are not in the sheet) the part before the @. */
+function dispName_(v) {
+  if (!looksEmail_(v)) return String(v || '');
+  const e = String(v).toLowerCase().trim(), u = users_().filter(function (x) { return String(x.id).toLowerCase() === e; })[0];
+  if (u && u.name) return u.name;
+  return isAdminEmail_(e) ? e.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); }) : 'HSSE';
+}
 function maskEmails_(o) { ['loggedBy', 'verifiedBy', 'closedBy'].forEach(function (k) { if (looksEmail_(o[k])) o[k] = nameFor_(o[k]); }); return o; }
 
 function list_(email) {
   const sc = scopeOf_(email), owner = isAdminEmail_(email);
-  const rows = findings_().filter(function (o) { return !sc || String(o.ic).toUpperCase().trim() === sc; }).map(function (o) { const c = {}; Object.keys(o).forEach(function (k) { c[k] = o[k]; }); if (!owner) maskEmails_(c); c.link = closeLink_(o.id); return c; });
+  const rows = findings_().filter(function (o) { return !sc || String(o.ic).toUpperCase().trim() === sc; }).map(function (o) { const c = {}; Object.keys(o).forEach(function (k) { c[k] = o[k]; }); if (!owner) maskEmails_(c); c.loggedByName = dispName_(o.loggedBy); c.verifiedByName = dispName_(o.verifiedBy); c.link = closeLink_(o.id); return c; });
   return { ok: true, rows: rows, today: todayIso_() };
 }
 
@@ -519,8 +526,7 @@ function markPhoto_(r, email) {
 }
 
 function adminClose_(r, email) {
-  const name = s_(r.closedBy, 120), note = s_(r.note, 1000);
-  if (name.length < 2) throw new Error('Write who closed it');
+  const typed = s_(r.closedBy, 120), note = s_(r.note, 1000);
   if (!r.after || !r.after.length) throw new Error('An after photo is required');
   return withLock_(function () {
     const sh = tab_(F_NAME, F_COLS), row = findRow_(sh, r.id);
@@ -528,9 +534,10 @@ function adminClose_(r, email) {
     const o = readRow_(sh, row), now = new Date().toISOString();
     const sc = scopeOf_(email); if (sc && String(o.ic).toUpperCase().trim() !== sc) throw new Error('This finding belongs to another company.');
     const ver = userInfo_(email).perms.indexOf('verify') >= 0;
+    const officer = dispName_(email); // the HSSE officer is always the logged-in user, never typed
     const ids = savePhotos_(r.after, o.id + '-after-' + (idsOf_(o.afterPhotos).length + 1)); saveThumb_(ids[0], r.afterThumb);
     trash_(idsOf_(o.afterPhotos)); o.afterPhotos = ids.join(','); // one after photo only: a new one replaces the old
-    o.closeNote = note; o.closedBy = name + (ver ? ' (via HSSE)' : ' (via app)'); o.closedAt = now; o.updatedAt = now;
+    o.closeNote = note; o.closedBy = (typed.length >= 2 ? typed + ' · ' : '') + officer + (ver ? ' (via HSSE)' : ' (via app)'); o.closedAt = now; o.updatedAt = now;
     if (ver) { o.status = 'Verified'; o.verifiedBy = email; o.verifiedAt = now; } // a verifier closing on the spot = closed and verified
     else o.status = 'Closed by IC'; // close only: waits for verification (auto-verify rules apply)
     writeRow_(sh, row, o, F_COLS);
