@@ -289,7 +289,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
 <script>
 const LOCS = ["ADMINISTRATION BUILDING", "BLOCK 6 B SOUTH EAST CORNER", "BLOCK 6B", "BLOCK 6B EAST GATE", "BOILER / CHIMNEY AREA", "CONTROL ROOM, MCC ROOM", "COOLING TOWER", "DDE TREATMENT PLANT (DTP)", "DIESEL TANK", "DIRTY COOLING TOWER", "DRY AND LIQUID CHEMICAL STORAGE", "ECOOILS WARE HOUSE", "EFFLUENT TREATMENT PLANT (ETP)", "ELECTRICAL SUBSTATION (PLN)", "EXTRACTION PLANT", "FA PLANT", "FIRE WATER PUMP HOUSE", "FIRE WATER TANK", "GSB OFFICE", "HEXANE AND DIESEL RECEIVING BAY", "HEXANE TANK", "KKS OFFICE", "LOADING/UNLOADING AREA (PUMP HOUSE)", "MCC BUILDING", "NORTH-WEST CORNER BLOCK 6A", "OFFICE VEHICLE PARKING AREA", "OIL POLISHING PLANT", "PBS OFFICE", "PIPE RACK", "PRE TREATMENT UNIT (PTU)", "RAW WATER PIT", "SCHEDULED & DOMESTIC WASTE SHED", "SECURITY BUILDING", "SECURITY POST", "SILO", "TANK FARM", "TRUCK PARKING AREA", "VAPOR ABSORPTION MACHINE (VAM) SHED", "WAREHOUSE", "WAREHOUSE BLOCK B", "WASTE WATER TREATMENT PLANT (WWTP)", "WATER TANK", "WATER TREATMENT PLANT (WTP) AND WATER TANKS", "WEIGHT BRIDGE", "WEN OFFICE", "WORKSHOP AREA"];
-const APP_VERSION = '1.18.0';
+const APP_VERSION = '1.18.1';
 const API_URL = 'https://script.google.com/macros/s/AKfycbydZ7RylbsTJqJdq_zZEXees36X6u5wT7U0z59Oh1caOwZltMX8fp4xOAFRUwzW9oDO/exec';
 const COMPANIES = ['PT. ECOOILS', 'PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS', 'PT. SOS'];
 const OTHER_CO = 'OTHER (TYPE YOUR COMPANY NAME)';
@@ -814,6 +814,7 @@ function scFill() {
   const cur = $('#scLoc').value, l = Object.entries(m).sort((a, b) => b[1] - a[1]), tot = l.reduce((n, x) => n + x[1], 0);
   $('#scLoc').innerHTML = l.length ? '<option value="*">' + esc(t('sc.allLoc')) + ' (' + tot + ')</option>' + l.map(([k, n]) => '<option value="' + esc(k) + '"' + (k === cur ? ' selected' : '') + '>' + esc(k) + ' (' + n + ')</option>').join('') : '<option value="">–</option>';
 }
+const scPic = r => (r.status === 'Reopened' && idsOf(r.afterPhotos).length) ? idsOf(r.afterPhotos).slice(-1)[0] : idsOf(r.beforePhotos)[0]; // sent back: the rejected after photo is the newest evidence, so it becomes the picture
 const scWrap = (g, text, w, max) => { const out = []; let line = ''; String(text || '').replace(/\s+/g, ' ').split(' ').forEach(wd => { const t2 = line ? line + ' ' + wd : wd; if (g.measureText(t2).width > w && line) { out.push(line); line = wd; } else line = t2; }); if (line) out.push(line); if (out.length > max) { out.length = max; out[max - 1] = out[max - 1].replace(/\s*\S*$/, '') + '…'; } return out; };
 const scImg = u => new Promise(ok => { if (!u) return ok(null); const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = u; });
 async function scBuild(loc, note, ic) {
@@ -823,7 +824,7 @@ async function scBuild(loc, note, ic) {
   const byIc = {}; all.forEach(r => { byIc[r.ic] = (byIc[r.ic] || 0) + 1; });
   const ph = {}; // before photos, one request per picture
   for (let p = 0; p < pages; p++) {
-    const part = all.slice(p * SC_PER, (p + 1) * SC_PER), ids = part.map(r => idsOf(r.beforePhotos)[0]).filter(Boolean);
+    const part = all.slice(p * SC_PER, (p + 1) * SC_PER), ids = part.map(r => scPic(r)).filter(Boolean);
     if (ids.length) { try { const j = await api(withToken({action: 'photos', ids: ids})); Object.assign(ph, j.photos || {}); } catch (e) {} }
     const hdr = 330 + (note ? 80 : 0), H = hdr + part.length * CH + 70, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
     g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); g.textBaseline = 'alphabetic';
@@ -837,7 +838,7 @@ async function scBuild(loc, note, ic) {
     if (note) { g.fillStyle = '#fff4d6'; g.fillRect(M, y, W - 2 * M, 52); g.fillStyle = '#231f20'; g.font = '500 26px ' + F; g.fillText(scWrap(g, note, W - 2 * M - 24, 1)[0], M + 12, y + 35); y += 64; }
     g.fillStyle = '#6e6b6c'; g.font = '400 22px ' + F; g.fillText(Object.entries(byIc).map(([k, n]) => k.replace('PT. ', '') + ' ' + n).join('   ·   '), M, hdr - 16); y = hdr;
     for (let i = 0; i < part.length; i++) {
-      const r = part[i], top = y + i * CH, id1 = idsOf(r.beforePhotos)[0], im = await scImg(ph[id1]);
+      const r = part[i], top = y + i * CH, id1 = scPic(r), im = await scImg(ph[id1]);
       g.fillStyle = '#dcdcdc'; g.fillRect(M, top, W - 2 * M, 2);
       const pw = 360, phh = 270, px = M, py = top + 14;
       if (im) { const k = Math.max(pw / im.width, phh / im.height), sw = pw / k, sh = phh / k; g.drawImage(im, (im.width - sw) / 2, (im.height - sh) / 2, sw, sh, px, py, pw, phh); } else { g.fillStyle = '#eee'; g.fillRect(px, py, pw, phh); g.fillStyle = '#999'; g.font = '400 22px ' + F; g.fillText('No photo', px + 130, py + 140); }
@@ -845,6 +846,7 @@ async function scBuild(loc, note, ic) {
       g.fillStyle = '#231f20'; g.font = '500 30px ' + F; g.fillText(r.id + '  ·  ' + String(r.ic).replace('PT. ', '') + (loc === '*' ? '  ·  ' + String(r.location || '').slice(0, 14) : ''), tx + 24, py + 28);
       g.fillStyle = '#6e6b6c'; g.font = '400 22px ' + F; g.fillText(r.risk + ' risk  ·  ' + catLabel(r.category), tx, py + 68);
       g.fillStyle = '#231f20'; g.font = '400 25px ' + F; scWrap(g, r.description, tw, 4).forEach((ln, k) => g.fillText(ln, tx, py + 108 + k * 32));
+      if (r.status === 'Reopened') { g.fillStyle = '#dd1d21'; g.fillRect(px, py, 150, 30); g.fillStyle = '#fff'; g.font = '500 18px ' + F; g.fillText('SENT BACK', px + 12, py + 21); }
       g.fillStyle = '#6e6b6c'; g.font = '400 20px ' + F; g.fillText(t('d.loggedBy') + ': ' + nmOf(r, 'loggedBy'), tx, py + 236);
       g.font = '500 23px ' + F; g.fillStyle = r.late > 0 ? '#dd1d21' : '#231f20'; g.fillText('Open ' + r.age + ' d  ·  Due ' + String(r.dueDate).slice(0, 10) + (r.late > 0 ? '  ·  ' + r.late + ' d overdue' : ''), tx, py + phh - 4);
     }
