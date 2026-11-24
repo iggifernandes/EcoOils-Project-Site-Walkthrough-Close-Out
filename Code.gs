@@ -1,4 +1,4 @@
-const VERSION = '1.18.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.19.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -261,7 +261,9 @@ function userInfo_(email) {
   const u = users_().filter(function (x) { return String(x.id).toLowerCase() === email && String(x.active) !== 'false' && String(x.active) !== 'FALSE'; })[0];
   if (!u) return null;
   const p = String(u.perms || '').split(',').map(function (x) { return x.trim(); }).filter(function (x) { return PERMS.indexOf(x) >= 0 && x !== 'users'; }); // 'users' (sees every email address) is owners only
-  return { email: email, admin: false, perms: p, name: u.name || '', company: String(u.company || '').toUpperCase().trim() };
+  const co = String(u.company || '').toUpperCase().trim();
+  if (IC_COMPANIES.indexOf(co) >= 0) ['view', 'close'].forEach(function (x) { if (p.indexOf(x) < 0) p.push(x); }); // every contractor person can see and close their own company's findings (HSSE still verifies)
+  return { email: email, admin: false, perms: p, name: u.name || '', company: co };
 }
 function me_(r) { const i = userInfo_(requirePerm_(r, '')); if (!i) throw new Error('SESSION'); return { ok: true, email: i.email, admin: i.admin, perms: i.perms, name: i.name || dispName_(i.email) }; }
 
