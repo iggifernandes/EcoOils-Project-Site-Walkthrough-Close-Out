@@ -1,4 +1,4 @@
-const VERSION = '1.19.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.21.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -275,7 +275,7 @@ function requestReset_(r) {
   if (userInfo_(email)) {
     const code = '' + Math.floor(100000 + Math.random() * 900000);
     cache.put('reset_' + email, hash_('code|' + email + '|' + code), 900);
-    mail_({ to: email, subject: 'EcoOils Walkthrough - PIN reset code', body: 'Your one-time code is ' + code + '. It expires in 15 minutes.\nIf you did not ask for it, ignore this email.', name: 'EcoOils Project HSSE' });
+    mail_({ to: email, subject: 'EcoOils Walkthrough - PIN reset code', body: 'Your one-time code is ' + code + '. It expires in 15 minutes.\nIf you did not ask for it, ignore this email.', name: 'EcoOils Project HSSE', priority: true });
   }
   return { ok: true }; // same answer either way
 }
@@ -712,7 +712,19 @@ function sendOne_(opt) {
    handed to the Mail Relay script (owned by ptecooilsmentari@gmail.com) so it is sent from that
    account and uses ITS daily quota. If they are not set, it sends from this account as before.
    If the relay fails, nothing is sent from this account unless RELAY_FALLBACK = 1. */
+/* Daily mail budget: ordinary notifications stop at MAIL_CAP (Script Property, default 60 a day, Jakarta date) so the rest of the
+   free quota is always kept for PIN-reset codes (priority:true), which are never counted against the cap. */
 function mail_(m) {
+  const day = Utilities.formatDate(new Date(), 'Asia/Jakarta', 'yyyyMMdd'), key = 'MAILN_' + day, P = PropertiesService.getScriptProperties();
+  if (!m.priority && Number(P.getProperty(key) || 0) >= Number(prop_('MAIL_CAP') || 60)) { console.error('Mail cap reached, kept for PIN resets'); return false; }
+  const ok = mailRaw_(m);
+  if (ok) {
+    P.setProperty(key, String(Number(P.getProperty(key) || 0) + 1));
+    try { Object.keys(P.getProperties()).forEach(function (k) { if (k.indexOf('MAILN_') === 0 && k !== key) P.deleteProperty(k); }); } catch (e) {}
+  }
+  return ok;
+}
+function mailRaw_(m) {
   const url = prop_('RELAY_URL'), secret = prop_('RELAY_SECRET');
   if (url && secret) {
     try {
