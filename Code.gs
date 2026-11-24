@@ -1,4 +1,4 @@
-const VERSION = '1.21.0'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.21.1'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -272,12 +272,26 @@ function requestReset_(r) {
   const rk = 'resetrate_' + email, n = Number(cache.get(rk) || 0);
   if (n >= 5) return { ok: true };
   cache.put(rk, String(n + 1), 3600);
+  if (cache.get('manual_' + email)) return { ok: true }; // an owner already handed this person a code by hand: keep it
   if (userInfo_(email)) {
     const code = '' + Math.floor(100000 + Math.random() * 900000);
     cache.put('reset_' + email, hash_('code|' + email + '|' + code), 900);
     mail_({ to: email, subject: 'EcoOils Walkthrough - PIN reset code', body: 'Your one-time code is ' + code + '. It expires in 15 minutes.\nIf you did not ask for it, ignore this email.', name: 'EcoOils Project HSSE', priority: true });
   }
   return { ok: true }; // same answer either way
+}
+
+/* EMAIL LIMIT REACHED? Owner only, no email used: in the Apps Script editor pick adminResetCode, put the person's email on the
+   first line below, Run, then read the 6-digit code in View > Logs. Give it to that person (WhatsApp / in person). They open the app,
+   tap "Forgot PIN", type their email and this code and choose their own new PIN. The code works for 15 minutes, once. */
+function adminResetCode() {
+  const email = 'PUT.EMAIL.HERE@example.com'.toLowerCase().trim();
+  if (!userInfo_(email)) throw new Error('No active user with that email: ' + email);
+  const code = '' + Math.floor(100000 + Math.random() * 900000), cache = CacheService.getScriptCache();
+  cache.put('reset_' + email, hash_('code|' + email + '|' + code), 900);
+  cache.put('manual_' + email, '1', 900);
+  cache.remove('fail_' + email);
+  Logger.log('One-time code for ' + email + ' is ' + code + ' (valid 15 minutes)');
 }
 
 function setPin_(r) {
@@ -290,7 +304,7 @@ function setPin_(r) {
     cache.put(fk, String(fails + 1), 900);
     throw new Error('Wrong or expired code');
   }
-  cache.remove('reset_' + email);
+  cache.remove('reset_' + email); cache.remove('manual_' + email);
   PropertiesService.getScriptProperties().setProperty('PIN_' + email, hash_('pin|' + email + '|' + r.pin));
   revokeDevices_(email, ''); // a PIN reset signs the email out of every remembered device
   return { ok: true };
