@@ -248,6 +248,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
     <label class="f"><span><span data-i="f.cat"></span> <b>*</b></span><select id="f_cat"></select></label>
     <label class="f"><span><span data-i="f.risk"></span> <b>*</b></span><select id="f_risk"></select></label>
     <label class="f"><span><span data-i="f.due"></span> <b>*</b></span><input id="f_due" type="date"><span class="hint" data-i="f.dueHint"></span></label>
+    <label class="f"><span data-i="f.act"></span><select id="f_act"></select><input id="f_act2" maxlength="120" style="margin-top:6px" data-ph="ph.otherAct" hidden></label>
     <label class="f w"><span><span data-i="f.desc"></span> <b>*</b></span><textarea id="f_desc" maxlength="1500"></textarea></label>
     <div class="w"><div class="hint"><span data-i="f.before"></span> <b style="color:var(--red)">*</b></div><div id="pb_log"></div></div>
    </div>
@@ -290,9 +291,14 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 
 <script>
 const LOCS = ["ADMINISTRATION BUILDING", "BLOCK 6 B SOUTH EAST CORNER", "BLOCK 6B", "BLOCK 6B EAST GATE", "BOILER / CHIMNEY AREA", "CONTROL ROOM, MCC ROOM", "COOLING TOWER", "DDE TREATMENT PLANT (DTP)", "DIESEL TANK", "DIRTY COOLING TOWER", "DRY AND LIQUID CHEMICAL STORAGE", "ECOOILS WARE HOUSE", "EFFLUENT TREATMENT PLANT (ETP)", "ELECTRICAL SUBSTATION (PLN)", "EXTRACTION PLANT", "FA PLANT", "FIRE WATER PUMP HOUSE", "FIRE WATER TANK", "GSB OFFICE", "HEXANE AND DIESEL RECEIVING BAY", "HEXANE TANK", "KKS OFFICE", "LOADING/UNLOADING AREA (PUMP HOUSE)", "MCC BUILDING", "NORTH-WEST CORNER BLOCK 6A", "OFFICE VEHICLE PARKING AREA", "OIL POLISHING PLANT", "PBS OFFICE", "PIPE RACK", "PRE TREATMENT UNIT (PTU)", "RAW WATER PIT", "SCHEDULED & DOMESTIC WASTE SHED", "SECURITY BUILDING", "SECURITY POST", "SILO", "TANK FARM", "TRUCK PARKING AREA", "VAPOR ABSORPTION MACHINE (VAM) SHED", "WAREHOUSE", "WAREHOUSE BLOCK B", "WASTE WATER TREATMENT PLANT (WWTP)", "WATER TANK", "WATER TREATMENT PLANT (WTP) AND WATER TANKS", "WEIGHT BRIDGE", "WEN OFFICE", "WORKSHOP AREA"];
-const APP_VERSION = '1.20.1';
+const APP_VERSION = '1.22.0';
 const API_URL = 'https://script.google.com/macros/s/AKfycbydZ7RylbsTJqJdq_zZEXees36X6u5wT7U0z59Oh1caOwZltMX8fp4xOAFRUwzW9oDO/exec';
 const COMPANIES = ['PT. ECOOILS', 'PT. GSB', 'PT. KKS', 'PT. WEN', 'PT. PBS', 'PT. SOS'];
+/* Immediate action options: these defaults plus every action anyone has typed under "…" (tracked from the findings, shown with counts on the Dashboard) */
+const ACTS = ['Stop the work', 'Barricade / make the area safe', 'Remove or isolate the hazard', 'Clean up now', 'Repair or replace', 'Wear / provide correct PPE', 'Brief the crew (toolbox talk)', 'Inspect and tag', 'Monitor only'];
+const uniqCI = (a, b) => { const seen = new Set(a.map(x => x.toLowerCase())); const o = a.slice(); b.forEach(x => { const k = x.toLowerCase(); if (x && !seen.has(k)) { seen.add(k); o.push(x); } }); return o; };
+const locList = () => uniqCI(LOCS, Array.from(new Set(ROWS.map(r => String(r.location || '').trim().toUpperCase()))).sort());
+const actList = () => uniqCI(ACTS, Array.from(new Set(ROWS.map(r => String(r.immediateAction || '').trim()))).sort());
 const OTHER_CO = 'OTHER (TYPE YOUR COMPANY NAME)';
 const DUE_DAYS = {High: 0, Medium: 3, Low: 7};
 const CATS = [
@@ -353,7 +359,7 @@ const D = {
 'f.ic':['Company','Perusahaan','Syarikat'],'f.loc':['Location','Lokasi','Lokasi'],'f.cat':['Category','Kategori','Kategori'],'f.risk':['Risk','Risiko','Risiko'],'f.due':['Close by','Tutup sebelum','Tutup sebelum'],
 'f.dueHint':['High: same day. Medium: 3 days. Low: 7 days. You can change the date.','Tinggi: hari yang sama. Sedang: 3 hari. Rendah: 7 hari. Tanggal dapat diubah.','Tinggi: hari yang sama. Sederhana: 3 hari. Rendah: 7 hari. Tarikh boleh diubah.'],
 'f.desc':['What did you see? (what and where)','Apa yang Anda lihat? (apa dan di mana)','Apa yang anda lihat? (apa dan di mana)'],'f.before':['BEFORE photo (1 to 3)','Foto SEBELUM (1 sampai 3)','Foto SEBELUM (1 hingga 3)'],
-'ph.otherCo':['Type company name','Ketik nama perusahaan','Taip nama syarikat'],'ph.otherLoc':['Type the location','Ketik lokasi','Taip lokasi'],'p.take':['Take photo','Ambil foto','Ambil gambar'],'p.up':['Upload photo','Unggah foto','Muat naik foto'],'p.hint':['One photo only. You can also drag a photo here. Tap × on the photo to replace it.','Satu foto saja. Anda juga bisa menyeret foto ke sini. Ketuk × pada foto untuk menggantinya.','Satu gambar sahaja. Anda juga boleh seret gambar ke sini. Ketik × pada gambar untuk menggantinya.'],'p.drop':['Drop photos here or tap to choose','Letakkan foto di sini atau ketuk untuk memilih','Letakkan foto di sini atau ketik untuk memilih'],
+'ph.otherCo':['Type company name','Ketik nama perusahaan','Taip nama syarikat'],'f.act':['Immediate action required','Tindakan segera yang diperlukan','Tindakan segera diperlukan'],'ph.otherAct':['Type the action','Ketik tindakannya','Taip tindakan'],'db.acts':['Immediate action required: trend','Tindakan segera: tren','Tindakan segera: aliran'],'db.newOpt':['new','baru','baharu'],'d.act':['Immediate action','Tindakan segera','Tindakan segera'],'ph.otherLoc':['Type the location','Ketik lokasi','Taip lokasi'],'p.take':['Take photo','Ambil foto','Ambil gambar'],'p.up':['Upload photo','Unggah foto','Muat naik foto'],'p.hint':['One photo only. You can also drag a photo here. Tap × on the photo to replace it.','Satu foto saja. Anda juga bisa menyeret foto ke sini. Ketuk × pada foto untuk menggantinya.','Satu gambar sahaja. Anda juga boleh seret gambar ke sini. Ketik × pada gambar untuk menggantinya.'],'p.drop':['Drop photos here or tap to choose','Letakkan foto di sini atau ketuk untuk memilih','Letakkan foto di sini atau ketik untuk memilih'],
 'log.title':['Log a walkthrough finding','Catat temuan walkthrough','Catat dapatan walkthrough'],'log.send':['Log finding and email the company','Catat temuan dan kirim email ke perusahaan','Catat dapatan dan hantar emel ke syarikat'],
 'log.done':['Finding logged','Temuan dicatat','Dapatan dicatat'],'log.mailSent':['Email sent to {n} contact(s) with the BEFORE photo and the close-out link.','Email dikirim ke {n} kontak beserta foto SEBELUM dan tautan penutupan.','Emel dihantar kepada {n} kenalan bersama foto SEBELUM dan pautan penutupan.'],
 'log.noMail':['No email contact for this company yet, so nothing was sent. Add one in the Users tab (company + Contractor findings), or send the link below by WhatsApp.','Belum ada kontak email untuk perusahaan ini, jadi belum ada yang terkirim. Tambahkan di tab Pengguna (perusahaan + Temuan kontraktor), atau kirim tautan di bawah lewat WhatsApp.','Belum ada kenalan emel untuk syarikat ini, jadi tiada yang dihantar. Tambah di tab Pengguna (syarikat + Dapatan kontraktor), atau hantar pautan di bawah melalui WhatsApp.'],
@@ -520,7 +526,8 @@ function setSel(sel, opts, keep) { const e = $(sel), cur = keep === undefined ? 
 function fillSelects() {
   const coOpts = [['', '—'], ...COMPANIES.map(c => [c, c]), [OTHER_CO, OTHER_CO]];
   setSel('#f_ic', coOpts); setSel('#u_co', coOpts); { const up = $('#u_pos'); if (up) { const v = up.value; up.innerHTML = posOptions(v, t('pc.position')); up.value = v; } }
-  setSel('#f_loc', [['', '—'], ...LOCS.map(x => [x, x]), ['__other', '…']]);
+  setSel('#f_loc', [['', '—'], ...locList().map(x => [x, x]), ['__other', '…']]);
+  setSel('#f_act', [['', '—'], ...actList().map(x => [x, x]), ['__other', '…']]);
   setSel('#f_cat', [['', '—'], ...CATS.map(c => [c[0], c[LI()]])]);
   setSel('#f_risk', RISKS.map(r => [r, t('r.' + r)]), $('#f_risk').value || 'Medium');
   setSel('#fl_grp', [['', t('l.grp0')], ['location', t('l.grpLoc')], ['ic', t('l.grpIc')], ['status', t('l.grpSt')], ['risk', t('l.grpRisk')]], $('#fl_grp').value || (LS('wt_grp') || ''));
@@ -530,7 +537,7 @@ function fillSelects() {
   const ics = [...new Set(ROWS.map(r => r.ic))].sort();
   setSel('#fl_ic', [['', t('l.allIc')], ...ics.map(c => [c, c])]);
   setSel('#rp_ic', [['', t('l.allIc')], ...ics.map(c => [c, c])]);
-  $('#f_ic2').hidden = $('#f_ic').value !== OTHER_CO; $('#f_loc2').hidden = $('#f_loc').value !== '__other';
+  $('#f_ic2').hidden = $('#f_ic').value !== OTHER_CO; $('#f_loc2').hidden = $('#f_loc').value !== '__other'; $('#f_act2').hidden = $('#f_act').value !== '__other';
 }
 
 /* ---------- state ---------- */
@@ -652,7 +659,7 @@ async function openDetail(id) {
   const bids = idsOf(r.beforePhotos).slice(0, 1), aids = idsOf(r.afterPhotos).slice(-1);
   const dlg = $('#dlg'), inn = $('#dlgIn'); dlg.hidden = false;
   const head = '<div class="row" style="justify-content:space-between"><b style="letter-spacing:.08em">' + esc(r.id) + '</b><span>' + chip(r) + '</span></div>';
-  const kv = [[t('f.ic'), r.ic], [t('f.loc'), r.location], [t('f.cat'), catLabel(r.category)], [t('f.risk'), '<span class="risk ' + esc(r.risk) + '"></span>' + esc(t('r.' + r.risk))], [t('d.logged'), fmtDate(String(r.createdAt).slice(0, 10))], [t('d.loggedBy'), nmOf(r, 'loggedBy')], [t('d.due'), fmtDate(r.dueDate)], [t('d.finding'), r.description]];
+  const kv = [[t('f.ic'), r.ic], [t('f.loc'), r.location], [t('f.cat'), catLabel(r.category)], [t('f.risk'), '<span class="risk ' + esc(r.risk) + '"></span>' + esc(t('r.' + r.risk))], [t('d.logged'), fmtDate(String(r.createdAt).slice(0, 10))], [t('d.loggedBy'), nmOf(r, 'loggedBy')], ...(r.immediateAction ? [[t('d.act'), r.immediateAction]] : []), [t('d.due'), fmtDate(r.dueDate)], [t('d.finding'), r.description]];
   if (r.reassignedAt) kv.unshift(['↪ ' + t('ra.ban'), t('ra.from') + ' ' + r.prevIc + ' ' + t('ra.by') + ' ' + r.reassignedBy + ' · ' + fmtDate(String(r.reassignedAt).slice(0, 10))]);
   if (r.closedAt) kv.push([t('d.closed'), fmtDate(String(r.closedAt).slice(0, 10))], [t('d.closedBy'), r.closedBy], [t('d.note'), r.closeNote || '–']);
   if (r.verifiedAt) kv.push([t('d.verified'), fmtDate(String(r.verifiedAt).slice(0, 10))], [t('d.verBy'), nmOf(r, 'verifiedBy')]);
@@ -697,13 +704,13 @@ function syncDue() { const r = $('#f_risk').value; $('#f_due').value = addDays(t
 async function submitLog() {
   const ic = $('#f_ic').value === OTHER_CO ? $('#f_ic2').value.trim().toUpperCase() : $('#f_ic').value;
   const loc = $('#f_loc').value === '__other' ? $('#f_loc2').value.trim() : $('#f_loc').value;
-  const fields = {ic, location: loc, category: $('#f_cat').value, risk: $('#f_risk').value, dueDate: $('#f_due').value, description: $('#f_desc').value.trim()};
+  const fields = {ic, location: loc, category: $('#f_cat').value, risk: $('#f_risk').value, dueDate: $('#f_due').value, description: $('#f_desc').value.trim(), immediateAction: $('#f_act').value === '__other' ? $('#f_act2').value.trim() : $('#f_act').value};
   if (!fields.ic || !fields.location || !fields.category || !fields.dueDate || fields.description.length < 10) return toast(t('v.fields'), true);
   if (!PB.log.length) return toast(t('v.photo'), true);
   const b = $('#btnLog'); b.disabled = true; toast(t('m.sending'));
   try {
     const j = await api(withToken({action: 'create', fields, before: PB.log, beforeThumb: THUMBOF[PB.log[0]]}), 90000);
-    PB.log = []; renderPB('log'); $('#f_desc').value = ''; $('#f_loc').value = ''; $('#f_loc2').hidden = true; $('#f_cat').value = '';
+    PB.log = []; renderPB('log'); $('#f_desc').value = ''; $('#f_loc').value = ''; $('#f_loc2').hidden = true; $('#f_act').value = ''; $('#f_act2').hidden = true; $('#f_cat').value = '';
     const msg = j.mail.sent ? t('log.mailSent', {n: j.mail.sent}) : (j.mail.quota ? t('log.quota') : t('log.noMail'));
     const dn = $('#logDone'); dn.hidden = false;
     dn.innerHTML = '<h2>' + esc(t('log.done')) + ': ' + esc(j.id) + '</h2><div class="box ' + (j.mail.sent ? 'ok' : 'warn') + '">' + esc(msg) + '</div><div class="hint">' + esc(t('log.link')) + '</div><input readonly value="' + esc(j.link) + '" onclick="this.select()"><div class="row" style="margin-top:8px"><a class="btn" target="_blank" rel="noopener" style="text-decoration:none" href="https://wa.me/?text=' + encodeURIComponent('[' + j.id + '] ' + j.link) + '">' + esc(t('x.wa')) + '</a><button class="btn pri" id="logAgain">' + esc(t('log.another')) + '</button></div>';
@@ -787,13 +794,16 @@ function dashRender() {
   h += '<div class="dc"><h3>' + esc(t('db.mix')) + '</h3><div class="stk">' + ['High', 'Medium', 'Low'].map((k, i) => rs[i] ? '<i class="' + k + '" style="width:' + (100 * rs[i] / rt) + '%">' + rs[i] + '</i>' : '').join('') + '</div><div class="hint">' + ['High', 'Medium', 'Low'].map((k, i) => '<span class="risk ' + k + '"></span>' + esc(t('r.' + k)) + ' ' + rs[i]).join(' &nbsp; ') + '</div>' +
     '<div class="hb">' + (() => { const top = d.cats.slice(0, 6), oth = d.cats.slice(6).reduce((a, c) => a + c[1], 0), m = Math.max(1, ...top.map(c => c[1])); return top.concat(oth ? [[t('db.other'), oth]] : []).map(c => '<div><span>' + esc(c[0]) + '</span><div class="bb"><i style="width:' + (100 * c[1] / m) + '%"></i></div><b>' + c[1] + '</b></div>').join(''); })() + '</div></div></div>';
   const lm = Math.max(1, ...d.locs.map(l => l.n));
-  h += '<div class="dg"><div class="dc"><h3>' + esc(t('db.locs')) + '</h3><div class="hb">' + (d.locs.length ? d.locs.map(l => '<div' + ' class="sc"' + '><span>' + btn(reg(l.l, d.open.filter(r => r.location === l.l)), esc(l.l)) + '</span><div class="bb seg" style="width:' + (100 * l.n / lm) + '%">' + ['High', 'Medium', 'Low'].map((k, i) => l.r[i] ? '<i class="' + k + '" style="flex:' + l.r[i] + '"></i>' : '').join('') + '</div><b>' + l.n + '</b>' + (ME.admin ? '<button type="button" class="dlink scq" data-sc="' + esc(l.l) + '">⬇ PNG</button>' : '') + '</div>').join('') : '<span class="gray">–</span>') + '</div></div>';
+  h += '<div class="dg"><div class="dc"><h3>' + esc(t('db.locs')) + '</h3><div class="hb">' + (d.locs.length ? d.locs.map(l => '<div' + ' class="sc"' + '><span>' + btn(reg(l.l, d.open.filter(r => r.location === l.l)), esc(l.l)) + '</span><div class="bb seg" style="width:' + (100 * l.n / lm) + '%">' + ['High', 'Medium', 'Low'].map((k, i) => l.r[i] ? '<i class="' + k + '" style="flex:' + l.r[i] + '"></i>' : '').join('') + '</div><b>' + l.n + '</b>' + (can('view') ? '<button type="button" class="dlink scq" data-sc="' + esc(l.l) + '">⬇ PNG</button>' : '') + '</div>').join('') : '<span class="gray">–</span>') + '</div></div>';
   const cm = {}; d.per.forEach(r => { const k = r.location + '|' + r.ic; cm[k] = (cm[k] || 0) + 1; }); const cmx = Math.max(1, ...Object.values(cm));
   h += '<div class="dc"><h3>' + esc(t('db.heat')) + '</h3><div class="xs"><table class="dt heat"><tr><th></th>' + d.ics.map(i => '<th>' + esc(i.replace('PT. ', '')) + '</th>').join('') + '</tr>' + d.locH.map(l => '<tr><td>' + esc(l) + '</td>' + d.ics.map(i => { const n = cm[l + '|' + i] || 0; return '<td style="background:rgba(68,162,118,' + (n ? 0.12 + 0.6 * n / cmx : 0) + ')">' + (n || '') + '</td>'; }).join('') + '</tr>').join('') + '</table></div></div></div>';
   const wl = (arr, withAge) => arr.slice(0, 10).map((r, i) => '<tr class="rowk' + (i >= 5 ? ' px' : '') + '" data-open="' + esc(r.id) + '"><td><b>' + esc(r.id) + '</b></td><td>' + esc(r.ic) + '</td><td>' + esc(r.location) + '</td><td><span class="risk ' + esc(r.risk) + '"></span></td><td>' + (withAge ? r.age : r.late) + ' ' + esc(t('db.d')) + '</td><td>' + (Number(r.reopenCount) > 0 ? '↺' + r.reopenCount : '') + '</td></tr>').join('');
   h += '<div class="dg"><div class="dc"><h3>' + esc(t('db.watch')) + ' (' + d.late.length + ')</h3><table class="dt">' + (d.late.length ? wl(d.late, false) : '<tr><td class="gray">–</td></tr>') + '</table>' + (d.late.length > 10 ? btn(reg(t('db.watch'), d.late), esc(t('l.more')) + ' (' + (d.late.length - 10) + ')') : '') + '</div>' +
     '<div class="dc"><h3>' + esc(t('db.await')) + ' (' + d.await_.length + ')</h3><table class="dt">' + (d.await_.length ? wl(d.await_, true) : '<tr><td class="gray">–</td></tr>') + '</table>' + (d.await_.length > 10 ? btn(reg(t('db.await'), d.await_), esc(t('l.more')) + ' (' + (d.await_.length - 10) + ')') : '') +
     (d.hot.length ? '<h3 style="margin-top:12px">' + esc(t('db.hot')) + '</h3>' + d.hot.map(x => '<div class="hint">• ' + esc(x.k.replace('|', ' · ')) + ' — ' + x.n + '×</div>').join('') : '') + '</div></div>';
+  { const ar = ROWS.filter(r => r.immediateAction && (!DASH.ic || r.ic === DASH.ic)), am = {}; ar.forEach(r => { const k = String(r.immediateAction).trim(); (am[k] = am[k] || []).push(r); });
+    const al = Object.entries(am).sort((a, b) => b[1].length - a[1].length), ax = Math.max(1, ...al.map(x => x[1].length)), known = new Set(ACTS.map(x => x.toLowerCase()));
+    h += '<div class="dg"><div class="dc"><h3>' + esc(t('db.acts')) + '</h3><div class="hb">' + (al.length ? al.slice(0, 12).map(([k, v]) => '<div class="sc"><span>' + btn(reg(k, v.filter(isOpen).length ? v.filter(isOpen) : v), esc(k)) + (known.has(k.toLowerCase()) ? '' : ' <span class="rsg">' + esc(t('db.newOpt')) + '</span>') + '</span><div class="bb" style="width:' + Math.round(100 * v.length / ax) + '%"></div><b>' + v.length + '</b></div>').join('') : '<div class="gray">–</div>') + '</div></div></div>'; }
   root.innerHTML = h;
   $$('#dashOut [data-set]').forEach(b => b.onclick = () => dashSheet(DSET[b.dataset.set]));
   $$('#dashOut [data-sc]').forEach(b => b.onclick = () => scRun(b.dataset.sc, !!(navigator.canShare && navigator.share), DASH.ic || ''));
@@ -908,7 +918,7 @@ function dashInit() {
 }
 
 function csvReport() {
-  const rows = REPORT.length ? REPORT : ROWS, cols = ['id', 'createdAt', 'ic', 'location', 'category', 'risk', 'description', 'dueDate', 'status', 'closedBy', 'closedAt', 'closeNote', 'verifiedBy', 'verifiedAt', 'hseNote', 'reopenCount'];
+  const rows = REPORT.length ? REPORT : ROWS, cols = ['id', 'createdAt', 'ic', 'location', 'category', 'risk', 'description', 'immediateAction', 'dueDate', 'status', 'closedBy', 'closedAt', 'closeNote', 'verifiedBy', 'verifiedAt', 'hseNote', 'reopenCount'];
   const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
   const csv = '﻿' + [cols.join(',')].concat(rows.map(r => cols.map(c => q(r[c])).join(','))).join('\r\n');
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8'})); a.download = 'walkthrough-' + todayISO() + '.csv'; document.body.appendChild(a); a.click(); a.remove();
@@ -1045,7 +1055,7 @@ function bind() {
   $('#btnSetPin').onclick = async () => { const p = $('#r_pin').value; if (!/^\d{6}$/.test(p)) return toast(t('m.pin6'), true); if (p !== $('#r_pin2').value) return toast(t('m.pinMismatch'), true);
     try { await api({action: 'setPin', email: $('#l_email').value, code: $('#r_code').value, pin: p}); toast(t('m.pinSet')); $('#r_pin').value = $('#r_pin2').value = $('#r_code').value = ''; $('#btnBack').click(); } catch (e) { toast(e.message, true); } };
   ['#fl_ic', '#fl_st', '#fl_grp', '#fl_sort'].forEach(s => $(s).onchange = () => { SHOWN = 100; renderList(); }); let qT; $('#btnPhone').onclick = phoneView; $('#fl_q').oninput = () => { clearTimeout(qT); qT = setTimeout(() => { SHOWN = 100; renderList(); }, 200); };
-  $('#f_ic').onchange = () => $('#f_ic2').hidden = $('#f_ic').value !== OTHER_CO; $('#f_loc').onchange = () => $('#f_loc2').hidden = $('#f_loc').value !== '__other';
+  $('#f_ic').onchange = () => $('#f_ic2').hidden = $('#f_ic').value !== OTHER_CO; $('#f_loc').onchange = () => $('#f_loc2').hidden = $('#f_loc').value !== '__other'; $('#f_act').onchange = () => $('#f_act2').hidden = $('#f_act').value !== '__other';
   $('#f_risk').onchange = syncDue; $('#btnLog').onclick = submitLog;
   $('#rpBuild').onclick = buildReport; $('#rpPrint').onclick = () => window.print(); $('#rpCsv').onclick = csvReport;
   $('#uAdd').onclick = addUser;

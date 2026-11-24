@@ -1,4 +1,4 @@
-const VERSION = '1.21.1'; // LINE 1 = the only version line in this file. Bump on every change.
+const VERSION = '1.22.0'; // LINE 1 = the only version line in this file. Bump on every change.
 
 // EcoOils Project - Site Walkthrough Close-Out backend (Google Apps Script web app).
 // Setup (once, on iggifernandes@gmail.com): Extensions > Apps Script > paste this file > run setup() >
@@ -9,7 +9,7 @@ const APP_URL = 'https://iggifernandes.github.io/EcoOils-Project-Site-Walkthroug
 const F_NAME = 'Findings';
 const F_COLS = ['id', 'createdAt', 'ic', 'location', 'category', 'risk', 'description', 'dueDate', 'status',
   'beforePhotos', 'afterPhotos', 'closeNote', 'closedBy', 'closedAt', 'verifiedBy', 'verifiedAt', 'hseNote',
-  'reopenCount', 'loggedBy', 'updatedAt', 'prevIc', 'reassignedBy', 'reassignedAt', 'reassignCount', 'reassignLog'];
+  'reopenCount', 'loggedBy', 'updatedAt', 'prevIc', 'reassignedBy', 'reassignedAt', 'reassignCount', 'reassignLog', 'immediateAction'];
 const C_NAME = 'Contacts'; // OLD tab: only read once, to move its people into the Users tab (migrateContacts_). Not used any more.
 const C_COLS = ['id', 'ic', 'name', 'email', 'role', 'updatedAt'];
 const U_NAME = 'Users';
@@ -465,7 +465,7 @@ function create_(r, email) {
     const ids = savePhotos_(r.before, id + '-before'); saveThumb_(ids[0], r.beforeThumb);
     const o = {
       id: id, createdAt: now, ic: s_(f.ic, 60).toUpperCase(), location: s_(f.location, 120), category: s_(f.category, 60), risk: s_(f.risk),
-      description: s_(f.description, 1500), dueDate: due, status: 'Open', beforePhotos: ids.join(','), afterPhotos: '', closeNote: '', closedBy: '',
+      description: s_(f.description, 1500), immediateAction: s_(f.immediateAction, 120), dueDate: due, status: 'Open', beforePhotos: ids.join(','), afterPhotos: '', closeNote: '', closedBy: '',
       closedAt: '', verifiedBy: '', verifiedAt: '', hseNote: '', reopenCount: 0, loggedBy: email, updatedAt: now
     };
     appendRows_(tab_(F_NAME, F_COLS), [F_COLS.map(function (c) { return o[c] == null ? '' : o[c]; })]);
@@ -476,7 +476,7 @@ function create_(r, email) {
   return { ok: true, id: row.id, link: closeLink_(row.id), mail: mail };
 }
 
-const EDITABLE = ['ic', 'location', 'category', 'risk', 'description', 'dueDate', 'hseNote'];
+const EDITABLE = ['ic', 'location', 'category', 'risk', 'description', 'dueDate', 'hseNote', 'immediateAction'];
 function update_(r) {
   const f = r.fields || {};
   return withLock_(function () {
